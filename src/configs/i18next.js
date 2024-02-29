@@ -45,6 +45,8 @@ i18n
       'tk',
       'zh',
       'hu',
+      'pt',
+      'pt_BR'
     ],
     ns: ['translation', 'errors'],
     defaultNS: 'translation',
