@@ -6,7 +6,7 @@ import { THEME_CONFIG } from './theme-config';
 
 const resources = {
   en: {
-    translation: '',
+    translation: 'pt',
   },
 };
 
@@ -46,7 +46,7 @@ i18n
       'zh',
       'hu',
       'pt',
-      'pt_BR'
+     
     ],
     ns: ['translation', 'errors'],
     defaultNS: 'translation',

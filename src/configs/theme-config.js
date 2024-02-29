@@ -1,5 +1,5 @@
 export const THEME_CONFIG = {
-  locale: 'pt_BR',
+  locale: 'pt',
   topNavColor: '#3e82f7',
   headerNavColor: '',
   currentTheme: 'dark',
