@@ -1,4 +1,4 @@
-export const PROJECT_NAME = 'Foodyman marketplace';
+export const PROJECT_NAME = 'Superpao';
 export const BASE_URL = process.env.REACT_APP_BASE_URL || 'https://admin.superpao.online';
 export const WEBSITE_URL = 'https://app.superpao.online';
 export const api_url = BASE_URL + '/api/v1/';
