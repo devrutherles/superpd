@@ -71,7 +71,7 @@ const ShopFormData = ({
   }
 
   async function fetchShopCategory(search) {
-    const params = { search, type: 'shop', active: 1, lang: defaultLang };
+    const params = { search, type: 'shop', active: 1 };
     setUserRefetch(false);
     return categoryService.getAll(params).then(({ data }) =>
       data.map((item) => ({
@@ -389,7 +389,6 @@ const ShopFormData = ({
                   tagRender={tagRender}
                   showCheckedStrategy={SHOW_ALL}
                   treeCheckStrictly
-                  refetch
                   onSelect={(value, node) => handleCategorySelect(node)}
                   onDeselect={(value, node) => handleCategorySelect(node)}
                   fetchOptions={fetchShopCategory}

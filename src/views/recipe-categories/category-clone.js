@@ -1,9 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Form, Spin } from 'antd';
+import {
+  Button,
+  Card,
+  Col,
+  Form,
+  Input,
+  Row,
+  Select,
+  Spin,
+  Switch,
+} from 'antd';
 import { toast } from 'react-toastify';
 import { useNavigate, useParams } from 'react-router-dom';
 import LanguageList from '../../components/language-list';
-import { batch, shallowEqual, useDispatch, useSelector } from 'react-redux';
+import TextArea from 'antd/es/input/TextArea';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import {
   disableRefetch,
   removeFromMenu,
@@ -11,8 +22,8 @@ import {
 } from '../../redux/slices/menu';
 import categoryService from '../../services/category';
 import { useTranslation } from 'react-i18next';
+import MediaUpload from '../../components/upload';
 import { fetchRecipeCategories } from '../../redux/slices/recipe-category';
-import RecipeCategoryForm from './category-form';
 
 const RecipeCategoryClone = () => {
   const { t } = useTranslation();
@@ -21,17 +32,23 @@ const RecipeCategoryClone = () => {
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
 
   const [loading, setLoading] = useState(false);
+  const [image, setImage] = useState(
+    activeMenu.data?.image ? [activeMenu.data?.image] : []
+  );
   const [form] = Form.useForm();
+  const [loadingBtn, setLoadingBtn] = useState(false);
   const [error, setError] = useState(null);
   const { uuid } = useParams();
-  const { languages } = useSelector((state) => state.formLang, shallowEqual);
+  const { defaultLang, languages } = useSelector(
+    (state) => state.formLang,
+    shallowEqual
+  );
 
   useEffect(() => {
     return () => {
       const data = form.getFieldsValue(true);
       dispatch(setMenuData({ activeMenu, data }));
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const createImage = (name) => {
@@ -48,10 +65,10 @@ const RecipeCategoryClone = () => {
     const { translations } = data;
     const result = languages.map((item) => ({
       [`title[${item.locale}]`]: translations.find(
-        (el) => el.locale === item.locale,
+        (el) => el.locale === item.locale
       )?.title,
       [`description[${item.locale}]`]: translations.find(
-        (el) => el.locale === item.locale,
+        (el) => el.locale === item.locale
       )?.description,
     }));
     return Object.assign({}, ...result);
@@ -70,8 +87,9 @@ const RecipeCategoryClone = () => {
           image: [createImage(category.img)],
           keywords: category.keywords.split(','),
         };
-        dispatch(setMenuData({ activeMenu, data: body }));
+
         form.setFieldsValue(body);
+        setImage([createImage(category.img)]);
       })
       .finally(() => {
         setLoading(false);
@@ -79,7 +97,8 @@ const RecipeCategoryClone = () => {
       });
   };
 
-  const handleSubmit = (values, image) => {
+  const onFinish = (values) => {
+    setLoadingBtn(true);
     const body = {
       ...values,
       type: 'receipt',
@@ -94,30 +113,148 @@ const RecipeCategoryClone = () => {
       .create(body)
       .then(() => {
         toast.success(t('successfully.updated'));
-        batch(() => {
-          dispatch(removeFromMenu({ ...activeMenu, nextUrl }));
-          dispatch(fetchRecipeCategories({}));
-        });
+        dispatch(removeFromMenu({ ...activeMenu, nextUrl }));
+        dispatch(fetchRecipeCategories());
         navigate(`/${nextUrl}`);
       })
-      .catch((err) => setError(err.response.data.params));
+      .catch((err) => setError(err.response.data.params))
+      .finally(() => setLoadingBtn(false));
   };
 
   useEffect(() => {
     if (activeMenu.refetch) {
       getCategory(uuid);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu.refetch]);
 
   return (
     <Card title={t('recipe.category.clone')} extra={<LanguageList />}>
       {!loading ? (
-        <RecipeCategoryForm
+        <Form
+          name='basic'
+          layout='vertical'
+          onFinish={onFinish}
+          initialValues={{
+            parent_id: { title: '---', value: 0, key: 0 },
+            active: true,
+            ...activeMenu.data,
+          }}
           form={form}
-          handleSubmit={handleSubmit}
-          error={error}
-        />
+        >
+          <Row gutter={12}>
+            <Col span={12}>
+              {languages.map((item, index) => (
+                <Form.Item
+                  key={item.title + index}
+                  label={t('name')}
+                  name={`title[${item.locale}]`}
+                  help={
+                    error
+                      ? error[`title.${defaultLang}`]
+                        ? error[`title.${defaultLang}`][0]
+                        : null
+                      : null
+                  }
+                  validateStatus={error ? 'error' : 'success'}
+                  rules={[
+                    {
+                      validator(_, value) {
+                        if (!value && item?.locale === defaultLang) {
+                          return Promise.reject(new Error(t('required')));
+                        } else if (value && value?.trim() === '') {
+                          return Promise.reject(new Error(t('no.empty.space')));
+                        } else if (value && value?.trim().length < 2) {
+                          return Promise.reject(
+                            new Error(t('must.be.at.least.2'))
+                          );
+                        }
+                        return Promise.resolve();
+                      },
+                    },
+                  ]}
+                  hidden={item.locale !== defaultLang}
+                >
+                  <Input />
+                </Form.Item>
+              ))}
+            </Col>
+
+            <Col span={12}>
+              {languages.map((item, index) => (
+                <Form.Item
+                  key={item.locale + index}
+                  label={t('description')}
+                  name={`description[${item.locale}]`}
+                  rules={[
+                    {
+                      validator(_, value) {
+                        if (!value && item?.locale === defaultLang) {
+                          return Promise.reject(new Error(t('required')));
+                        } else if (value && value?.trim() === '') {
+                          return Promise.reject(new Error(t('no.empty.space')));
+                        } else if (value && value?.trim().length < 5) {
+                          return Promise.reject(
+                            new Error(t('must.be.at.least.5'))
+                          );
+                        }
+                        return Promise.resolve();
+                      },
+                    },
+                  ]}
+                  hidden={item.locale !== defaultLang}
+                >
+                  <TextArea rows={4} />
+                </Form.Item>
+              ))}
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                label={t('keywords')}
+                name='keywords'
+                rules={[{ required: true, message: t('required') }]}
+              >
+                <Select mode='tags' style={{ width: '100%' }}></Select>
+              </Form.Item>
+            </Col>
+
+            <Col span={4}>
+              <Form.Item
+                label={t('image')}
+                name='images'
+                rules={[
+                  {
+                    validator() {
+                      if (image?.length === 0) {
+                        return Promise.reject(new Error(t('required')));
+                      }
+                      return Promise.resolve();
+                    },
+                  },
+                ]}
+              >
+                <MediaUpload
+                  type='categories'
+                  imageList={image}
+                  setImageList={setImage}
+                  form={form}
+                  multiple={false}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={2}>
+              <Form.Item
+                label={t('active')}
+                name='active'
+                valuePropName='checked'
+              >
+                <Switch />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Button type='primary' htmlType='submit' loading={loadingBtn}>
+            {t('submit')}
+          </Button>
+        </Form>
       ) : (
         <div className='d-flex justify-content-center align-items-center py-5'>
           <Spin size='large' className='mt-5 pt-5' />

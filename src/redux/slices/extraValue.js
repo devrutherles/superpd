@@ -6,7 +6,6 @@ const initialState = {
   loading: false,
   extraValues: [],
   error: '',
-  meta: {},
 };
 
 export const fetchExtraValues = createAsyncThunk(
@@ -39,7 +38,6 @@ const extraValueSlice = createSlice({
       state.loading = false;
       state.extraValues = payload.data;
       state.error = '';
-      state.meta = payload.meta;
     });
     builder.addCase(fetchExtraValues.rejected, (state, action) => {
       state.loading = false;
@@ -55,7 +53,6 @@ const extraValueSlice = createSlice({
       state.loading = false;
       state.extraValues = payload.data;
       state.error = '';
-      state.meta = payload.meta;
     });
     builder.addCase(fetchSelletExtraValue.rejected, (state, action) => {
       state.loading = false;

@@ -101,17 +101,6 @@ const Brands = () => {
     navigate(`/catalog/brands/import`);
   };
 
-  const goToShop = (row) => {
-    dispatch(
-      addMenu({
-        id: 'edit-shop',
-        url: `shop/${row.uuid}`,
-        name: t('edit.shop'),
-      })
-    );
-    navigate(`/shop/${row.uuid}`, { state: 'edit' });
-  };
-
   const [columns, setColumns] = useState([
     {
       title: t('id'),
@@ -125,20 +114,6 @@ const Brands = () => {
       dataIndex: 'title',
       key: 'title',
       is_show: true,
-    },
-    {
-      title: t('created.by'),
-      dataIndex: 'shop',
-      key: 'shop',
-      is_show: true,
-      render: (shop) =>
-        shop ? (
-          <span onClick={() => goToShop(shop)} className='text-hover'>
-            {shop?.translation?.title}
-          </span>
-        ) : (
-          t('admin')
-        ),
     },
     {
       title: t('image'),

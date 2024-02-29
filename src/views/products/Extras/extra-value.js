@@ -15,18 +15,10 @@ import ExtraValueModal from './extra-value-modal';
 import ExtraDeleteModal from './extra-delete-modal';
 import DeleteButton from '../../../components/delete-button';
 import { IMG_URL } from '../../../configs/app-global';
-import {
-  addMenu,
-  disableRefetch,
-  setMenuData,
-} from '../../../redux/slices/menu';
+import { disableRefetch, setMenuData } from '../../../redux/slices/menu';
 import FilterColumns from '../../../components/filter-column';
 import { FaTrashRestoreAlt } from 'react-icons/fa';
 import ResultModal from '../../../components/result-modal';
-import { useNavigate } from 'react-router-dom';
-import { InfiniteSelect } from 'components/infinite-select';
-import shopService from 'services/restaurant';
-import useDidUpdate from 'helpers/useDidUpdate';
 
 export default function ExtraValue() {
   const { t } = useTranslation();
@@ -34,41 +26,12 @@ export default function ExtraValue() {
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { extraGroups } = useSelector(
     (state) => state.extraGroup,
-    shallowEqual,
+    shallowEqual
   );
-  const { extraValues, loading, meta } = useSelector(
+  const { extraValues, loading } = useSelector(
     (state) => state.extraValue,
-    shallowEqual,
+    shallowEqual
   );
-  const navigate = useNavigate();
-
-  const [links, setLinks] = useState(null);
-
-  async function fetchUserShop({ search, page }) {
-    const params = {
-      search: search?.length === 0 ? undefined : search,
-      status: 'approved',
-      page: page,
-    };
-    return shopService.search(params).then((res) => {
-      setLinks(res.links);
-      return res.data.map((item) => ({
-        label: item.translation !== null ? item.translation.title : 'no name',
-        value: item.id,
-      }));
-    });
-  }
-
-  const goToShop = (row) => {
-    dispatch(
-      addMenu({
-        id: 'edit-shop',
-        url: `shop/${row.uuid}`,
-        name: t('edit.shop'),
-      }),
-    );
-    navigate(`/shop/${row.uuid}`, { state: 'edit' });
-  };
 
   const [id, setId] = useState(null);
   const [modal, setModal] = useState(null);
@@ -90,43 +53,26 @@ export default function ExtraValue() {
         extraGroups?.find((item) => item.id === id)?.translation?.title,
     },
     {
-      title: t('created.by'),
-      dataIndex: 'shop',
-      key: 'shop',
-      is_show: true,
-      render: (_, row) =>
-        row?.group?.shop ? (
-          <span
-            onClick={() => goToShop(row?.group?.shop)}
-            className='text-hover'
-          >
-            {row.group?.shop?.translation?.title}
-          </span>
-        ) : (
-          t('admin')
-        ),
-    },
-    {
       title: t('value'),
       dataIndex: 'value',
       key: 'value',
       is_show: true,
       render: (value, row) => (
         <Space className='extras'>
-          {row?.group?.type === 'color' ? (
+          {row.group.type === 'color' ? (
             <div
               className='extra-color-wrapper-contain'
-              style={{ backgroundColor: row?.value }}
+              style={{ backgroundColor: row.value }}
             />
           ) : null}
-          {row?.group?.type === 'image' ? (
+          {row.group.type === 'image' ? (
             <Image
               width={100}
-              src={IMG_URL + row?.value}
+              src={IMG_URL + row.value}
               className='borderRadius'
             />
           ) : null}
-          {row?.group?.type === 'image' ? null : <span>{row?.value}</span>}
+          {row.group.type === 'image' ? null : <span>{row.value}</span>}
         </Space>
       ),
     },
@@ -153,14 +99,6 @@ export default function ExtraValue() {
 
   const handleCancel = () => setModal(null);
 
-  const data = activeMenu?.data;
-
-  const paramsData = {
-    shop_id: data?.selectedShop?.value,
-    perPage: data?.perPage,
-    page: data?.page,
-  };
-
   const deleteExtra = () => {
     setLoadingBtn(true);
     const params = {
@@ -168,7 +106,7 @@ export default function ExtraValue() {
         {},
         ...id.map((item, index) => ({
           [`ids[${index}]`]: item,
-        })),
+        }))
       ),
     };
     extraService
@@ -187,7 +125,7 @@ export default function ExtraValue() {
       .dropAllValue()
       .then(() => {
         toast.success(t('successfully.deleted'));
-        dispatch(fetchExtraValues(paramsData));
+        dispatch(fetchExtraValues());
         setRestore(null);
       })
       .finally(() => setLoadingBtn(false));
@@ -199,19 +137,15 @@ export default function ExtraValue() {
       .restoreAllValue()
       .then(() => {
         toast.success(t('successfully.restored'));
-        dispatch(fetchExtraValues(paramsData));
+        dispatch(fetchExtraValues());
         setRestore(null);
       })
       .finally(() => setLoadingBtn(false));
   };
 
-  useDidUpdate(() => {
-    dispatch(fetchExtraValues(paramsData));
-  }, [activeMenu?.data]);
-
   useEffect(() => {
     if (activeMenu.refetch) {
-      dispatch(fetchExtraValues(paramsData));
+      dispatch(fetchExtraValues());
       dispatch(disableRefetch(activeMenu));
     }
   }, [activeMenu.refetch]);
@@ -221,35 +155,15 @@ export default function ExtraValue() {
       setMenuData({
         activeMenu,
         data: { ...activeMenu.data, [name]: item },
-      }),
+      })
     );
   };
-
-  function onChangePagination(pagination, filter, sorter) {
-    const { pageSize: perPage, current: page } = pagination;
-    const { field: column } = sorter;
-    dispatch(
-      setMenuData({
-        activeMenu,
-        data: { ...activeMenu.data, perPage, page, column },
-      }),
-    );
-  }
 
   return (
     <Card
       title={t('extra.value')}
       extra={
         <Space wrap>
-          <InfiniteSelect
-            placeholder={t('select.shop')}
-            hasMore={links?.next}
-            loading={loading}
-            fetchOptions={fetchUserShop}
-            style={{ minWidth: 180, marginLeft: '8px' }}
-            onChange={(e) => handleFilter(e, 'selectedShop')}
-            value={activeMenu.data?.selectedShop}
-          />
           <Button
             type='primary'
             icon={<PlusCircleOutlined />}
@@ -281,14 +195,7 @@ export default function ExtraValue() {
         columns={columns?.filter((item) => item.is_show)}
         dataSource={extraValues}
         rowKey={(record) => record.id}
-        pagination={{
-          pageSize: paramsData.perPage,
-          page: activeMenu.data?.page || 1,
-          total: meta.total,
-          defaultCurrent: activeMenu.data?.page,
-          current: activeMenu.data?.page,
-        }}
-        onChange={onChangePagination}
+        pagination={false}
       />
       {modal && <ExtraValueModal modal={modal} handleCancel={handleCancel} />}
       {id && (

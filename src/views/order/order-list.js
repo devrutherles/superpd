@@ -246,7 +246,6 @@ export default function OrderList() {
       is_show: true,
       dataIndex: 'created_at',
       key: 'created_at',
-      render: (_, row) => moment(row?.created_at).format('YYYY-MM-DD HH:mm')
     },
     {
       title: t('delivery.date'),

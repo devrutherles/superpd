@@ -3,9 +3,7 @@ import request from '../request';
 const sellerCategory = {
   getAll: (params) => request.get('dashboard/seller/categories', { params }),
   selectPaginate: (params) =>
-    request.get('dashboard/seller/categories/select-paginate', { params }),
-  selectMyCategoryPaginate: (params) =>
-    request.get('dashboard/seller/my-categories/select-paginate', { params }),
+  request.get('dashboard/seller/categories/select-paginate', { params }),
   getById: (uuid, params) =>
     request.get(`dashboard/seller/categories/${uuid}`, { params }),
   delete: (params) =>
@@ -18,7 +16,7 @@ const sellerCategory = {
     request.get('dashboard/seller/categories/search', { params }),
   select: (params) =>
     request.get('dashboard/seller/categories/select-paginate', { params }),
-  setActive: (id) => request.post(`dashboard/seller/categories/${id}/active`),
+  setActive: (id) => request.post(`dashboard/seller/categories/${id}/active`)
 };
 
 export default sellerCategory;

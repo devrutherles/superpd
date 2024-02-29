@@ -90,9 +90,7 @@ const Filter = () => {
       status: 'published',
     };
     dispatch(fetchRestProducts(params));
-    if (cartData?.shop?.value) {
-      fetchSellerPayments();
-    }
+    fetchSellerPayments();
   }, [brand, category, search, cartData.shop]);
 
   const selectShop = () => dispatch(clearCart());

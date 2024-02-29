@@ -13,7 +13,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import smsService from '../../services/smsPayloads';
 import { fetchSms } from '../../redux/slices/sms-geteways';
-import { batch, shallowEqual, useDispatch } from 'react-redux';
+import { shallowEqual, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { disableRefetch, removeFromMenu } from '../../redux/slices/menu';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -41,6 +41,7 @@ export default function SmsPayloadEdit() {
     smsService
       .getById(type)
       .then((res) => {
+        console.log('res', res.data);
         const data = res.data;
         form.setFieldsValue({
           default: Boolean(data.default),
@@ -66,15 +67,12 @@ export default function SmsPayloadEdit() {
       },
     };
     const nextUrl = 'settings/sms-payload';
-
     smsService
       .update(type, data)
       .then(() => {
+        dispatch(fetchSms());
         toast.success(t('successfully.updated'));
-        batch(() => {
-          dispatch(fetchSms());
-          dispatch(removeFromMenu({ ...activeMenu, nextUrl }));
-        });
+        dispatch(removeFromMenu({ ...activeMenu, nextUrl }));
         navigate(`/${nextUrl}`);
       })
       .finally(() => setLoadingBtn(false));
@@ -113,7 +111,7 @@ export default function SmsPayloadEdit() {
                     onChange={handleChange}
                     value={typeList}
                     options={options.filter(
-                      (i) => !smsGatewaysList.some((e) => e.type === i.value),
+                      (i) => !smsGatewaysList.some((e) => e.type === i.value)
                     )}
                   />
                 </Form.Item>

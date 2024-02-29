@@ -11,11 +11,7 @@ import { useTranslation } from 'react-i18next';
 import extraService from '../../../services/extra';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { fetchExtraGroups } from '../../../redux/slices/extraGroup';
-import {
-  addMenu,
-  disableRefetch,
-  setMenuData,
-} from '../../../redux/slices/menu';
+import { disableRefetch, setMenuData } from '../../../redux/slices/menu';
 import ExtraGroupModal from './extra-group-modal';
 import DeleteButton from '../../../components/delete-button';
 import ExtraGroupShowModal from './extra-group-show-modal';
@@ -25,9 +21,6 @@ import { Context } from '../../../context/context';
 import ResultModal from '../../../components/result-modal';
 import SearchInput from '../../../components/search-input';
 import useDidUpdate from '../../../helpers/useDidUpdate';
-import { useNavigate } from 'react-router-dom';
-import { InfiniteSelect } from 'components/infinite-select';
-import shopService from 'services/restaurant';
 
 export default function ExtraGroup() {
   const { t } = useTranslation();
@@ -38,7 +31,6 @@ export default function ExtraGroup() {
     (state) => state.extraGroup,
     shallowEqual
   );
-  const navigate = useNavigate();
 
   const [id, setId] = useState(null);
   const [show, setShow] = useState(null);
@@ -53,35 +45,6 @@ export default function ExtraGroup() {
     perPage: data?.perPage,
     sort: data?.sort,
     page: data?.page,
-    shop_id: data?.selectedShop?.value,
-  };
-
-  const [links, setLinks] = useState(null);
-
-  async function fetchUserShop({ search, page }) {
-    const params = {
-      search: search?.length === 0 ? undefined : search,
-      status: 'approved',
-      page: page,
-    };
-    return shopService.search(params).then((res) => {
-      setLinks(res.links);
-      return res.data.map((item) => ({
-        label: item.translation !== null ? item.translation.title : 'no name',
-        value: item.id,
-      }));
-    });
-  }
-
-  const goToShop = (row) => {
-    dispatch(
-      addMenu({
-        id: 'edit-shop',
-        url: `shop/${row.uuid}`,
-        name: t('edit.shop'),
-      })
-    );
-    navigate(`/shop/${row.uuid}`, { state: 'edit' });
   };
 
   const [columns, setColumns] = useState([
@@ -97,20 +60,6 @@ export default function ExtraGroup() {
       key: 'translation',
       is_show: true,
       render: (translation) => translation?.title,
-    },
-    {
-      title: t('created.by'),
-      dataIndex: 'shop',
-      key: 'shop',
-      is_show: true,
-      render: (shop) =>
-        shop ? (
-          <span onClick={() => goToShop(shop)} className='text-hover'>
-            {shop?.translation?.title}
-          </span>
-        ) : (
-          t('admin')
-        ),
     },
     {
       title: t('type'),
@@ -169,7 +118,7 @@ export default function ExtraGroup() {
         setIsModalVisible(false);
         toast.success(t('successfully.deleted'));
         setId(null);
-        dispatch(fetchExtraGroups(paramsData));
+        dispatch(fetchExtraGroups());
       })
       .finally(() => setLoadingBtn(false));
   };
@@ -180,7 +129,7 @@ export default function ExtraGroup() {
       .dropAllGroup()
       .then(() => {
         toast.success(t('successfully.deleted'));
-        dispatch(fetchExtraGroups(paramsData));
+        dispatch(fetchExtraGroups());
         setRestore(null);
       })
       .finally(() => setLoadingBtn(false));
@@ -201,8 +150,6 @@ export default function ExtraGroup() {
   useDidUpdate(() => {
     dispatch(fetchExtraGroups(paramsData));
   }, [activeMenu.data]);
-
-  console.log(activeMenu.data)
 
   useEffect(() => {
     if (activeMenu.refetch) {
@@ -267,22 +214,13 @@ export default function ExtraGroup() {
         </Space>
       }
     >
-      <div className='d-flex'>
+      <div className='d-flex justify-content-between'>
         <SearchInput
           placeholder={t('search')}
           handleChange={(search) => handleFilter(search, 'search')}
           defaultValue={activeMenu.data?.search}
           resetSearch={!activeMenu.data?.search}
           className={'w-25'}
-        />
-        <InfiniteSelect
-          placeholder={t('select.shop')}
-          hasMore={links?.next}
-          loading={loading}
-          fetchOptions={fetchUserShop}
-          style={{ minWidth: 180, marginLeft: '8px' }}
-          onChange={(e) => handleFilter( e,  "selectedShop")}
-          value={activeMenu.data?.selectedShop}
         />
       </div>
 

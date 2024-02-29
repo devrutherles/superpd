@@ -40,7 +40,7 @@ export default function OrderDetails() {
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual,
+    shallowEqual
   );
   const data = activeMenu?.data?.order;
   const { t } = useTranslation();
@@ -53,7 +53,7 @@ export default function OrderDetails() {
   const [orderDetails, setOrderDetails] = useState(null);
   const { statusList } = useSelector(
     (state) => state.orderStatus,
-    shallowEqual,
+    shallowEqual
   );
 
   const columns = [
@@ -245,7 +245,7 @@ export default function OrderDetails() {
                     <Typography.Text className='order-card-title'>
                       {numberToPrice(
                         data?.total_price,
-                        defaultCurrency?.symbol,
+                        defaultCurrency?.symbol
                       )}
                     </Typography.Text>
                   )}
@@ -279,7 +279,7 @@ export default function OrderDetails() {
                     <Typography.Text className='order-card-title'>
                       {data?.details?.reduce(
                         (total, item) => (total += item.quantity),
-                        0,
+                        0
                       )}
                     </Typography.Text>
                   )}
@@ -293,7 +293,7 @@ export default function OrderDetails() {
             <Card>
               <Steps
                 current={statusList?.findIndex(
-                  (item) => item.name === data?.status,
+                  (item) => item.name === data?.status
                 )}
               >
                 {statusList?.slice(0, -1).map((item) => (
@@ -312,7 +312,7 @@ export default function OrderDetails() {
                     {t('created.date.&.time')}:
                     <span className='ml-2'>
                       <BsCalendarDay className='mr-1' />{' '}
-                      {moment(data?.created_at).format('YYYY-MM-DD HH:mm')}{' '}
+                      {moment(data?.created_at).format('YYYY-MM-DD hh:mm')}{' '}
                     </span>
                   </div>
                   <br />
@@ -413,8 +413,6 @@ export default function OrderDetails() {
                 <br />
                 <span>{t('discount')}:</span>
                 <br />
-                <span>{t('service.fee')}:</span>
-                <br />
                 <h3>{t('total.price')}:</h3>
               </div>
               <div>
@@ -428,9 +426,9 @@ export default function OrderDetails() {
                   {numberToPrice(
                     data?.details?.reduce(
                       (total, item) => (total += item.total_price),
-                      0,
+                      0
                     ),
-                    defaultCurrency?.symbol,
+                    defaultCurrency?.symbol
                   )}
                 </span>
                 <br />
@@ -440,10 +438,6 @@ export default function OrderDetails() {
                 <br />
                 <span>
                   {numberToPrice(data?.total_discount, defaultCurrency?.symbol)}
-                </span>
-                <br />
-                <span>
-                  {numberToPrice(data?.service_fee, defaultCurrency?.symbol)}
                 </span>
                 <br />
                 <h3 ref={totalPriceRef}>
@@ -547,7 +541,7 @@ export default function OrderDetails() {
                     {loading ? (
                       <Skeleton.Button size={16} />
                     ) : (
-                      moment(data?.user?.created_at).format('DD-MM-YYYY, HH:mm')
+                      moment(data?.user?.created_at).format('DD-MM-YYYY, hh:mm')
                     )}
                   </span>
                 </div>
@@ -576,7 +570,7 @@ export default function OrderDetails() {
                         style={{ backgroundColor: '#48e33d' }}
                         count={numberToPrice(
                           data?.user?.orders_sum_total_price,
-                          defaultCurrency?.symbol,
+                          defaultCurrency?.symbol
                         )}
                       />
                     )}
@@ -591,7 +585,7 @@ export default function OrderDetails() {
                 <span className='message'>{data?.review.comment}</span>
                 <Space className='w-100 justify-content-end'>
                   <span className='date'>
-                    {moment(data?.review.created_at).format('YYYY-MM-DD HH:mm')}
+                    {moment(data?.review.created_at).format('YYYY-MM-DD hh:mm')}
                   </span>
                 </Space>
               </div>

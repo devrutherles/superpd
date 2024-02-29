@@ -149,7 +149,7 @@ export default function ProductModal({ extrasModal, setExtrasModal }) {
           (item.product.quantity || item.product.min_qty)),
       0
     );
-    return addonPrice + showExtras?.stock ? showExtras?.stock[priceKey || 'price'] : 0 * counter;
+    return addonPrice + showExtras?.stock[priceKey || 'price'] * counter;
   }
 
   function addonCalculate(id, quantity) {

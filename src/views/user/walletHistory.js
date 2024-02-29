@@ -7,7 +7,6 @@ import userService from '../../services/user';
 import { PlusCircleOutlined } from '@ant-design/icons';
 import UserWalletModal from './userWalletModal';
 import FilterColumns from '../../components/filter-column';
-import moment from 'moment';
 
 export default function WalletHistory({ data }) {
   const { t } = useTranslation();
@@ -52,7 +51,6 @@ export default function WalletHistory({ data }) {
       dataIndex: 'created_at',
       key: 'created_at',
       is_show: true,
-      render: (created_at) => moment(created_at).format('YYYY-MM-DD HH:mm')
     },
   ]);
 

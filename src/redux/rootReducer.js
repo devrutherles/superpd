@@ -97,7 +97,6 @@ import parcelReview from './slices/parcelReview';
 import requestModels from './slices/request-models';
 import paymentToPartners from './slices/paymentToPartners';
 import shopReviews from './slices/shop-reviews';
-import deliverymanRequest from './slices/deliveryman-request';
 
 const rootReducer = {
   bookingList,
@@ -200,7 +199,6 @@ const rootReducer = {
   requestModels,
   paymentToPartners,
   shopReviews,
-  deliverymanRequest,
 };
 
 export default rootReducer;

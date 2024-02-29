@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { Card, Form } from 'antd';
+import { Button, Card, Col, Form, Input, InputNumber, Row } from 'antd';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import {
   disableRefetch,
@@ -11,24 +11,30 @@ import {
 import { useTranslation } from 'react-i18next';
 import LanguageList from '../../../components/language-list';
 import bookingZoneService from '../../../services/seller/booking-zone';
-import ZoneForm from './zone-form';
+import MediaUpload from 'components/upload';
 
 const BookingZoneEdit = () => {
   const { t } = useTranslation();
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { defaultLang } = useSelector((state) => state.formLang, shallowEqual);
+  const { defaultLang, languages } = useSelector(
+    (state) => state.formLang,
+    shallowEqual
+  );
+  const [image, setImage] = useState(
+    activeMenu.data?.image ? [activeMenu.data?.image] : []
+  );
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [loadingBtn, setLoadingBtn] = useState(false);
 
   useEffect(() => {
     return () => {
       const data = form.getFieldsValue(true);
       dispatch(setMenuData({ activeMenu, data }));
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const createImages = (items) =>
@@ -43,20 +49,15 @@ const BookingZoneEdit = () => {
     bookingZoneService
       .getById(id)
       .then((res) => {
-        const data = {
-          ...res.data,
-          title: {
-            [defaultLang]: res?.data.translation.title,
-          },
-          area: Number(res?.data.area),
-          image: createImages(res?.data?.galleries),
-        };
-
+        let data = res.data;
         form.setFieldsValue({
           ...data,
+          title: {
+            [defaultLang]: data.translation.title,
+          },
+          area: Number(data.area),
         });
-
-        dispatch(setMenuData({ activeMenu, data }));
+        setImage(createImages(data.galleries));
       })
       .finally(() => {
         setLoading(false);
@@ -64,35 +65,109 @@ const BookingZoneEdit = () => {
       });
   };
 
-  const handleSubmit = (values, image) => {
+  const onFinish = (values) => {
     const body = {
       ...values,
       area: String(values.area),
       images: image?.map((img) => img.name),
     };
+    setLoadingBtn(true);
     const nextUrl = 'seller/booking/zone';
-
-    return bookingZoneService.update(id, body).then(() => {
-      toast.success(t('successfully.updated'));
-      navigate(`/${nextUrl}`);
-      dispatch(removeFromMenu({ ...activeMenu, nextUrl }));
-    });
+    bookingZoneService
+      .update(id, body)
+      .then(() => {
+        toast.success(t('successfully.created'));
+        navigate(`/${nextUrl}`);
+        dispatch(removeFromMenu({ ...activeMenu, nextUrl }));
+      })
+      .finally(() => setLoadingBtn(false));
   };
 
   useEffect(() => {
     if (activeMenu.refetch) {
       fetchBox(id);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu.refetch]);
 
   return (
     <Card
-      title={t('edit.booking.zone')}
+      title={t('add.booking.zone')}
       extra={<LanguageList />}
       loading={loading}
     >
-      <ZoneForm form={form} handleSubmit={handleSubmit} />
+      <Form
+        name='basic'
+        layout='vertical'
+        onFinish={onFinish}
+        form={form}
+        initialValues={{ active: true, ...activeMenu.data }}
+      >
+        <Row gutter={12}>
+          <Col span={12}>
+            {languages.map((item) => (
+              <Form.Item
+                key={'title' + item.id}
+                label={t('title')}
+                name={['title', item.locale]}
+                rules={[
+                  {
+                    validator(_, value) {
+                      if (!value && item?.locale === defaultLang) {
+                        return Promise.reject(new Error(t('required')));
+                      } else if (value && value?.trim() === '') {
+                        return Promise.reject(new Error(t('no.empty.space')));
+                      } else if (value && value?.trim().length < 2) {
+                        return Promise.reject(
+                          new Error(t('must.be.at.least.2'))
+                        );
+                      }
+                      return Promise.resolve();
+                    },
+                  },
+                ]}
+                hidden={item.locale !== defaultLang}
+              >
+                <Input />
+              </Form.Item>
+            ))}
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              label={t('area')}
+              name='area'
+              rules={[
+                { required: true, message: t('required') },
+                { type: 'number', min: 1, message: t('must.be.at.least.1') },
+              ]}
+            >
+              <InputNumber className='w-100' />
+            </Form.Item>
+          </Col>
+          <Col span={24}>
+            <Form.Item
+              label={t('image')}
+              name='images'
+              rules={[
+                {
+                  required: image?.length === 0,
+                  message: t('required'),
+                },
+              ]}
+            >
+              <MediaUpload
+                type='shop-galleries'
+                imageList={image}
+                setImageList={setImage}
+                form={form}
+                multiple={true}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Button type='primary' htmlType='submit' loading={loadingBtn}>
+          {t('submit')}
+        </Button>
+      </Form>
     </Card>
   );
 };

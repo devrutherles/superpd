@@ -43,7 +43,7 @@ export default function AddonsImport() {
   };
 
   const downloadFile = () => {
-    const body = example + 'import-example/addons.xlsx';
+    const body = example + 'import-example/addons.xls';
     window.location.href = body;
   };
   return (

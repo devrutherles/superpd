@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { Card, Form, Spin } from 'antd';
-import { batch, shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { Button, Card, Col, Form, Input, Row, Spin } from 'antd';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import {
   disableRefetch,
   removeFromMenu,
   setMenuData,
 } from '../../redux/slices/menu';
+import { IMG_URL } from '../../configs/app-global';
 import { useTranslation } from 'react-i18next';
 import LanguageList from '../../components/language-list';
 import getTranslationFields from '../../helpers/getTranslationFields';
+import MediaUpload from '../../components/upload';
 import shopTagService from '../../services/shopTag';
 import { fetchShopTag } from '../../redux/slices/shopTag';
-import ShopTagForm from './tag-form';
 
 const TagClone = () => {
   const { t } = useTranslation();
@@ -22,16 +23,23 @@ const TagClone = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const { id } = useParams();
+
+  const [image, setImage] = useState(
+    activeMenu.data?.img ? activeMenu.data?.img : []
+  );
+  const [loadingBtn, setLoadingBtn] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { languages } = useSelector((state) => state.formLang, shallowEqual);
+  const { languages, defaultLang } = useSelector(
+    (state) => state.formLang,
+    shallowEqual
+  );
 
   useEffect(() => {
     return () => {
       const data = form.getFieldsValue(true);
       dispatch(setMenuData({ activeMenu, data }));
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const createImages = (items) =>
@@ -48,7 +56,7 @@ const TagClone = () => {
     const { translations } = data;
     const result = languages.map((item) => ({
       [`title[${item.locale}]`]: translations.find(
-        (el) => el.locale === item.locale,
+        (el) => el.locale === item.locale
       )?.title,
     }));
     return Object.assign({}, ...result);
@@ -66,6 +74,7 @@ const TagClone = () => {
           ...getLanguageFields(tag),
         };
         form.setFieldsValue(data);
+        setImage(createImages([tag.img]));
         dispatch(setMenuData({ activeMenu, data }));
       })
       .finally(() => {
@@ -74,34 +83,95 @@ const TagClone = () => {
       });
   };
 
-  const handleSubmit = (values, image) => {
+  const onFinish = (values) => {
     const body = {
       images: image.map((image) => image.name),
       title: getTranslationFields(languages, values, 'title'),
     };
+    setLoadingBtn(true);
     const nextUrl = 'shop-tag';
-
-    return shopTagService.create(body).then(() => {
-      toast.success(t('successfully.cloned'));
-      batch(() => {
+    shopTagService
+      .create(body)
+      .then(() => {
+        toast.success(t('successfully.created'));
         dispatch(removeFromMenu({ ...activeMenu, nextUrl }));
-        dispatch(fetchShopTag({}));
-      });
-      navigate(`/${nextUrl}`);
-    });
+        navigate(`/${nextUrl}`);
+        dispatch(fetchShopTag());
+      })
+      .finally(() => setLoadingBtn(false));
   };
 
   useEffect(() => {
     if (activeMenu.refetch) {
       getTag(id);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu.refetch]);
 
   return (
     <Card title={t('shop.banner')} className='h-100' extra={<LanguageList />}>
       {!loading ? (
-        <ShopTagForm form={form} handleSubmit={handleSubmit} />
+        <Form
+          name='shop-add'
+          layout='vertical'
+          onFinish={onFinish}
+          form={form}
+          initialValues={{ active: true, ...activeMenu.data }}
+          className='d-flex flex-column h-100'
+        >
+          <Row gutter={12}>
+            <Col span={12}>
+              {languages.map((item) => (
+                <Form.Item
+                  key={'title' + item.locale}
+                  label={t('title')}
+                  name={`title[${item.locale}]`}
+                  rules={[
+                    {
+                      required: item.locale === defaultLang,
+                      message: t('required'),
+                    },
+                  ]}
+                  hidden={item.locale !== defaultLang}
+                >
+                  <Input />
+                </Form.Item>
+              ))}
+            </Col>
+            <Col span={24}>
+              <Form.Item
+                rules={[
+                  {
+                    required: !image.length,
+                    message: t('required'),
+                  },
+                ]}
+                label={t('image')}
+                name='images'
+              >
+                <MediaUpload
+                  type='products'
+                  imageList={image}
+                  setImageList={setImage}
+                  form={form}
+                  length='1'
+                  multiple={false}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+          <div className='flex-grow-1 d-flex flex-column justify-content-end'>
+            <div className='pb-5'>
+              <Button
+                type='primary'
+                htmlType='submit'
+                loading={loadingBtn}
+                disabled={loadingBtn}
+              >
+                {t('submit')}
+              </Button>
+            </div>
+          </div>
+        </Form>
       ) : (
         <div className='d-flex justify-content-center align-items-center'>
           <Spin size='large' className='py-5' />

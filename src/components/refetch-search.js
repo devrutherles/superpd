@@ -24,7 +24,9 @@ export const RefetchSearch = ({
   }, [fetchOptions, debounceTimeout]);
 
   const fetchOnFocus = () => {
+    if (!options.length || refetch) {
       debounceFetcher('');
+    }
   };
 
   return (

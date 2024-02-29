@@ -21,7 +21,6 @@ import {
   setCartData,
   setCartOrder,
   addOrderNotes,
-  setCartTotalCoupon,
 } from '../../../redux/slices/cart';
 import shopService from '../../../services/shop';
 import getImage from '../../../helpers/getImage';
@@ -57,13 +56,11 @@ export default function OrderCart() {
   const [couponField, setCouponField] = useState('');
   const debouncedCartItems = useDebounce(cartItems, 300);
   const cartData = useSelector((state) => getCartData(state.cart));
-  console.log('total', total);
 
   const deleteCard = (e) => dispatch(removeFromCart(e));
 
   const clearAll = () => {
     dispatch(clearCart());
-
     if (currentBag !== 0) {
       dispatch(removeBag(currentBag));
     }
@@ -97,7 +94,6 @@ export default function OrderCart() {
     if (data?.shop?.value) {
       getShops();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function formatProducts(list) {
@@ -111,7 +107,7 @@ export default function OrderCart() {
         quantity: addon.quantity,
         stock_id: addon.stockID,
         parent_id: item.stockID ? item.stockID?.id : item.stock?.id,
-      })),
+      }))
     );
 
     const combine = product.concat(addons);
@@ -119,7 +115,7 @@ export default function OrderCart() {
     const result = {
       products: combine,
       currency_id: currency?.id,
-      coupon: coupons[0]?.coupon,
+      coupon: data?.coupon?.name,
       shop_id: data?.shop?.value,
       type: data?.deliveries?.label?.toLowerCase(),
       address: {
@@ -137,7 +133,7 @@ export default function OrderCart() {
         currency_id: currency?.id,
         shop_id: data?.shop?.value,
         active: 1,
-      }),
+      })
     );
     if (filteredCartItems.length) {
       productCalculate();
@@ -150,14 +146,7 @@ export default function OrderCart() {
     } else {
       dispatch(clearCartShops());
     }
-  }, [
-    debouncedCartItems,
-    currentBag,
-    data?.address,
-    currency,
-    coupons,
-    data.coupon,
-  ]);
+  }, [debouncedCartItems, currentBag, data?.address, currency]);
 
   function productCalculate() {
     const products = formatProducts(filteredCartItems);
@@ -180,14 +169,13 @@ export default function OrderCart() {
         const orderData = {
           product_total: product.stocks?.reduce(
             (acc, curr) => acc + (curr.total_price || curr.price),
-            0,
+            0
           ),
           product_tax: product.total_tax,
           shop_tax: product.total_shop_tax,
           order_total: product.total_price,
           delivery_fee: product.delivery_fee,
           service_fee: product?.service_fee,
-          couponOBJ: product?.coupon,
         };
         dispatch(setCartTotal(orderData));
         // calculateCashback(product.total_price);
@@ -216,23 +204,18 @@ export default function OrderCart() {
         currency_id: currency?.id,
         shop_id: cartData?.shop.value,
         active: 1,
-      }),
+      })
     );
   };
 
   function handleCheckCoupon(shopId) {
-    // let coupon = coupons.find((item) => item.shop_id === shopId);
-    // if (!coupon) {
-    //   return;
-    // }
-    const data = {
-      coupon: couponField,
-      shop_id: shopId,
-    };
-
+    let coupon = coupons.find((item) => item.shop_id === shopId);
+    if (!coupon) {
+      return;
+    }
     setLoadingCoupon(shopId);
     invokableService
-      .checkCoupon(data)
+      .checkCoupon(coupon)
       .then((res) => {
         const coupon = res.data.id;
         dispatch(setCartData({ coupon, bag_id: currentBag }));
@@ -241,9 +224,8 @@ export default function OrderCart() {
             shop_id: shopId,
             price: res.data.price,
             verified: true,
-          }),
+          })
         );
-        dispatch(setCartTotalCoupon(res.data));
       })
       .catch(() =>
         dispatch(
@@ -251,8 +233,8 @@ export default function OrderCart() {
             shop_id: shopId,
             price: 0,
             verified: false,
-          }),
-        ),
+          })
+        )
       )
       .finally(() => setLoadingCoupon(null));
   }
@@ -293,7 +275,7 @@ export default function OrderCart() {
         stock_id: addon.stockID,
         quantity: addon.quantity,
         parent_id: product.stockID.id,
-      })),
+      }))
     );
     const body = {
       user_id: data.user?.value,
@@ -409,7 +391,7 @@ export default function OrderCart() {
                           <span>
                             {numberToPrice(
                               item?.total_price || item?.price,
-                              currency?.symbol,
+                              currency?.symbol
                             )}
                           </span>
 
@@ -450,7 +432,7 @@ export default function OrderCart() {
                             addOrderNotes({
                               label: item.stockID.id,
                               value: event.target.value || undefined,
-                            }),
+                            })
                           )
                         }
                       />
@@ -509,7 +491,7 @@ export default function OrderCart() {
                             <span>
                               {numberToPrice(
                                 item?.total_price || item?.price,
-                                currency?.symbol,
+                                currency?.symbol
                               )}
                             </span>
 
@@ -539,7 +521,7 @@ export default function OrderCart() {
                     </Row>
                   </div>
                 </>
-              ),
+              )
             )}
 
             <div className='d-flex my-3'>
@@ -561,7 +543,7 @@ export default function OrderCart() {
                       user_id: data?.user?.value,
                       shop_id: shop.id,
                       verified: false,
-                    }),
+                    })
                   )
                 }
                 onChange={(event) => setCouponField(event.target.value)}
@@ -571,7 +553,7 @@ export default function OrderCart() {
                   couponField.trim().length === 0 ||
                   couponField.trim().length < 2
                 }
-                onClick={() => handleCheckCoupon(shop?.products?.[0]?.shop?.id)}
+                onClick={() => handleCheckCoupon(shop.id)}
                 loading={loadingCoupon === shop.id}
               >
                 {t('check.coupon')}
@@ -604,14 +586,6 @@ export default function OrderCart() {
               <span>{t('service.fee')}</span>
               <span>{numberToPrice(total.service_fee, currency?.symbol)}</span>
             </div>
-            {total?.couponOBJ?.price && (
-              <div className='all-price-container'>
-                <span>{t('coupon')}</span>
-                <span style={{ color: 'red' }}>
-                  - {numberToPrice(total?.couponOBJ?.price, currency?.symbol)}
-                </span>
-              </div>
-            )}
             {/* <div className='all-price-container'>
               <span>{t('cashback')}</span>
               <span>{numberToPrice(total?.cashback, currency.symbol)}</span>

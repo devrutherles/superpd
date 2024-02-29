@@ -25,6 +25,7 @@ import sellerCategory from '../../services/seller/category';
 import { IMG_URL } from '../../configs/app-global';
 import { useTranslation } from 'react-i18next';
 import MediaUpload from '../../components/upload';
+import { AsyncSelect } from 'components/async-select';
 import requestModelsService from 'services/request-models';
 import { fetchRequestModels } from 'redux/slices/request-models';
 import { DebounceSelect } from 'components/search';
@@ -123,8 +124,8 @@ const SellerCategoryRequestEdit = () => {
     }
   }, [activeMenu.refetch]);
 
-  async function fetchUserCategoryList(search) {
-    const params = { perPage: 100, type: state?.parentId ? 'main' : 'sub_shop', active: 1, search };
+  async function fetchUserCategoryList() {
+    const params = { perPage: 100, type: state?.parentId ? 'main' : 'sub_shop', active: 1 };
     return sellerCategory.selectPaginate(params).then((res) =>
       res.data.map((item) => ({
         label: item.translation?.title,

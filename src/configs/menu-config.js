@@ -100,13 +100,6 @@ const adminRoutes = [
         id: 'deliveryboy-reviews_01',
         children: [],
       },
-      {
-        name: 'deliveryman.request',
-        icon: 'QuestionCircleOutlined',
-        url: 'deliveryman/request',
-        id: 'deliveryman-request_01',
-        children: [],
-      },
     ],
   },
   {

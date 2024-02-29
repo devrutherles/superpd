@@ -12,7 +12,7 @@ import {
 } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { removeFromMenu, setRefetch } from '../../redux/slices/menu';
-import { batch, shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import Paystack from '../../assets/images/paystack.svg';
@@ -36,11 +36,11 @@ export default function PaymentPayloadAdd() {
   const { languages } = useSelector((state) => state.formLang, shallowEqual);
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const [image, setImage] = useState(
-    activeMenu.data?.image ? [activeMenu.data?.image] : [],
+    activeMenu.data?.image ? [activeMenu.data?.image] : []
   );
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual,
+    shallowEqual
   );
 
   const dispatch = useDispatch();
@@ -60,7 +60,7 @@ export default function PaymentPayloadAdd() {
           ...values,
           logo: image[0] ? image[0].name : undefined,
           paypal_currency: values.paypal_currency?.label,
-          currency: !!values.currency?.label ? values.currency?.label : values.currency ,
+          currency: values.currency,
           paypal_validate_ssl: values?.paypal_validate_ssl
             ? Number(values?.paypal_validate_ssl)
             : undefined,
@@ -69,12 +69,10 @@ export default function PaymentPayloadAdd() {
       .then(() => {
         const nextUrl = 'payment-payloads';
         toast.success(t('successfully.created'));
-        batch(() => {
-          dispatch(removeFromMenu({ ...activeMenu, nextUrl }));
-          dispatch(fetchPaymentPayloads({}));
-          dispatch(setRefetch(activeMenu));
-        });
+        dispatch(removeFromMenu({ ...activeMenu, nextUrl }));
         navigate(`/${nextUrl}`);
+        dispatch(fetchPaymentPayloads());
+        dispatch(setRefetch(activeMenu));
       })
       .catch((err) => {
         toast.dismiss();
@@ -384,7 +382,7 @@ export default function PaymentPayloadAdd() {
                         placeholder={t('select.locale')}
                         defaultValue={{
                           label: languages.find(
-                            (item) => item.locale === i18n.language,
+                            (item) => item.locale === i18n.language
                           )?.title,
                           value: i18n.language,
                         }}

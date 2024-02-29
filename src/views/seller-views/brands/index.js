@@ -77,13 +77,6 @@ export default function Brands() {
       is_show: true,
     },
     {
-      title: t('created.by'),
-      dataIndex: 'shop',
-      key: 'shop',
-      is_show: true,
-      render: (shop) => (shop ? t('you') : t('admin')),
-    },
-    {
       title: t('image'),
       dataIndex: 'img',
       key: 'img',
@@ -122,17 +115,15 @@ export default function Brands() {
               type='primary'
               icon={<EditOutlined />}
               onClick={() => goToEdit(row)}
-              disabled={!row?.shop_id}
             />
-            <DeleteButton
+            {/* <DeleteButton
               icon={<DeleteOutlined />}
-              disabled={!row?.shop_id}
               onClick={() => {
-                setId([row.id]);
+                setId([row.uuid]);
                 setIsModalVisible(true);
                 setText(true);
               }}
-            />
+            /> */}
           </Space>
         );
       },

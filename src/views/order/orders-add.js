@@ -31,7 +31,7 @@ export default function OrderAdd() {
 
   const { orderProducts, data, total, coupon } = useSelector(
     (state) => state.order,
-    shallowEqual,
+    shallowEqual
   );
 
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
@@ -52,7 +52,7 @@ export default function OrderAdd() {
   }, []);
 
   function getFirstShopFromList(shops) {
-    if (!shops.length) {
+     if (!shops.length) {
       return null;
     }
     return {
@@ -71,7 +71,6 @@ export default function OrderAdd() {
       });
       dispatch(disableRefetch(activeMenu));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu.refetch]);
 
   function createTransaction(id, data) {

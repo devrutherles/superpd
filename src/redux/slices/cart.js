@@ -42,7 +42,7 @@ const cartSlice = createSlice({
       const existingIndex = state.cartItems.findIndex(
         (item) =>
           item.stockID.id === payload.stockID.id &&
-          item.bag_id === payload.bag_id,
+          item.bag_id === payload.bag_id
       );
       if (existingIndex >= 0) {
         state.cartItems[existingIndex].quantity += payload.quantity;
@@ -52,7 +52,7 @@ const cartSlice = createSlice({
     },
     reduceCart(state, action) {
       const itemIndex = state.cartItems.findIndex(
-        (item) => item.stockID.id === action.payload.stockID.id,
+        (item) => item.stockID.id === action.payload.stockID.id
       );
 
       if (state.cartItems[itemIndex].quantity > 1) {
@@ -62,7 +62,7 @@ const cartSlice = createSlice({
     removeFromCart(state, action) {
       const { payload } = action;
       const nextCartItems = state.cartItems.filter(
-        (item) => item.stockID.id !== payload.stockID.id,
+        (item) => item.stockID.id !== payload.stockID.id
       );
       state.cartItems = nextCartItems;
       return state;
@@ -96,7 +96,7 @@ const cartSlice = createSlice({
       const { payload } = action;
       state.data = state.data.filter((item) => item.bag_id !== payload);
       state.cartItems = state.cartItems.filter(
-        (item) => item.bag_id !== payload,
+        (item) => item.bag_id !== payload
       );
       state.bags = state.bags.filter((item) => item !== payload);
       state.currentBag = 0;
@@ -120,17 +120,13 @@ const cartSlice = createSlice({
     setCartData(state, action) {
       const { payload } = action;
       const dataIndex = state.data.findIndex(
-        (item) => item.bag_id === payload.bag_id,
+        (item) => item.bag_id === payload.bag_id
       );
       state.data[dataIndex] = { ...state.data[dataIndex], ...payload };
     },
     setCartTotal(state, action) {
       const { payload } = action;
       state.total = payload;
-    },
-    setCartTotalCoupon(state, action) {
-      const { payload } = action;
-      state.total.couponOBJ = payload;
     },
     setCartCashback(state, action) {
       const { payload } = action;
@@ -139,7 +135,7 @@ const cartSlice = createSlice({
     addCoupon(state, action) {
       const { payload } = action;
       const itemIndex = state.coupons.findIndex(
-        (item) => item.shop_id === payload.shop_id,
+        (item) => item.shop_id === payload.shop_id
       );
       if (itemIndex >= 0) {
         state.coupons[itemIndex].coupon = payload.coupon;
@@ -150,7 +146,7 @@ const cartSlice = createSlice({
     verifyCoupon(state, action) {
       const { payload } = action;
       const itemIndex = state.coupons.findIndex(
-        (item) => item.shop_id === payload.shop_id,
+        (item) => item.shop_id === payload.shop_id
       );
       state.coupons[itemIndex].verified = payload.verified;
       state.coupons[itemIndex].price = payload.price;
@@ -161,19 +157,13 @@ const cartSlice = createSlice({
     },
     clearCart(state) {
       state.cartItems = state.cartItems.filter(
-        (item) => item.bag_id !== state.currentBag,
+        (item) => item.bag_id !== state.currentBag
       );
       state.coupons = [];
     },
     clearCartShops(state) {
       state.cartShops = [];
       state.total = initialState.total;
-    },
-    clearCartCoupon(state, action) {
-      const { payload } = action;
-
-      state.data.filter((item) => item.bag_id === payload).coupon = null;
-      state.data.filter((item) => item.bag_id === payload).couponOBJ = {};
     },
   },
 });
@@ -197,6 +187,5 @@ export const {
   setCartOrder,
   setCartPayment,
   addOrderNotes,
-  setCartTotalCoupon,
 } = cartSlice.actions;
 export default cartSlice.reducer;

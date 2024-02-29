@@ -12,7 +12,6 @@ import FilterColumns from '../../components/filter-column';
 import { useNavigate } from 'react-router-dom';
 import { fetchAdminPayouts } from '../../redux/slices/adminPayouts';
 import PayoutStatusChangeModal from './payoutStatusChangeModal';
-import moment from "moment/moment";
 
 const { TabPane } = Tabs;
 const roles = ['all', 'accepted', 'pending', 'canceled'];
@@ -98,7 +97,6 @@ export default function AdminPayouts() {
       dataIndex: 'created_at',
       key: 'created_at',
       is_show: true,
-      render: (_, row) => moment(row?.created_at).format('YYYY-MM-DD HH:mm')
     },
     {
       title: t('answer'),

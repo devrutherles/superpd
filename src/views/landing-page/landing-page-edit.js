@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Button, Card, Col, Form, Input, Row, Spin } from 'antd';
-import { shallowEqual, useDispatch, useSelector, batch } from 'react-redux';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { disableRefetch, removeFromMenu, setMenuData } from 'redux/slices/menu';
 import { fetchLandingPages } from 'redux/slices/landing-page';
 import { useTranslation } from 'react-i18next';
@@ -23,7 +23,7 @@ const LandingPageEdit = () => {
   const [loadingBtn, setLoadingBtn] = useState(false);
   const { languages, defaultLang } = useSelector(
     (state) => state.formLang,
-    shallowEqual,
+    shallowEqual
   );
   const { id } = useParams();
   const [image, setImage] = useState(activeMenu?.data?.img);
@@ -34,7 +34,7 @@ const LandingPageEdit = () => {
           activeMenu?.data['features[1].img'],
           activeMenu?.data['features[2].img'],
         ]
-      : ['', '', ''],
+      : ['', '', '']
   );
 
   const updateMedia = (obj, idx) => {
@@ -51,7 +51,7 @@ const LandingPageEdit = () => {
     const description = {};
     languages.forEach((element) => {
       title[`title[${element.locale}]`] = data.title.hasOwnProperty(
-        element.locale,
+        element.locale
       )
         ? data.title[element.locale]
         : undefined;
@@ -89,12 +89,10 @@ const LandingPageEdit = () => {
       const data = form.getFieldsValue(true);
       dispatch(setMenuData({ activeMenu, data }));
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onFinish = (values) => {
     setLoadingBtn(true);
-    const nextUrl = 'settings/landing-page';
     const body = {
       title: getTranslationFields(languages, values, 'title'),
       description: getTranslationFields(languages, values, 'description'),
@@ -108,12 +106,11 @@ const LandingPageEdit = () => {
     landingPageService
       .update(id, { data: body, type: 'welcome' })
       .then(() => {
+        const nextUrl = 'settings/landing-page';
         toast.success(t('successfully.created'));
-        batch(() => {
-          dispatch(removeFromMenu({ ...activeMenu, nextUrl }));
-          dispatch(fetchLandingPages({}));
-        });
+        dispatch(removeFromMenu({ ...activeMenu, nextUrl }));
         navigate(`/${nextUrl}`);
+        dispatch(fetchLandingPages());
       })
       .finally(() => setLoadingBtn(false));
   };
@@ -122,7 +119,6 @@ const LandingPageEdit = () => {
     if (activeMenu.refetch) {
       getLandingPage(id);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu.refetch]);
 
   return (

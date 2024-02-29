@@ -50,9 +50,9 @@ const MessageSubciribed = () => {
       render: (expired_at) => (
         <div>
           {moment(new Date()).isBefore(expired_at) ? (
-            <Tag color='blue'>{moment(expired_at).format('YYYY-MM-DD HH:mm')}</Tag>
+            <Tag color='blue'>{expired_at}</Tag>
           ) : (
-            <Tag color='error'>{moment(expired_at).format('YYYY-MM-DD HH:mm')}</Tag>
+            <Tag color='error'>{expired_at}</Tag>
           )}
         </div>
       ),
@@ -62,7 +62,6 @@ const MessageSubciribed = () => {
       dataIndex: 'created_at',
       key: 'created_at',
       is_show: true,
-      render: (_, row) => moment(row?.created_at).format('YYYY-MM-DD HH:mm')
     },
     {
       title: t('options'),

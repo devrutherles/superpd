@@ -12,7 +12,7 @@ import {
   Spin,
   Switch,
 } from 'antd';
-import { batch, shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import {
   disableRefetch,
   removeFromMenu,
@@ -41,11 +41,11 @@ const PaymentPayloadEdit = () => {
   const { languages } = useSelector((state) => state.formLang, shallowEqual);
   const [activePayment, setActivePayment] = useState(null);
   const [image, setImage] = useState(
-    activeMenu.data?.image ? [activeMenu.data?.image] : [],
+    activeMenu.data?.image ? [activeMenu.data?.image] : []
   );
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual,
+    shallowEqual
   );
 
   useEffect(() => {
@@ -53,7 +53,6 @@ const PaymentPayloadEdit = () => {
       const data = form.getFieldsValue(true);
       dispatch(setMenuData({ activeMenu, data }));
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const createImage = (name) => {
@@ -97,7 +96,7 @@ const PaymentPayloadEdit = () => {
       payload: {
         ...values,
         logo: image[0] ? image[0].name : undefined,
-        currency: !!values.currency?.label ? values.currency?.label : values.currency,
+        currency: values.currency,
         paypal_validate_ssl: values?.paypal_validate_ssl
           ? Number(values.paypal_validate_ssl)
           : undefined,
@@ -109,11 +108,9 @@ const PaymentPayloadEdit = () => {
       .then(() => {
         const nextUrl = 'payment-payloads';
         toast.success(t('successfully.updated'));
-        batch(() => {
-          dispatch(removeFromMenu({ ...activeMenu, nextUrl }));
-          dispatch(fetchPaymentPayloads({}));
-        });
+        dispatch(removeFromMenu({ ...activeMenu, nextUrl }));
         navigate(`/${nextUrl}`);
+        dispatch(fetchPaymentPayloads());
       })
       .finally(() => setLoadingBtn(false));
   };
@@ -122,7 +119,6 @@ const PaymentPayloadEdit = () => {
     if (activeMenu.refetch) {
       getPayload(id);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu.refetch]);
 
   const handleAddIcon = (data) => {
@@ -363,7 +359,7 @@ const PaymentPayloadEdit = () => {
                           placeholder={t('select.locale')}
                           defaultValue={{
                             label: languages.find(
-                              (item) => item.locale === i18n.language,
+                              (item) => item.locale === i18n.language
                             )?.title,
                             value: i18n.language,
                           }}

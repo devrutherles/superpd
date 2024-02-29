@@ -1,14 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { Card, Form } from 'antd';
-import { batch, shallowEqual, useDispatch, useSelector } from 'react-redux';
-import { disableRefetch, removeFromMenu, setMenuData } from 'redux/slices/menu';
+import { Button, Card, Col, Form, Row } from 'antd';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import {
+  disableRefetch,
+  removeFromMenu,
+  setMenuData,
+} from '../../../redux/slices/menu';
+import productService from '../../../services/seller/product';
+import { DebounceSelect } from '../../../components/search';
 import { useTranslation } from 'react-i18next';
-import storeisService from 'services/seller/storeis';
-import { fetchStoreis } from 'redux/slices/storeis';
-import Loading from 'components/loading';
-import StoryForm from './story-form';
+import storeisService from '../../../services/seller/storeis';
+import { fetchStoreis } from '../../../redux/slices/storeis';
+import Loading from '../../../components/loading';
+import ImageGallery from './upload/image-gallery';
 
 const StoreisEdit = () => {
   const { t } = useTranslation();
@@ -18,6 +24,11 @@ const StoreisEdit = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { myShop: shop } = useSelector((state) => state.myShop, shallowEqual);
+
+  const [image, setImage] = useState(
+    activeMenu.data?.images ? [activeMenu.data?.images[0]] : []
+  );
+  const [loadingBtn, setLoadingBtn] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -25,7 +36,6 @@ const StoreisEdit = () => {
       const data = form.getFieldsValue(true);
       dispatch(setMenuData({ activeMenu, data }));
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const createImages = (items) =>
@@ -39,16 +49,15 @@ const StoreisEdit = () => {
     storeisService
       .getById(alias)
       .then(({ data }) => {
-        const body = {
+        form.setFieldsValue({
           ...data,
-          image: createImages(data?.file_urls),
+          image: createImages(data.file_urls),
           products: {
-            label: data?.product?.translation?.title,
-            value: data?.product?.id,
+            label: data.product.translation.title,
+            value: data.product.id,
           },
-        };
-        dispatch(setMenuData({ activeMenu, data: body }));
-        form.setFieldsValue({ ...body });
+        });
+        setImage(createImages(data.file_urls));
       })
       .finally(() => {
         setLoading(false);
@@ -56,42 +65,112 @@ const StoreisEdit = () => {
       });
   };
 
-  const handleSubmit = (values, image) => {
+  const onFinish = (values) => {
     const body = {
       ...Object.assign(
         {},
         ...image.map((item, index) => ({
           [`file_urls[${index}]`]: item.name,
-        })),
+        }))
       ),
       product_id: values.products.value,
     };
+    setLoadingBtn(true);
     const nextUrl = 'seller/stories';
-
-    return storeisService.update(id, body).then(() => {
-      const data = {
-        shop_id: shop.id,
-      };
-      toast.success(t('successfully.updated'));
-      batch(() => {
+    storeisService
+      .update(id, body)
+      .then(() => {
+        const data = {
+          shop_id: shop.id,
+        };
+        toast.success(t('successfully.updated'));
         dispatch(removeFromMenu({ ...activeMenu, nextUrl }));
+        navigate(`/${nextUrl}`);
         dispatch(fetchStoreis(data));
-      });
-      navigate(`/${nextUrl}`);
-    });
+      })
+      .finally(() => setLoadingBtn(false));
   };
 
   useEffect(() => {
     if (activeMenu.refetch) {
       getStory(id);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu.refetch]);
+
+  function fetchProductsStock(search) {
+    const data = {
+      search,
+      shop_id: shop.id,
+      status: 'published',
+      active: 1,
+      rest: 1,
+    };
+    return productService.getAll(data).then((res) =>
+      res.data.map((product) => ({
+        label: product.translation.title,
+        value: product.id,
+        key: product.id,
+      }))
+    );
+  }
 
   return (
     <Card title={t('edit.story')} className='h-100'>
       {!loading ? (
-        <StoryForm form={form} handleSubmit={handleSubmit} />
+        <Form
+          name='story-add'
+          layout='vertical'
+          onFinish={onFinish}
+          form={form}
+          initialValues={{ active: true, ...activeMenu.data }}
+          className='d-flex flex-column h-100'
+        >
+          <Row gutter={12}>
+            <Col span={24}>
+              <Form.Item
+                label={t('image')}
+                name='images'
+                rules={[
+                  {
+                    required: image.length === 0,
+                    message: t('required'),
+                  },
+                ]}
+              >
+                <ImageGallery
+                  form={form}
+                  setFileList={setImage}
+                  fileList={image}
+                />
+              </Form.Item>
+            </Col>
+
+            <Col span={24}>
+              <Form.Item
+                label={t('products')}
+                name={'products'}
+                rules={[
+                  {
+                    required: true,
+                    message: t('required'),
+                  },
+                ]}
+              >
+                <DebounceSelect
+                  fetchOptions={fetchProductsStock}
+                  debounceTimeout={200}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+          <div className='flex-grow-1 d-flex flex-column justify-content-end'>
+            <div className='pb-5'>
+              <Button type='primary' htmlType='submit' loading={loadingBtn}>
+                {t('submit')}
+              </Button>
+            </div>
+          </div>
+        </Form>
       ) : (
         <Loading />
       )}

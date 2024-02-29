@@ -50,52 +50,43 @@ const ShopDelivery = ({ next, prev }) => {
     }
   };
 
-  const getDays = (identifier) => {
-    if (identifier) {
-      setLoading(true);
-      closeDates.getById(uuid).then((res) => {
-        setDays(
-          res.data.closed_dates
-            .filter(
-              (date) => date.day > moment(new Date()).format('YYYY-MM-DD')
-            )
-            .map((itm) => new Date(itm.day))
+  const getDays = () => {
+    setLoading(true);
+    closeDates.getById(uuid).then((res) => {
+      setDays(
+        res.data.closed_dates
+          .filter((date) => date.day > moment(new Date()).format('YYYY-MM-DD'))
+          .map((itm) => new Date(itm.day))
+      );
+    });
+
+    workingDays
+      .getById(uuid)
+      .then((res) => {
+        setLines(
+          res.data.dates.length !== 0
+            ? res.data.dates.map((item) => item.disabled)
+            : []
         );
-      });
 
-      workingDays
-        .getById(uuid)
-        .then((res) => {
-          setLines(
-            res.data.dates.length !== 0
-              ? res.data.dates.map((item) => item.disabled)
-              : []
-          );
-
-          res.data.dates.length !== 0 &&
-            form.setFieldsValue({
-              working_days: res.data.dates.map((item) => ({
-                title: item.day,
-                from: moment(item.from, 'HH:mm:ss'),
-                to: moment(item.to, 'HH:mm:ss'),
-                disabled: Boolean(item.disabled),
-              })),
-            });
-        })
-        .finally(() => setLoading(false));
-    }
+        res.data.dates.length !== 0 &&
+          form.setFieldsValue({
+            working_days: res.data.dates.map((item) => ({
+              title: item.day,
+              from: moment(item.from, 'HH:mm:ss'),
+              to: moment(item.to, 'HH:mm:ss'),
+              disabled: Boolean(item.disabled),
+            })),
+          });
+      })
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
     form.setFieldsValue({
       working_days: weeks,
     });
-    getDays(uuid);
-
-    return () => {
-      setLoading(false);
-      setLoadingBtn(false);
-    }
+    if (uuid) getDays();
   }, []);
 
   return (

@@ -63,13 +63,6 @@ export default function SellerExtraGroup() {
       render: (translation) => translation?.title,
     },
     {
-      title: t('created.by'),
-      dataIndex: 'shop',
-      key: 'shop',
-      is_show: true,
-      render: (shop) => (shop ? t('you') : t('admin')),
-    },
-    {
       title: t('type'),
       dataIndex: 'type',
       key: 'type',

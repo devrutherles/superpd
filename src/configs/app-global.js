@@ -1,6 +1,7 @@
-export const PROJECT_NAME = 'Superpao';
-export const BASE_URL = process.env.REACT_APP_BASE_URL || 'https://admin.superpao.online';
-export const WEBSITE_URL = 'https://app.superpao.online';
+export const PROJECT_NAME = 'Foodyman marketplace';
+export const BASE_URL =
+  process.env.REACT_APP_BASE_URL || 'http://admin.superpao.online';
+export const WEBSITE_URL = 'https://superpd.vercel.app';
 export const api_url = BASE_URL + '/api/v1/';
 export const api_url_admin = BASE_URL + '/api/v1/dashboard/admin/';
 export const api_url_admin_dashboard = BASE_URL + '/api/v1/dashboard/';
@@ -10,18 +11,18 @@ export const export_url = BASE_URL + '/storage/';
 export const example = BASE_URL + '/';
 
 export const VAPID_KEY =
-  'BHFv5NaxfCmJ9s2VPGdSG9TZ5gdux45UOpJW9fUDoFeqAsXv8XFZmzMI7vp84B6QAKiCD1eMy8E4M9f1RRPfRR0';
+  'BHlmEHmLNoEmbd8-67VLwpv2Z0SF7Tjhco9sxgB2avDHW6AoYStFa5usQ3H6seaGiUFkUwBeknQWL8kuCjlQke8';
 
 export const LAT = 47.4143302506288;
 export const LNG = 8.532059477976883;
 
-export const API_KEY = 'AIzaSyC-94TkEzZAFhV4XLq9q-EmWsx_z1_ZARo';
-export const AUTH_DOMAIN = 'foodyman-703bd.firebaseapp.com';
-export const PROJECT_ID = 'foodyman-703bd';
-export const STORAGE_BUCKET = 'foodyman-703bd.appspot.com';
-export const MESSAGING_SENDER_ID = '723986947199';
-export const APP_ID = '1:723986947199:web:5b3b23e1e9f97083f5334a';
-export const MEASUREMENT_ID = 'G-09DRT9D4L0';
+export const API_KEY = 'AIzaSyDalS14dkqkUcEmialsBxx_JpNSXNd48dM';
+export const AUTH_DOMAIN = 'restromenuu.firebaseapp.com';
+export const PROJECT_ID = 'restromenuu';
+export const STORAGE_BUCKET = 'restromenuu.appspot.com';
+export const MESSAGING_SENDER_ID = '748418011151';
+export const APP_ID = '1:748418011151:web:0a55033660a4f08c20537a';
+export const MEASUREMENT_ID = 'G-2MCN6L44DK';
 
 export const RECAPTCHASITEKEY = '6LfbQG4pAAAAAKQqEJLOfWcmXdFrfx8KpuswbT3G';
 

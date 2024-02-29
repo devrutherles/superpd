@@ -16,7 +16,6 @@ import ResultModal from '../../components/result-modal';
 import SearchInput from '../../components/search-input';
 import useDidUpdate from '../../helpers/useDidUpdate';
 import formatSortType from '../../helpers/formatSortType';
-import moment from "moment/moment";
 
 const { TabPane } = Tabs;
 const roles = ['pending', 'accepted', 'canceled', 'deleted_at'];
@@ -96,7 +95,6 @@ const Refunds = () => {
       is_show: true,
       dataIndex: 'created_at',
       key: 'created_at',
-      render: (_, row) => moment(row?.created_at).format('YYYY-MM-DD HH:mm')
     },
     {
       title: t('options'),

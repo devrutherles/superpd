@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Card } from 'antd';
+import { Card } from 'antd';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import Dragger from 'antd/lib/upload/Dragger';
@@ -8,7 +8,6 @@ import { toast } from 'react-toastify';
 import { setMenuData } from '../../redux/slices/menu';
 import brandService from '../../services/brand';
 import { fetchBrands } from '../../redux/slices/brand';
-import { example } from 'configs/app-global';
 
 export default function BrandImport() {
   const { t } = useTranslation();
@@ -36,16 +35,8 @@ export default function BrandImport() {
     });
   };
 
-  const downloadFile = () => {
-    const body = example + 'import-example/brands.xlsx';
-    window.location.href = body;
-  };
-
   return (
     <Card title={t('import')}>
-      <Button type='primary' className='mb-4' onClick={downloadFile}>
-        {t('download.csv')}
-      </Button>
       <Dragger
         name='file'
         multiple={false}

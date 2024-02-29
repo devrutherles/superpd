@@ -7,7 +7,7 @@ import CategoryRequestList from './category-request-list';
 
 export default function SellerCategories() {
   const { t } = useTranslation();
-  const location = useLocation();
+  const location = useLocation()
   return (
     <Tabs
       defaultActiveKey={location.state?.tab || 'list'}

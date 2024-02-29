@@ -130,22 +130,17 @@ const ProductStock = ({ prev, next, isRequest }) => {
                   );
                 });
               });
-              const selectedAddons = [];
-              selectedStock?.addons?.forEach((item) => {
-                if (item.product) {
-                  selectedAddons.push({
-                    label: item?.product?.translation?.title || item?.label,
-                    value: item?.product?.id || item?.value,
-                  });
-                }
-              });
               return {
                 price: selectedStock?.price || 0,
                 quantity: selectedStock?.quantity || 0,
                 sku: selectedStock?.sku,
                 stock_id: selectedStock?.id,
                 tax: activeMenu?.data.tax || 0,
-                addons: selectedAddons,
+                addons:
+                  selectedStock?.addons?.map((item) => ({
+                    label: item?.product?.translation?.title || item?.label,
+                    value: item?.product?.id || item?.value,
+                  })) || [],
                 ...Object.assign(
                   {},
                   ...additionalStock.map((extra, idx) => ({
@@ -179,22 +174,18 @@ const ProductStock = ({ prev, next, isRequest }) => {
         let defaultStock = [];
         if (additionalStocks.length === 0 && res.data.stocks?.length !== 0) {
           const stockWithoutExtras = res.data.stocks?.at(0);
-          const selectedAddons = [];
-          stockWithoutExtras?.addons?.forEach((item) => {
-            if (item.product) {
-              selectedAddons.push({
-                label: item?.product?.translation?.title || item?.label,
-                value: item?.product?.id || item?.value,
-              });
-            }
-          });
           defaultStock = [
             {
               price: stockWithoutExtras?.price || 0,
               quantity: stockWithoutExtras?.quantity || 0,
               sku: stockWithoutExtras?.sku,
               tax: activeMenu.data?.tax || 0,
-              addons: stockWithoutExtras ? selectedAddons : [],
+              addons: stockWithoutExtras
+                ? stockWithoutExtras.addons?.map((item) => ({
+                    label: item?.product?.translation?.title || item?.label,
+                    value: item?.product?.id || item?.value,
+                  }))
+                : [],
             },
           ];
         }
@@ -225,8 +216,7 @@ const ProductStock = ({ prev, next, isRequest }) => {
       search,
       addon: 1,
       shop_id: activeMenu?.data?.shop_id,
-      'statuses[0]': 'published',
-      'statuses[1]': 'pending',
+      status: 'published',
       active: 1,
     };
     return productService.getAll(params).then((res) =>
@@ -255,21 +245,16 @@ const ProductStock = ({ prev, next, isRequest }) => {
                 });
               }
             );
-            const selectedAddons = [];
-            selectedStock?.addons?.forEach((item) => {
-              if (item.product) {
-                selectedAddons.push({
-                  label: item?.product?.translation?.title || item?.label,
-                  value: item?.product?.id || item?.value,
-                });
-              }
-            });
             return {
               price: selectedStock?.price || 0,
               quantity: selectedStock?.quantity || 0,
               stock_id: selectedStock?.id,
               tax: activeMenu?.data.tax || 0,
-              addons: selectedAddons,
+              addons:
+                selectedStock?.addons?.map((item) => ({
+                  label: item?.product?.translation?.title || item?.label,
+                  value: item?.product?.id || item?.value,
+                })) || [],
               ...Object.assign(
                 {},
                 ...item.map((extra, idx) => ({
@@ -306,22 +291,18 @@ const ProductStock = ({ prev, next, isRequest }) => {
           activeMenu.data?.actualStocks?.length !== 0
         ) {
           const stockWithoutExtras = activeMenu.data.actualStocks?.at(0);
-          const selectedAddons = [];
-          stockWithoutExtras?.addons?.forEach((item) => {
-            if (item.product) {
-              selectedAddons.push({
-                label: item?.product?.translation?.title || item?.label,
-                value: item?.product?.id || item?.value,
-              });
-            }
-          });
           defaultStock = [
             {
               price: stockWithoutExtras?.price || 0,
               quantity: stockWithoutExtras?.quantity || 0,
               sku: stockWithoutExtras?.sku,
               tax: activeMenu.data?.tax || 0,
-              addons: stockWithoutExtras ? selectedAddons : [],
+              addons: stockWithoutExtras
+                ? stockWithoutExtras.addons?.map((item) => ({
+                    label: item?.product?.translation?.title || item?.label,
+                    value: item?.product?.id || item?.value,
+                  }))
+                : [],
             },
           ];
         }
@@ -353,7 +334,7 @@ const ProductStock = ({ prev, next, isRequest }) => {
           sku: stock.sku,
           ...Object.assign(
             {},
-            ...stock.ids?.map((extra, idx) => ({
+            ...stock.ids.map((extra, idx) => ({
               [`extras[${idx}]`]: {
                 label: extra.label,
                 value: extra.value,
@@ -510,11 +491,7 @@ const ProductStock = ({ prev, next, isRequest }) => {
                               const totalPrice =
                                 tax === 0 ? price : (price * tax) / 100 + price;
                               return (
-                                <Form.Item
-                                  label={`${t('total.price')} (${
-                                    defaultCurrency?.symbol
-                                  })`}
-                                >
+                                <Form.Item label={`${t('total.price')} (${defaultCurrency?.symbol})`}>
                                   <InputNumber
                                     min={1}
                                     disabled

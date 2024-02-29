@@ -31,6 +31,7 @@ export default function WaiterOrderDetails() {
   const totalPriceRef = useRef();
   const productListRef = useRef();
 
+  const [totalPrice, setTotalPrice] = useState(null);
   const [loading, setLoading] = useState(false);
   const [orderDetails, setOrderDetails] = useState(null);
   const [orderDeliveryDetails, setOrderDeliveryDetails] = useState(null);
@@ -100,6 +101,7 @@ export default function WaiterOrderDetails() {
           total_price +
           row?.addons?.reduce((total, item) => (total += item.total_price), 0);
 
+        setTotalPrice(data);
         return numberToPrice(data, defaultCurrency?.symbol);
       },
     },
@@ -243,7 +245,7 @@ export default function WaiterOrderDetails() {
             <br />
             <span>{numberToPrice(data?.tax, defaultCurrency?.symbol)}</span>
             <br />
-            <span>{numberToPrice(data?.origin_price, defaultCurrency?.symbol)}</span>
+            <span>{numberToPrice(totalPrice, defaultCurrency?.symbol)}</span>
             <br />
             <span>
               {numberToPrice(data?.total_discount, defaultCurrency?.symbol)}

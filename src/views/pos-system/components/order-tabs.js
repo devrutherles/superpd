@@ -41,11 +41,11 @@ export default function OrderTabs() {
   const dispatch = useDispatch();
   const { currencies, loading } = useSelector(
     (state) => state.currency,
-    shallowEqual,
+    shallowEqual
   );
   const { currentBag, bags, currency } = useSelector(
     (state) => state.cart,
-    shallowEqual,
+    shallowEqual
   );
   const data = useSelector((state) => getCartData(state.cart));
   const { payments } = useSelector((state) => state.payment, shallowEqual);
@@ -56,6 +56,7 @@ export default function OrderTabs() {
   const cartData = useSelector((state) => getCartData(state.cart));
   const { payment_type: paymentRole, before_order_phone_required } =
     useSelector((state) => state.globalSettings.settings, shallowEqual);
+
   async function getUsers({ search, page }) {
     const params = {
       search,
@@ -92,7 +93,7 @@ export default function OrderTabs() {
         bag_id: currentBag,
         userOBJ: user,
         phone: user?.phone,
-      }),
+      })
     );
     form.setFieldsValue({ address: null, phone: user?.phone });
   }
@@ -129,7 +130,7 @@ export default function OrderTabs() {
         setCartData({
           currentCurrency,
           bag_id: currentBag,
-        }),
+        })
       );
       dispatch(setCurrency(currentCurrency));
       form.setFieldsValue({
@@ -144,7 +145,7 @@ export default function OrderTabs() {
         setCartData({
           formCurrency,
           bag_id: currentBag,
-        }),
+        })
       );
       form.setFieldsValue({
         currency: formCurrency,
@@ -259,7 +260,7 @@ export default function OrderTabs() {
                       validator(_, value) {
                         if (value < 0) {
                           return Promise.reject(
-                            new Error(t('must.be.positive')),
+                            new Error(t('must.be.positive'))
                           );
                         }
                       },
@@ -272,7 +273,7 @@ export default function OrderTabs() {
                     disabled={data?.userOBJ?.phone}
                     onChange={(phone) =>
                       dispatch(
-                        setCartData({ phone: phone, bag_id: currentBag }),
+                        setCartData({ phone: phone, bag_id: currentBag })
                       )
                     }
                   />
@@ -304,7 +305,7 @@ export default function OrderTabs() {
                       setCartData({
                         currency,
                         bag_id: currentBag,
-                      }),
+                      })
                     );
                   }}
                 >

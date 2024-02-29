@@ -6,7 +6,7 @@ import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import {
   removeFromMenu,
   setMenuData,
-} from '../../../redux/slices/menu';
+ } from '../../../redux/slices/menu';
 
 import { useTranslation } from 'react-i18next';
 import MediaUpload from '../../../components/upload';

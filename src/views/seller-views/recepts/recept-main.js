@@ -5,7 +5,7 @@ import { shallowEqual, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import MediaUpload from '../../../components/upload';
 import sellerCategory from '../../../services/seller/category';
-import { DebounceSelect } from 'components/search';
+import { AsyncSelect } from '../../../components/async-select';
 
 const { TextArea } = Input;
 
@@ -17,10 +17,10 @@ const ReceptMain = ({ next, image, setImage }) => {
     shallowEqual
   );
 
-  function fetchCategory(search) {
-    return sellerCategory.getAll({ active: 1, type: 'receipt', search }).then((res) => {
+  function fetchCategory() {
+    return sellerCategory.getAll({ active: 1, type: 'receipt' }).then((res) => {
       return res.data.map((category) => ({
-        label: category?.translation?.title || 'no name',
+        label: category.translation.title,
         value: category.id,
       }));
     });
@@ -67,7 +67,7 @@ const ReceptMain = ({ next, image, setImage }) => {
               },
             ]}
           >
-            <DebounceSelect fetchOptions={fetchCategory} debounceTimeout={200} />
+            <AsyncSelect fetchOptions={fetchCategory} debounceTimeout={200} />
           </Form.Item>
         </Col>
         <Col span={12}>

@@ -22,7 +22,6 @@ import useDemo from '../../../helpers/useDemo';
 const Setting = ({ setFavicon, favicon, setLogo, logo }) => {
   const { t } = useTranslation();
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
-  const {defaultCurrency} = useSelector(state => state.currency)
   const dispatch = useDispatch();
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [form] = Form.useForm();
@@ -148,7 +147,7 @@ const Setting = ({ setFavicon, favicon, setLogo, logo }) => {
               },
             ]}
           >
-            <InputNumber min={0} className='w-100' addonBefore={defaultCurrency?.symbol} />
+            <InputNumber min={0} className='w-100' />
           </Form.Item>
         </Col>
         <Col span={12}>

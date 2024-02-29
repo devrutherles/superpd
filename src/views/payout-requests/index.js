@@ -11,7 +11,6 @@ import { EditOutlined } from '@ant-design/icons';
 import PayoutRequestModal from './payoutRequestModal';
 import FilterColumns from '../../components/filter-column';
 import { useNavigate } from 'react-router-dom';
-import moment from "moment";
 
 const { TabPane } = Tabs;
 const roles = ['processed', 'paid', 'rejected', 'canceled'];
@@ -107,7 +106,6 @@ export default function PayoutRequests() {
       dataIndex: 'created_at',
       key: 'created_at',
       is_show: true,
-      render: (_, row) => moment(row?.created_at).format('YYYY-MM-DD HH:mm')
     },
     {
       title: t('options'),

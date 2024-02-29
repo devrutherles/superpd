@@ -21,23 +21,21 @@ export default function UserEdit({ prev }) {
   const [form] = Form.useForm();
 
   const showUserData = (uuid) => {
-    if (uuid) {
-      setLoading(true);
-      userService
-        .getById(uuid)
-        .then((res) => {
-          const data = res.data;
-          form.setFieldsValue({
-            firstname: data.firstname,
-            lastname: data.lastname,
-            email: data.email,
-            phone: data.phone,
-            password_confirmation: data.password_confirmation,
-            password: data.password,
-          });
-        })
-        .finally(() => setLoading(false));
-    }
+    setLoading(true);
+    userService
+      .getById(uuid)
+      .then((res) => {
+        const data = res.data;
+        form.setFieldsValue({
+          firstname: data.firstname,
+          lastname: data.lastname,
+          email: data.email,
+          phone: data.phone,
+          password_confirmation: data.password_confirmation,
+          password: data.password,
+        });
+      })
+      .finally(() => setLoading(false));
   };
 
   const onFinish = (values) => {
@@ -64,11 +62,8 @@ export default function UserEdit({ prev }) {
   };
 
   useEffect(() => {
-    showUserData(activeMenu?.data?.seller?.uuid);
-
-    return () => {
-      setLoading(false);
-      setLoadingBtn(false);
+    if (activeMenu?.data.seller) {
+      showUserData(activeMenu?.data?.seller?.uuid);
     }
   }, []);
 

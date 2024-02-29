@@ -3,7 +3,6 @@ import { Button, Descriptions, Modal } from 'antd';
 import { useTranslation } from 'react-i18next';
 import Loading from 'components/loading';
 import reviewService from 'services/review';
-import moment from 'moment';
 
 export default function OrderReviewShowModal({ id, handleCancel }) {
   const [data, setData] = useState({});
@@ -56,7 +55,7 @@ export default function OrderReviewShowModal({ id, handleCancel }) {
             {description}
           </Descriptions.Item>
           <Descriptions.Item span={3} label={t('created.at')}>
-            {moment(data.created_at).format('DD.MM.YYYY HH:mm')}
+            {data.created_at}
           </Descriptions.Item>
         </Descriptions>
       ) : (

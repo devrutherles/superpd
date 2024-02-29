@@ -12,7 +12,6 @@ import { fetchSellerTransactions } from '../../../redux/slices/transaction';
 import TransactionShowModal from './transactionShowModal';
 import numberToPrice from '../../../helpers/numberToPrice';
 import FilterColumns from '../../../components/filter-column';
-import moment from "moment";
 const { TabPane } = Tabs;
 
 const statuses = ['all', 'progress', 'paid', 'rejected'];
@@ -90,7 +89,6 @@ export default function SellerTransactions() {
       dataIndex: 'created_at',
       key: 'created_at',
       is_show: true,
-      render: (_, row) => moment(row?.created_at).format('YYYY-MM-DD HH:mm')
     },
     {
       title: t('options'),

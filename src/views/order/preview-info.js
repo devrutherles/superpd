@@ -41,7 +41,7 @@ const PreviewInfo = ({ orderId, handleClose }) => {
   function calculateProductsPrice() {
     return data?.details.reduce(
       (total, item) => (total += item.origin_price),
-      0,
+      0
     );
   }
 
@@ -191,14 +191,14 @@ const PreviewInfo = ({ orderId, handleClose }) => {
                       <span>{t('sub-total.amount')}: </span>
                       {numberToPrice(
                         calculateProductsPrice(),
-                        data?.currency?.symbol,
+                        data?.currency?.symbol
                       )}
                     </p>
                     <p>
                       {t('delivery.price')} :{' '}
                       {numberToPrice(
                         data?.delivery_fee,
-                        data?.currency?.symbol,
+                        data?.currency?.symbol
                       )}
                     </p>
                     <p>
@@ -210,14 +210,10 @@ const PreviewInfo = ({ orderId, handleClose }) => {
                       {numberToPrice(
                         data?.details?.reduce(
                           (total, item) => (total += item.tax),
-                          0,
+                          0
                         ),
-                        data?.currency?.symbol,
+                        data?.currency?.symbol
                       )}
-                    </p>
-                    <p>
-                      {t('service.fee')} :{' '}
-                      {numberToPrice(data?.service_fee, data?.currency?.symbol)}
                     </p>
                     {/* <p>
                       {t('coupon')} :{' '}
@@ -233,19 +229,16 @@ const PreviewInfo = ({ orderId, handleClose }) => {
                       <div className='ml-2 font-weight-bold'>
                         {numberToPrice(
                           data?.total_price,
-                          data?.currency?.symbol,
+                          data?.currency?.symbol
                         )}
                       </div>
                     </span>
                     {data?.total_discount ? (
-                      <div>
-                        <h3>{t('total.discount')}:</h3>{' '}
-                        <span className={'strike'}>
-                          {numberToPrice(
-                            data?.total_discount,
-                            data?.currency?.symbol,
-                          )}
-                        </span>
+                      <div className={data?.total_discount ? 'strike' : ''}>
+                        {numberToPrice(
+                          data?.total_discount,
+                          data?.currency?.symbol
+                        )}
                       </div>
                     ) : null}
                   </h2>

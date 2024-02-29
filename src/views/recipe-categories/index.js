@@ -26,8 +26,6 @@ import ResultModal from '../../components/result-modal';
 import formatSortType from '../../helpers/formatSortType';
 import { fetchRecipeCategories } from '../../redux/slices/recipe-category';
 import RecipeCategoryStatusModal from './categoryStatusModal';
-import shopService from 'services/restaurant';
-import { InfiniteSelect } from 'components/infinite-select';
 const colors = ['blue', 'red', 'gold', 'volcano', 'cyan', 'lime'];
 
 const { TabPane } = Tabs;
@@ -43,23 +41,6 @@ const RecipeCategories = () => {
   const [active, setActive] = useState(null);
   const [recipeData, setRecipeData] = useState(null);
   const immutable = activeMenu.data?.role || role;
-
-  const [links, setLinks] = useState(null);
-
-  async function fetchUserShop({ search, page }) {
-    const params = {
-      search: search?.length === 0 ? undefined : search,
-      status: 'approved',
-      page: page,
-    };
-    return shopService.search(params).then((res) => {
-      setLinks(res.links);
-      return res.data.map((item) => ({
-        label: item.translation !== null ? item.translation.title : 'no name',
-        value: item.id,
-      }));
-    });
-  }
 
   function goToEdit(row) {
     dispatch(
@@ -94,17 +75,6 @@ const RecipeCategories = () => {
     navigate(`/recipe-categories/import`);
   };
 
-  const goToShop = (row) => {
-    dispatch(
-      addMenu({
-        id: 'edit-shop',
-        url: `shop/${row.uuid}`,
-        name: t('edit.shop'),
-      })
-    );
-    navigate(`/shop/${row.uuid}`, { state: 'edit' });
-  };
-
   const goToClone = (uuid) => {
     dispatch(
       addMenu({
@@ -128,20 +98,6 @@ const RecipeCategories = () => {
       dataIndex: 'name',
       key: 'name',
       is_show: true,
-    },
-    {
-      title: t('created.by'),
-      dataIndex: 'shop',
-      key: 'shop',
-      is_show: true,
-      render: (shop) =>
-        shop ? (
-          <span onClick={() => goToShop(shop)} className='text-hover'>
-            {shop?.translation?.title}
-          </span>
-        ) : (
-          t('admin')
-        ),
     },
     {
       title: t('translations'),
@@ -181,6 +137,7 @@ const RecipeCategories = () => {
     {
       title: t('active'),
       dataIndex: 'active',
+      key: 'active',
       is_show: true,
       render: (active, row) => {
         return (
@@ -271,7 +228,6 @@ const RecipeCategories = () => {
     status:
       immutable === 'deleted_at' || immutable === 'all' ? undefined : immutable,
     deleted_at: immutable === 'deleted_at' ? immutable : undefined,
-    shop_id: data?.selectedShop?.value,
   };
 
   const categoryDelete = () => {
@@ -423,16 +379,6 @@ const RecipeCategories = () => {
             defaultValue={activeMenu.data?.search}
             resetSearch={!activeMenu.data?.search}
             style={{ minWidth: 300 }}
-          />
-
-          <InfiniteSelect
-            placeholder={t('select.shop')}
-            hasMore={links?.next}
-            loading={loading}
-            fetchOptions={fetchUserShop}
-            style={{ minWidth: 180 }}
-            onChange={(e) => handleFilter({ selectedShop: e })}
-            value={activeMenu.data?.selectedShop}
           />
 
           {immutable !== 'deleted_at' ? (

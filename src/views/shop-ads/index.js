@@ -64,7 +64,7 @@ export default function ShopAds() {
       setMenuData({
         activeMenu,
         data: { ...activeMenu.data, perPage, page, column, sort },
-      }),
+      })
     );
   };
 
@@ -75,7 +75,7 @@ export default function ShopAds() {
         {},
         ...id.map((item, index) => ({
           [`ids[${index}]`]: item,
-        })),
+        }))
       ),
     };
 
@@ -100,7 +100,7 @@ export default function ShopAds() {
         id: 'shop-ads',
         url: `shop-ads/${row.id}`,
         name: t('edit.shop.ads'),
-      }),
+      })
     );
     navigate(`/shop-ads/${row.id}`);
   };
@@ -111,7 +111,7 @@ export default function ShopAds() {
         id: 'transactions',
         url: `transactions`,
         name: t('transactions'),
-      }),
+      })
     );
     navigate(`/transactions`);
   };
@@ -167,7 +167,7 @@ export default function ShopAds() {
       render: (_, row) => (
         <>
           {row?.expired_at ? (
-            moment(row?.expired_at).format('YYYY-MM-DD HH:mm')
+            moment(row?.expired_at).format('YYYY-MM-DD hh:mm')
           ) : (
             <span>{t('not.expired')}</span>
           )}

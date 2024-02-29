@@ -14,7 +14,6 @@ import { ShoppingCartOutlined } from '@ant-design/icons';
 import { MdRestaurant } from 'react-icons/md';
 import { IoBicycleSharp, IoCheckmarkDoneSharp } from 'react-icons/io5';
 import { AiOutlineCloseCircle } from 'react-icons/ai';
-import moment from "moment/moment";
 const { Step } = Steps;
 const User = () => <img src={FaUser} width='50' alt='Pin' />;
 const Store = () => <img src={FaStore} width='50' alt='Pin' />;
@@ -131,7 +130,7 @@ const ShowLocationsMap = ({ id, handleCancel }) => {
                   {t('order.id')} #{data?.id}
                 </h3>
                 <p>
-                  <BsCalendar2Day /> {moment(data?.created_at).format('YYYY-MM-DD HH:mm')}
+                  <BsCalendar2Day /> {data?.created_at}
                 </p>
                 <p>
                   {t('schedulet.at')} {data?.delivery_date}

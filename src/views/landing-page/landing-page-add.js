@@ -21,7 +21,7 @@ const LandingPageAdd = () => {
   const [loadingBtn, setLoadingBtn] = useState(false);
   const { languages, defaultLang } = useSelector(
     (state) => state.formLang,
-    shallowEqual,
+    shallowEqual
   );
   const [image, setImage] = useState(activeMenu?.data?.img);
   const [media, setMedia] = useState(
@@ -31,7 +31,7 @@ const LandingPageAdd = () => {
           activeMenu?.data['features[1].img'],
           activeMenu?.data['features[2].img'],
         ]
-      : ['', '', ''],
+      : ['', '', '']
   );
 
   const updateMedia = (obj, idx) => {
@@ -45,7 +45,6 @@ const LandingPageAdd = () => {
       const data = form.getFieldsValue(true);
       dispatch(setMenuData({ activeMenu, data }));
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onFinish = (values) => {
@@ -67,7 +66,7 @@ const LandingPageAdd = () => {
         toast.success(t('successfully.created'));
         dispatch(removeFromMenu({ ...activeMenu, nextUrl }));
         navigate(`/${nextUrl}`);
-        dispatch(fetchLandingPages({}));
+        dispatch(fetchLandingPages());
       })
       .finally(() => setLoadingBtn(false));
   };

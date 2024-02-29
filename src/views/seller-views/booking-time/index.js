@@ -17,7 +17,6 @@ import FilterColumns from '../../../components/filter-column';
 import sellerBookingTime from '../../../services/seller/booking-time';
 import { useNavigate } from 'react-router-dom';
 import RiveResult from 'components/rive-result';
-import moment from "moment";
 
 const BookingTables = () => {
   const { t } = useTranslation();
@@ -78,7 +77,6 @@ const BookingTables = () => {
       dataIndex: 'created_at',
       key: 'created_at',
       is_show: true,
-      render: (_, row) => moment(row?.created_at).format('YYYY-MM-DD HH:mm')
     },
     {
       title: t('options'),

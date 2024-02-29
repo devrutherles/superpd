@@ -22,7 +22,6 @@ import DeleteButton from '../../components/delete-button';
 import FilterColumns from '../../components/filter-column';
 import ResultModal from '../../components/result-modal';
 import { FaTrashRestoreAlt } from 'react-icons/fa';
-import moment from "moment/moment";
 
 const { TabPane } = Tabs;
 const roles = ['published', 'deleted_at'];
@@ -74,7 +73,6 @@ export default function Notifications() {
       dataIndex: 'created_at',
       key: 'created_at',
       is_show: true,
-      render: (_, row) => moment(row?.created_at).format('YYYY-MM-DD HH:mm')
     },
     {
       title: t('published.at'),
@@ -97,6 +95,7 @@ export default function Notifications() {
       dataIndex: 'options',
       is_show: true,
       render: (_, row) => {
+        console.log('row', row);
         return (
           <Space>
             {!row.published_at ? (

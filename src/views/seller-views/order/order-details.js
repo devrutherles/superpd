@@ -40,7 +40,7 @@ import {
 } from 'react-icons/bs';
 import { MdEmail, MdLocationOn } from 'react-icons/md';
 import { IMG_URL } from '../../../configs/app-global';
-import { BiMessageDots, BiMoney } from 'react-icons/bi';
+import { BiDollar, BiMessageDots, BiMoney } from 'react-icons/bi';
 import { FiShoppingCart } from 'react-icons/fi';
 import { IoMapOutline } from 'react-icons/io5';
 import moment from 'moment';
@@ -51,11 +51,11 @@ export default function SellerOrderDetails() {
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual,
+    shallowEqual
   );
   const { statusList } = useSelector(
     (state) => state.orderStatus,
-    shallowEqual,
+    shallowEqual
   );
   const data = activeMenu?.data?.data;
   const { t } = useTranslation();
@@ -65,6 +65,7 @@ export default function SellerOrderDetails() {
   const productListRef = useRef();
 
   const { isDemo } = useDemo();
+  const [totalPrice, setTotalPrice] = useState(null);
   const [loading, setLoading] = useState(false);
   const [orderDetails, setOrderDetails] = useState(null);
   const [orderDeliveryDetails, setOrderDeliveryDetails] = useState(null);
@@ -149,6 +150,7 @@ export default function SellerOrderDetails() {
           total_price +
           row?.addons?.reduce((total, item) => (total += item.total_price), 0);
 
+        setTotalPrice(data);
         return numberToPrice(data, defaultCurrency?.symbol);
       },
     },
@@ -159,7 +161,6 @@ export default function SellerOrderDetails() {
       title: t('date'),
       dataIndex: 'date',
       key: 'date',
-      render: (_, row) => moment(row?.date).format('YYYY-MM-DD HH:mm'),
     },
     {
       title: t('document'),
@@ -182,18 +183,18 @@ export default function SellerOrderDetails() {
     {
       price: numberToPrice(data?.total_price, defaultCurrency.symbol),
       number: (
-        <Link to={`/seller/generate-invoice/${data?.id}`}>#{data?.id}</Link>
+        <Link to={`/orders/generate-invoice/${data?.id}`}>#{data?.id}</Link>
       ),
       document: t('invoice'),
-      date: moment(data?.transaction?.created_at).format('YYYY-MM-DD HH:mm'),
+      date: data?.delivery_date,
     },
     {
       price: '-',
       number: (
-        <Link to={`/seller/generate-invoice/${data?.id}`}>#{data?.id}</Link>
+        <Link to={`/orders/generate-invoice/${data?.id}`}>#{data?.id}</Link>
       ),
       document: t('delivery.reciept'),
-      date: moment(data?.transaction?.created_at).format('YYYY-MM-DD HH:mm'),
+      date: data?.delivery_date,
     },
   ];
 
@@ -221,7 +222,7 @@ export default function SellerOrderDetails() {
           setMenuData({
             activeMenu,
             data: { details, currency, user, id, createdAt, price, data },
-          }),
+          })
         );
       })
       .finally(() => {
@@ -303,7 +304,7 @@ export default function SellerOrderDetails() {
                     <Typography.Text className='order-card-title'>
                       {numberToPrice(
                         data?.total_price,
-                        defaultCurrency?.symbol,
+                        defaultCurrency?.symbol
                       )}
                     </Typography.Text>
                   )}
@@ -337,7 +338,7 @@ export default function SellerOrderDetails() {
                     <Typography.Text className='order-card-title'>
                       {data?.details?.reduce(
                         (total, item) => (total += item.quantity),
-                        0,
+                        0
                       )}
                     </Typography.Text>
                   )}
@@ -351,7 +352,7 @@ export default function SellerOrderDetails() {
             <Card>
               <Steps
                 current={statusList?.findIndex(
-                  (item) => item.name === data?.status,
+                  (item) => item.name === data?.status
                 )}
               >
                 {statusList?.slice(0, -1).map((item) => (
@@ -370,7 +371,7 @@ export default function SellerOrderDetails() {
                     {t('created.date.&.time')}:
                     <span className='ml-2'>
                       <BsCalendarDay className='mr-1' />{' '}
-                      {moment(data?.created_at).format('YYYY-MM-DD HH:mm')}{' '}
+                      {moment(data?.created_at).format('YYYY-MM-DD hh:mm')}{' '}
                     </span>
                   </div>
                   <br />
@@ -489,14 +490,6 @@ export default function SellerOrderDetails() {
                 <br />
                 <span>{t('discount')}:</span>
                 <br />
-                {data?.coupon && (
-                  <>
-                    <span>{t('coupon')}:</span>
-                    <br />
-                  </>
-                )}
-                <span>{t('service.fee')}:</span>
-                <br />
                 <h3>{t('total.price')}:</h3>
               </div>
               <div>
@@ -507,26 +500,11 @@ export default function SellerOrderDetails() {
                 <span>{numberToPrice(data?.tax, defaultCurrency?.symbol)}</span>
                 <br />
                 <span>
-                  {numberToPrice(data?.origin_price, defaultCurrency?.symbol)}
+                  {numberToPrice(totalPrice, defaultCurrency?.symbol)}
                 </span>
                 <br />
                 <span>
                   {numberToPrice(data?.total_discount, defaultCurrency?.symbol)}
-                </span>
-                <br />
-                {data?.coupon && (
-                  <>
-                    <span>
-                      {numberToPrice(
-                        data?.coupon?.price,
-                        defaultCurrency?.symbol,
-                      )}
-                    </span>
-                    <br />
-                  </>
-                )}
-                <span>
-                  {numberToPrice(data?.service_fee, defaultCurrency?.symbol)}
                 </span>
                 <br />
                 <h3 ref={totalPriceRef}>
@@ -562,7 +540,7 @@ export default function SellerOrderDetails() {
                   !data?.deliveryman ? (
                     <p>
                       {t(
-                        'The supplier is not assigned or delivery type pickup',
+                        'The supplier is not assigned or delivery type pickup'
                       )}
                     </p>
                   ) : (
@@ -672,7 +650,7 @@ export default function SellerOrderDetails() {
                           <Skeleton.Button size={16} />
                         ) : (
                           moment(data?.user?.created_at).format(
-                            'DD-MM-YYYY, hh:mm',
+                            'DD-MM-YYYY, hh:mm'
                           )
                         )}
                       </span>
@@ -704,7 +682,7 @@ export default function SellerOrderDetails() {
                             style={{ backgroundColor: '#48e33d' }}
                             count={numberToPrice(
                               data?.user?.orders_sum_price,
-                              defaultCurrency?.symbol,
+                              defaultCurrency?.symbol
                             )}
                           />
                         )}
@@ -720,7 +698,7 @@ export default function SellerOrderDetails() {
                     <Space className='w-100 justify-content-end'>
                       <span className='date'>
                         {moment(data?.review?.created_at).format(
-                          'YYYY-MM-DD HH:mm',
+                          'YYYY-MM-DD hh:mm'
                         )}
                       </span>
                     </Space>
@@ -750,14 +728,11 @@ export default function SellerOrderDetails() {
                     </div>
                   )}
 
-                  <div className='delivery-info my-1'>
-                    <strong>{t('min.delivery.price')}:</strong>
-                    <span>
-                      {numberToPrice(
-                        data?.shop?.price,
-                        defaultCurrency?.symbol,
-                      )}
-                    </span>
+                  <div className='delivery-info'>
+                    <b>
+                      <BiDollar size={16} />
+                    </b>
+                    <span>{data?.shop?.price}</span>
                   </div>
                   <div className='delivery-info'>
                     <b>

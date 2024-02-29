@@ -1,23 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Form, Modal } from 'antd';
+import {
+  Button,
+  Col,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  Row,
+  Switch,
+} from 'antd';
 import { useTranslation } from 'react-i18next';
 import subscriptionService from '../../services/subscriptions';
 import Loading from '../../components/loading';
-import SubscriptionForm from './subscriptions-form';
-import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import { setMenuData } from '../../redux/slices/menu';
 
 export default function SubscriptionEditModal({
   modal,
   handleCancel,
   refetch,
 }) {
-  const dispatch = useDispatch();
   const [form] = Form.useForm();
   const { t } = useTranslation();
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
 
   const onFinish = (values) => {
     const payload = {
@@ -27,7 +31,6 @@ export default function SubscriptionEditModal({
       type: 'shop',
     };
     setLoadingBtn(true);
-
     subscriptionService
       .update(modal.id, payload)
       .then(() => {
@@ -42,22 +45,16 @@ export default function SubscriptionEditModal({
     subscriptionService
       .getById(modal.id)
       .then((res) => {
-        const data = {
-          ...res.data,
-          with_report: !!res?.data?.with_report,
-          active: !!res?.data?.active,
-        };
+        console.log('data', res.data);
         form.setFieldsValue({
-          ...data,
+          ...res.data,
         });
-        dispatch(setMenuData({ activeMenu, data }));
       })
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
     fetchSubscriptionList();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modal]);
 
   return (
@@ -84,7 +81,105 @@ export default function SubscriptionEditModal({
         {loading ? (
           <Loading />
         ) : (
-          <SubscriptionForm form={form} onFinish={onFinish} />
+          <Form form={form} layout='vertical' onFinish={onFinish}>
+            <Row gutter={12}>
+              <Col span={12}>
+                <Form.Item
+                  label={t('title')}
+                  name='title'
+                  rules={[
+                    {
+                      required: true,
+                      message: t('required'),
+                    },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+              </Col>
+
+              <Col span={12}>
+                <Form.Item
+                  label={t('period')}
+                  name='month'
+                  rules={[
+                    {
+                      required: true,
+                      message: t('required'),
+                    },
+                  ]}
+                >
+                  <InputNumber min={0} max={12} className='w-100' />
+                </Form.Item>
+              </Col>
+
+              <Col span={12}>
+                <Form.Item
+                  label={t('product_limit')}
+                  name='product_limit'
+                  rules={[
+                    {
+                      required: true,
+                      message: t('required'),
+                    },
+                  ]}
+                >
+                  <InputNumber min={0} className='w-100' />
+                </Form.Item>
+              </Col>
+
+              <Col span={12}>
+                <Form.Item
+                  label={t('order_limit')}
+                  name='order_limit'
+                  rules={[
+                    {
+                      required: true,
+                      message: t('required'),
+                    },
+                  ]}
+                >
+                  <InputNumber min={0} className='w-100' />
+                </Form.Item>
+              </Col>
+
+              <Col span={12}>
+                <Form.Item
+                  label={t('price')}
+                  name='price'
+                  rules={[
+                    {
+                      required: true,
+                      message: t('required'),
+                    },
+                  ]}
+                >
+                  <InputNumber min={0} className='w-100' />
+                </Form.Item>
+              </Col>
+              <Col span={12} />
+
+              <Col span={12}>
+                <Form.Item
+                  label={t('with_report')}
+                  name='with_report'
+                  valuePropName='checked'
+                >
+                  <Switch />
+                </Form.Item>
+              </Col>
+
+              <Col span={12}>
+                <Form.Item
+                  label={t('active')}
+                  name='active'
+                  valuePropName='checked'
+                >
+                  <Switch />
+                </Form.Item>
+              </Col>
+            </Row>
+          </Form>
         )}
       </Modal>
     </React.Fragment>

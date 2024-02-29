@@ -21,6 +21,7 @@ const sms = createSlice({
     });
     builder.addCase(fetchSms.fulfilled, (state, action) => {
       const { payload } = action;
+      console.log('payload', payload);
       state.loading = false;
       state.smsGatewaysList = payload.data;
       state.error = '';

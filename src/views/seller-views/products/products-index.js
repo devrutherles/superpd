@@ -49,10 +49,6 @@ const ProductsIndex = ({ next, action_type = '', isRequest }) => {
     const params = {
       search: username ? username : null,
       type: 'main',
-      lang: defaultLang,
-      "statuses[0]": 'pending',
-      "statuses[1]": 'published',
-      active: 1
     };
     return categoryService.paginateSelect(params).then((res) =>
       res.data.map((item) => ({
@@ -447,7 +443,6 @@ const ProductsIndex = ({ next, action_type = '', isRequest }) => {
                     >
                       <AsyncTreeSelect
                         fetchOptions={fetchUserCategoryList}
-                        refetch
                         dropdownRender={(menu) => (
                           <>
                             {menu}

@@ -64,11 +64,6 @@ const Map = ({ next, prev }) => {
     if (activeMenu.data?.id) {
       getMap(activeMenu.data?.id);
     }
-
-    return () => {
-      setLoading(false);
-      setLoadingBtn(false);
-    }
   }, [activeMenu.data]);
 
   return (

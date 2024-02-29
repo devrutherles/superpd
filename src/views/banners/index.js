@@ -21,7 +21,6 @@ import FilterColumns from '../../components/filter-column';
 import ResultModal from '../../components/result-modal';
 import { FaTrashRestoreAlt } from 'react-icons/fa';
 import useDidUpdate from '../../helpers/useDidUpdate';
-import moment from 'moment';
 
 const roles = ['published', 'deleted_at'];
 const { TabPane } = Tabs;
@@ -38,7 +37,7 @@ const Banners = () => {
   const [type, setType] = useState(null);
   const { banners, meta, loading } = useSelector(
     (state) => state.banner,
-    shallowEqual,
+    shallowEqual
   );
   const [id, setId] = useState(null);
 
@@ -68,13 +67,6 @@ const Banners = () => {
       },
     },
     {
-      title: t('title'),
-      dataIndex: 'title',
-      key: 'title',
-      is_show: true,
-      render: (_, row) => row?.translation?.title,
-    },
-    {
       title: t('active'),
       dataIndex: 'active',
       key: 'active',
@@ -99,7 +91,6 @@ const Banners = () => {
       dataIndex: 'created_at',
       key: 'created_at',
       is_show: true,
-      render: (_, row) => moment(row?.created_at).format('DD.MM.YYYY HH:mm'),
     },
     {
       title: t('options'),
@@ -139,7 +130,7 @@ const Banners = () => {
         id: 'banner/add',
         url: 'banner/add',
         name: t('add.banner'),
-      }),
+      })
     );
     navigate('/banner/add');
   };
@@ -150,7 +141,7 @@ const Banners = () => {
         url: `banner/${row.id}`,
         id: 'banner_edit',
         name: t('edit.banner'),
-      }),
+      })
     );
     navigate(`/banner/${row.id}`);
   };
@@ -161,7 +152,7 @@ const Banners = () => {
         url: `banner/clone/${row.id}`,
         id: 'banner_clone',
         name: t('clone.banner'),
-      }),
+      })
     );
     navigate(`/banner/clone/${row.id}`);
   };
@@ -173,7 +164,7 @@ const Banners = () => {
         {},
         ...id.map((item, index) => ({
           [`ids[${index}]`]: item,
-        })),
+        }))
       ),
     };
     bannerService
@@ -235,7 +226,6 @@ const Banners = () => {
       dispatch(fetchBanners(paramsData));
       dispatch(disableRefetch(activeMenu));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu.refetch]);
 
   const onChangePagination = (pageNumber) => {
@@ -275,7 +265,7 @@ const Banners = () => {
       setMenuData({
         activeMenu,
         data: { ...activeMenu.data, [name]: item },
-      }),
+      })
     );
   };
 

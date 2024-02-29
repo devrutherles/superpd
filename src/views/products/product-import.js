@@ -35,7 +35,7 @@ export default function ProductImport() {
   };
 
   const downloadFile = () => {
-    const body = example + 'import-example/products.xlsx';
+    const body = example + 'import-example/product_import.xls';
     window.location.href = body;
   };
 

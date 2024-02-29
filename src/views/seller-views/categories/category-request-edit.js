@@ -125,8 +125,8 @@ const SellerCategoryRequestEdit = () => {
     }
   }, [activeMenu.refetch]);
 
-  async function fetchUserCategoryList(search) {
-    const params = { perPage: 100, type: state?.parentId ? 'main' : 'sub_shop', active: 1, search };
+  async function fetchUserCategoryList() {
+    const params = { perPage: 100, type: state?.parentId ? 'main' : 'sub_shop', active: 1 };
     return sellerCategory.selectPaginate(params).then((res) =>
       res.data.map((item) => ({
         label: item.translation?.title,

@@ -16,11 +16,11 @@ export default function SearchInput({
       handleChange(value);
     };
     return debounce(loadOptions, 800);
-  }, [handleChange]);
+  }, []);
 
   useEffect(() => {
     setSearchTerm(defaultValue);
-  }, [resetSearch, defaultValue]);
+  }, [resetSearch]);
 
   return (
     <Input

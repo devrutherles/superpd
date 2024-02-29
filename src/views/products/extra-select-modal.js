@@ -1,4 +1,4 @@
-import { Button, Input, List, Modal, Pagination, Tag } from 'antd';
+import { Button, Input, List, Modal, Tag } from 'antd';
 import React, { useEffect, useState } from 'react';
 import extraService from 'services/extra';
 import ExtraGroupModal from './Extras/extra-group-modal';
@@ -13,10 +13,9 @@ const ExtraSelectModal = ({ open, onClose, selectedExtras, onSelect }) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 500);
-  const [meta, setMeta] = useState();
-  const getExtraGroup = (query, page = 1) => {
+  const getExtraGroup = (query) => {
     setLoading(true);
-    const params = { valid: true, perPage: 10, search: query, page };
+    const params = { valid: true, perPage: 100, search: query };
     extraService
       .getAllGroups(params)
       .then((res) => {
@@ -27,13 +26,8 @@ const ExtraSelectModal = ({ open, onClose, selectedExtras, onSelect }) => {
           shop_id: item.shop_id,
         }));
         setExtrasGroup(data);
-        setMeta(res.meta);
       })
       .finally(() => setLoading(false));
-  };
-
-  const onChange = (page) => {
-    getExtraGroup(debouncedSearch, page);
   };
 
   useEffect(() => {
@@ -50,18 +44,7 @@ const ExtraSelectModal = ({ open, onClose, selectedExtras, onSelect }) => {
           onClose();
           setSearch('');
         }}
-        footer={
-          !loading ? (
-            <Button
-              type='link'
-              onClick={() => setIsAddModalOpen(true)}
-              style={{ paddingLeft: 0 }}
-              icon={<PlusOutlined />}
-            >
-              {t('add.new.extra')}
-            </Button>
-          ) : null
-        }
+        footer={null}
       >
         <Input
           className='mt-3'
@@ -87,11 +70,18 @@ const ExtraSelectModal = ({ open, onClose, selectedExtras, onSelect }) => {
               {item.label}
             </List.Item>
           )}
-        />
-        <Pagination
-          onChange={onChange}
-          current={meta?.current_page}
-          total={meta?.total}
+          footer={
+            !loading ? (
+              <Button
+                type='link'
+                onClick={() => setIsAddModalOpen(true)}
+                style={{ paddingLeft: 0 }}
+                icon={<PlusOutlined />}
+              >
+                {t('add.new.extra')}
+              </Button>
+            ) : null
+          }
         />
       </Modal>
       <ExtraGroupModal

@@ -145,11 +145,11 @@ export default function ProductModal({ extrasModal, setExtrasModal }) {
     const addonPrice = addons?.reduce(
       (total, item) =>
         (total +=
-          item.product.stock?.price *
+          item.product.stock.price *
           (item.product.quantity || item.product.min_qty)),
       0
     );
-    return addonPrice + showExtras?.stock ? showExtras?.stock[priceKey || 'price'] : 0 * counter;
+    return addonPrice + showExtras?.stock[priceKey || 'price'] * counter;
   }
 
   function addonCalculate(id, quantity) {

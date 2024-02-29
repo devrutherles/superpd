@@ -50,9 +50,7 @@ const categorySlice = createSlice({
         id: item.id,
         locales: item.locales,
         deleted_at: item?.deleted_at,
-        status: item.status,
-        shop: item.shop,
-        shop_id: item.shop_id
+        status: item.status
         // children: item.children?.map((child) => ({
         //   name:
         //     child.translation !== null ? child.translation.title : 'no name',
@@ -100,9 +98,7 @@ const categorySlice = createSlice({
         uuid: item.uuid,
         id: item.id,
         locales: item.locales,
-        status: item.status,
-        shop: item.shop,
-        shop_id: item.shop_id
+        status: item.status
         // children: item.children?.map((child) => ({
         //   name:
         //     child.translation !== null ? child.translation.title : 'no name',

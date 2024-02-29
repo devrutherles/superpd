@@ -160,9 +160,9 @@ const ProductCategories = () => {
       key: 'status',
       render: (status, row) => (
         <div>
-          {status === 'pending' ? (
+          {status === 'new' ? (
             <Tag color='blue'>{t(status)}</Tag>
-          ) : status === 'unpublished' ? (
+          ) : status === 'canceled' ? (
             <Tag color='error'>{t(status)}</Tag>
           ) : (
             <Tag color='cyan'>{t(status)}</Tag>

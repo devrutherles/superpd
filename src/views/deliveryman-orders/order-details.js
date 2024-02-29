@@ -359,7 +359,10 @@ export default function DeliverymanOrderDetails() {
                 <br />
                 <span>
                   {numberToPrice(
-                    data?.origin_price,
+                    data?.details?.reduce(
+                      (total, item) => (total += item.total_price),
+                      0
+                    ),
                     defaultCurrency?.symbol
                   )}
                 </span>

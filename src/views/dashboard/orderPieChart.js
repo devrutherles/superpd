@@ -10,9 +10,9 @@ const OrderPieChart = ({ counts }) => {
       <ChartWidget
         type='pie'
         series={[
-          counts?.progress_orders_count || {data: []},
-          counts?.delivered_orders_count || {data: []},
-          counts?.cancel_orders_count || {data: []},
+          counts.progress_orders_count,
+          counts.delivered_orders_count,
+          counts.cancel_orders_count,
         ]}
         xAxis={[
           t('in.progress.orders'),

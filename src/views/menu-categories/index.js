@@ -108,7 +108,7 @@ const MenuCategories = () => {
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { menuCategories, meta, loading } = useSelector(
     (state) => state.menuCategory,
-    shallowEqual,
+    shallowEqual
   );
   const data = activeMenu.data;
   const paramsData = {
@@ -126,7 +126,7 @@ const MenuCategories = () => {
         {},
         ...id.map((item, index) => ({
           [`ids[${index}]`]: item,
-        })),
+        }))
       ),
     };
     categoryService
@@ -148,7 +148,6 @@ const MenuCategories = () => {
       dispatch(fetchMenuCategories(paramsData));
       dispatch(disableRefetch(activeMenu));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu.refetch]);
 
   useDidUpdate(() => {
@@ -161,7 +160,7 @@ const MenuCategories = () => {
       setMenuData({
         activeMenu,
         data: { ...activeMenu.data, perPage: pageSize, page: current },
-      }),
+      })
     );
   };
 
@@ -187,7 +186,7 @@ const MenuCategories = () => {
       setMenuData({
         activeMenu,
         data: { ...data, ...items },
-      }),
+      })
     );
   };
 

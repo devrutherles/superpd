@@ -27,7 +27,7 @@ export default function Cashback() {
   const dispatch = useDispatch();
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual,
+    shallowEqual
   );
   const { setIsModalVisible } = useContext(Context);
   const [id, setId] = useState(null);
@@ -44,13 +44,6 @@ export default function Cashback() {
       dataIndex: 'id',
       key: 'id',
       is_show: true,
-    },
-    {
-      title: t('shop.name'),
-      dataIndex: 'shop',
-      key: 'shop',
-      is_show: true,
-      render: (_, row) => row?.shop?.translation?.title,
     },
     {
       title: t('cashback'),
@@ -123,7 +116,7 @@ export default function Cashback() {
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { points, meta, loading, params } = useSelector(
     (state) => state.point,
-    shallowEqual,
+    shallowEqual
   );
   const data = activeMenu.data;
   const paramsData = {
@@ -139,7 +132,7 @@ export default function Cashback() {
         {},
         ...id.map((item, index) => ({
           [`ids[${index}]`]: item,
-        })),
+        }))
       ),
     };
     pointService
@@ -186,7 +179,7 @@ export default function Cashback() {
       setMenuData({
         activeMenu,
         data: { ...activeMenu.data, perPage, page, column, sort },
-      }),
+      })
     );
   }
 

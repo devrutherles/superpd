@@ -33,32 +33,31 @@ export default function Dashboard() {
   const dispatch = useDispatch();
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { user } = useSelector((state) => state.auth, shallowEqual);
-  const { loading, params } = useSelector(
+  const { loading } = useSelector(
     (state) => state.statisticsCount,
     shallowEqual
   );
 
   function getDashboardsByRole() {
-    const body = { time: params.type || 'subMonth' };
-  const otherChartsBody = {time: 'subWeek'}
+    const body = { time: 'subMonth' };
     switch (user?.role) {
       case 'admin':
         dispatch(fetchStatistics(body));
-        dispatch(fetchTopCustomers(otherChartsBody));
-        dispatch(fetchTopProducts(otherChartsBody));
-        dispatch(fetchOrderCounts(otherChartsBody));
-        dispatch(fetchOrderSales(otherChartsBody));
+        dispatch(fetchTopCustomers(body));
+        dispatch(fetchTopProducts(body));
+        dispatch(fetchOrderCounts(body));
+        dispatch(fetchOrderSales(body));
         break;
       case 'manager':
-        dispatch(fetchTopCustomers(otherChartsBody));
-        dispatch(fetchTopProducts(otherChartsBody));
+        dispatch(fetchTopCustomers(body));
+        dispatch(fetchTopProducts(body));
         break;
       case 'seller':
         dispatch(fetchSellerStatisticsCount(body));
-        dispatch(fetchSellerTopCustomers(otherChartsBody));
-        dispatch(fetchSellerTopProducts(otherChartsBody));
-        dispatch(fetchSellerOrderCounts(otherChartsBody));
-        dispatch(fetchSellerOrderSales(otherChartsBody));
+        dispatch(fetchSellerTopCustomers(body));
+        dispatch(fetchSellerTopProducts(body));
+        dispatch(fetchSellerOrderCounts(body));
+        dispatch(fetchSellerOrderSales(body));
         break;
       case 'moderator':
         break;
@@ -72,11 +71,11 @@ export default function Dashboard() {
   }
 
   useEffect(() => {
-    if (activeMenu.refetch || params.type) {
+    if (activeMenu.refetch) {
       getDashboardsByRole();
       dispatch(disableRefetch(activeMenu));
     }
-  }, [activeMenu.refetch, params.type]);
+  }, [activeMenu.refetch]);
 
   const renderDashboardByRole = () => {
     switch (user.role) {

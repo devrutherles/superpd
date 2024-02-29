@@ -11,7 +11,6 @@ import numberToPrice from '../../../helpers/numberToPrice';
 import PayoutStatusModal from './payoutStatusModal';
 import PayoutRequest from './payoutRequest';
 import FilterColumns from '../../../components/filter-column';
-import moment from "moment/moment";
 
 export default function SellerPayouts() {
   const { t } = useTranslation();
@@ -71,7 +70,6 @@ export default function SellerPayouts() {
       dataIndex: 'created_at',
       key: 'created_at',
       is_show: true,
-      render: (_, row) => moment(row?.created_at).format('YYYY-MM-DD HH:mm')
     },
   ]);
 

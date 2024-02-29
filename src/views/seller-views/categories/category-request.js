@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Card, Image, Table, Button, Space, Tag, Modal } from 'antd';
+import { Card, Image, Table, Button, Space, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
 import getImage from '../../../helpers/getImage';
 import CreateCategory from './createCategory';
-import { EditOutlined, MessageOutlined } from '@ant-design/icons';
+import { EditOutlined } from '@ant-design/icons';
 import {
   addMenu,
   disableRefetch,
@@ -26,13 +26,11 @@ const body = {
   type: 'category',
 };
 
-export default function SellerCategoryRequests({ parentId }) {
+export default function SellerCategoryRequests({ parentId}) {
   const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { setIsModalVisible } = useContext(Context);
   const [loadingBtn, setLoadingBtn] = useState(false);
-  const [isVisibleMsgModal, setIsVisibleMsgModal] = useState(false);
-  const [modalText, setModalText] = useState('');
   const [id, setId] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -44,7 +42,7 @@ export default function SellerCategoryRequests({ parentId }) {
     params,
   } = useSelector((state) => state.requestModels, shallowEqual);
   const data = activeMenu.data;
-  const { uuid: parentUuid } = useParams();
+  const {uuid: parentUuid} = useParams();
 
   const paramsData = {
     search: data?.search,
@@ -53,7 +51,7 @@ export default function SellerCategoryRequests({ parentId }) {
     perPage: data?.perPage,
     page: data?.page,
     parent_id: parentId,
-    type: 'category',
+    type: 'category'
   };
 
   const goToEdit = (row) => {
@@ -64,9 +62,7 @@ export default function SellerCategoryRequests({ parentId }) {
         name: t('request.edit'),
       })
     );
-    navigate(`/seller/category-request/${row.id}`, {
-      state: { parentId, parentUuid },
-    });
+    navigate(`/seller/category-request/${row.id}`, {state: {parentId, parentUuid}});
   };
 
   const [columns, setColumns] = useState([
@@ -77,8 +73,8 @@ export default function SellerCategoryRequests({ parentId }) {
       is_show: true,
       render: (_, row) => (
         <Space>
-          {row?.model?.translation?.title} <HiArrowNarrowRight />{' '}
-          {row?.data?.title?.[row.model?.translation?.locale]}
+          {row.model.translation.title} <HiArrowNarrowRight />{' '}
+          {row.data.title[row.model.translation.locale]}
         </Space>
       ),
     },
@@ -91,7 +87,7 @@ export default function SellerCategoryRequests({ parentId }) {
         return (
           <Space>
             <Image
-              src={getImage(row?.model?.img)}
+              src={getImage(row.model.img)}
               alt='img_gallery'
               width={100}
               className='rounded'
@@ -100,7 +96,7 @@ export default function SellerCategoryRequests({ parentId }) {
             />
             <HiArrowNarrowRight />
             <Image
-              src={getImage(row.data?.images?.at(0))}
+              src={getImage(row.data.images.at(0))}
               alt='img_gallery'
               width={100}
               className='rounded'
@@ -112,23 +108,6 @@ export default function SellerCategoryRequests({ parentId }) {
       },
     },
     {
-      title: t('status'),
-      is_show: true,
-      dataIndex: 'status',
-      key: 'status',
-      render: (status, row) => (
-        <div>
-          {status === 'pending' ? (
-            <Tag color='blue'>{t(status)}</Tag>
-          ) : status === 'canceled' ? (
-            <Tag color='error'>{t(status)}</Tag>
-          ) : (
-            <Tag color='cyan'>{t(status)}</Tag>
-          )}
-        </div>
-      ),
-    },
-    {
       title: t('options'),
       key: 'options',
       dataIndex: 'options',
@@ -136,15 +115,6 @@ export default function SellerCategoryRequests({ parentId }) {
       render: (_, row) => {
         return (
           <Space>
-            {row?.status === 'canceled' && row?.status_note && (
-              <Button
-                icon={<MessageOutlined />}
-                onClick={() => {
-                  setIsVisibleMsgModal(true);
-                  setModalText(row.status_note);
-                }}
-              />
-            )}
             <Button icon={<EditOutlined />} onClick={() => goToEdit(row)} />
             <DeleteButton
               danger
@@ -254,24 +224,6 @@ export default function SellerCategoryRequests({ parentId }) {
         setText={setId}
         loading={loadingBtn}
       />
-      <Modal
-        title={t('reject.message')}
-        closable={false}
-        visible={isVisibleMsgModal}
-        footer={null}
-        centered
-      >
-        <p>{modalText}</p>
-        <div className='d-flex justify-content-end'>
-          <Button
-            type='primary'
-            className='mr-2'
-            onClick={() => setIsVisibleMsgModal(false)}
-          >
-            {t('close')}
-          </Button>
-        </div>
-      </Modal>
     </Card>
   );
 }

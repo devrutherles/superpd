@@ -40,7 +40,7 @@ const UserDetail = () => {
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual,
+    shallowEqual
   );
 
   const {
@@ -126,7 +126,7 @@ const UserDetail = () => {
         url: `/order/details/${id}`,
         id: 'order.details',
         name: t('order.details'),
-      }),
+      })
     );
     navigate(`/order/details/${id}`);
   };
@@ -137,7 +137,7 @@ const UserDetail = () => {
         url: `/shop/${uuid}`,
         id: 'edit.shop',
         name: t('edit.shop'),
-      }),
+      })
     );
     navigate(`/shop/${uuid}`);
   };
@@ -148,7 +148,7 @@ const UserDetail = () => {
         id: `product-edit`,
         url: `product/${uuid}`,
         name: t('edit.product'),
-      }),
+      })
     );
     navigate(`/product/${uuid}`);
   };
@@ -159,7 +159,7 @@ const UserDetail = () => {
         url: `user/${id}`,
         id: 'user_edit',
         name: t('edit.user'),
-      }),
+      })
     );
     navigate(`/user/${id}`, { state: 'user' });
   };
@@ -172,7 +172,7 @@ const UserDetail = () => {
       setMenuData({
         activeMenu,
         data: { ...activeMenu.data, perPage, page, column, sort },
-      }),
+      })
     );
   }
 
@@ -241,7 +241,7 @@ const UserDetail = () => {
             />
             <Descriptions column={2}>
               <Descriptions.Item label={t('registration.date')}>
-                {moment(data?.registered_at).format('YYYY-MM-DD HH:mm')}
+                {moment(data?.registered_at).format('YYYY-MM-DD hh:mm')}
               </Descriptions.Item>
               <Descriptions.Item label={t('status')}>
                 <Tag color={data?.active ? 'cyan' : 'red'}>
@@ -286,7 +286,7 @@ const UserDetail = () => {
                   count={
                     numberToPrice(
                       statistic?.total_delivered_price,
-                      defaultCurrency?.symbol,
+                      defaultCurrency?.symbol
                     ) || 0
                   }
                 />

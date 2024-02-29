@@ -104,7 +104,7 @@ export default function OrderReviews() {
       dataIndex: 'created_at',
       key: 'created_at',
       is_show: true,
-      render: (createdAt) => moment(createdAt).format('YYYY-MM-DD HH:mm'),
+      render: (createdAt) => moment(createdAt).format('DD.MM.YYYY'),
     },
     {
       title: t('options'),

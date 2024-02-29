@@ -49,7 +49,7 @@ const ShopAddData = ({
     });
 
   async function fetchShopCategory(search) {
-    const params = { search, type: 'shop', active: 1, lang: defaultLang };
+    const params = { search, type: 'shop', active: 1 };
     return categoryService.selectPaginate(params).then(({ data }) =>
       data.map((item) => ({
         label: item.translation?.title || 'no name',
@@ -267,7 +267,6 @@ const ShopAddData = ({
                   tagRender={tagRender}
                   showCheckedStrategy={SHOW_ALL}
                   treeCheckStrictly
-                  refetch
                   onSelect={(value, node) => handleCategorySelect(node)}
                   onDeselect={(value, node) => handleCategorySelect(node)}
                   fetchOptions={fetchShopCategory}
