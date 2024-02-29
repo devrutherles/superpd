@@ -1,6 +1,6 @@
 export const PROJECT_NAME = 'Foodyman marketplace';
 export const BASE_URL =
-  process.env.REACT_APP_BASE_URL || 'http://admin.superpao.online';
+  process.env.REACT_APP_BASE_URL || 'https://admin.superpao.online';
 export const WEBSITE_URL = 'https://superpd.vercel.app';
 export const api_url = BASE_URL + '/api/v1/';
 export const api_url_admin = BASE_URL + '/api/v1/dashboard/admin/';
