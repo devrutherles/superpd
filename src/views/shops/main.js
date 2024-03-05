@@ -65,7 +65,7 @@ const ShopMain = ({ next, action_type = '', user }) => {
       'location[longitude]': location.lng,
       user: undefined,
       delivery_time: 0,
-      type:1
+   
     };
     if (action_type === 'edit') {
       shopUpdate(values, body);
