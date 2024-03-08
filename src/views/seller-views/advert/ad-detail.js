@@ -1,12 +1,16 @@
 import { Button, Descriptions, Image, Modal, Spin } from 'antd';
 import numberToPrice from 'helpers/numberToPrice';
-import moment from 'moment';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import advertService from 'services/seller/advert';
+import { shallowEqual, useSelector } from 'react-redux';
 
 const AdDetail = ({ id, onClose }) => {
   const { t } = useTranslation();
+  const { defaultCurrency } = useSelector(
+    (state) => state.currency,
+    shallowEqual,
+  );
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(null);
   const getAd = useCallback(() => {
@@ -44,10 +48,14 @@ const AdDetail = ({ id, onClose }) => {
             {data?.translation?.title}
           </Descriptions.Item>
           <Descriptions.Item span={3} label={t('price')}>
-            {numberToPrice(data?.price)}
+            {numberToPrice(
+              data?.price,
+              defaultCurrency?.symbol,
+              defaultCurrency?.position,
+            )}
           </Descriptions.Item>
           <Descriptions.Item span={3} label={t('time')}>
-            {data?.time}{" "}{data?.time_type}
+            {data?.time} {data?.time_type}
           </Descriptions.Item>
           <Descriptions.Item span={3} label={t('banner')}>
             <Image width={300} src={data?.banner?.img} />

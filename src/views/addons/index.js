@@ -56,23 +56,6 @@ const AddonsCategories = () => {
       render: (_, data) => data.translation?.title,
     },
     {
-      title: t('status'),
-      is_show: true,
-      dataIndex: 'status',
-      key: 'status',
-      render: (status) => (
-        <div>
-          {status === 'published' ? (
-            <Tag color='blue'>{t(status)}</Tag>
-          ) : status === 'unpublished' ? (
-            <Tag color='error'>{t(status)}</Tag>
-          ) : (
-            <Tag color='cyan'>{t(status)}</Tag>
-          )}
-        </div>
-      ),
-    },
-    {
       title: t('translations'),
       dataIndex: 'locales',
       is_show: true,
@@ -125,9 +108,9 @@ const AddonsCategories = () => {
       key: 'status',
       render: (status, row) => (
         <div>
-          {status === 'new' ? (
+          {status === 'pending' ? (
             <Tag color='blue'>{t(status)}</Tag>
-          ) : status === 'canceled' ? (
+          ) : status === 'unpublished' ? (
             <Tag color='error'>{t(status)}</Tag>
           ) : (
             <Tag color='cyan'>{t(status)}</Tag>

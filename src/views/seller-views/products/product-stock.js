@@ -22,10 +22,7 @@ const ProductStock = ({ prev, next, isRequest, mode }) => {
   const { myShop } = useSelector((state) => state.myShop, shallowEqual);
   const [loading, setLoading] = useState(null);
   const location = useLocation();
-  const { defaultLang } = useSelector(
-    (state) => state.formLang,
-    shallowEqual
-  );
+  const { defaultLang } = useSelector((state) => state.formLang, shallowEqual);
   const { settings } = useSelector((state) => state.globalSettings);
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
@@ -53,14 +50,16 @@ const ProductStock = ({ prev, next, isRequest, mode }) => {
         quantity: item.quantity,
         ids:
           (isExtrasChanged.length > 0 || isRequest || location.state) &&
-          !location.state?.create && settings?.product_auto_approve === '0'
+          !location.state?.create &&
+          settings?.product_auto_approve === '0'
             ? activeMenu.data?.extras.map((_, idx) => item[`extras[${idx}]`])
             : activeMenu.data?.extras.map(
                 (_, idx) => item[`extras[${idx}]`].value
               ),
         addons: item.addons
           ? (isExtrasChanged.length > 0 || isRequest || location.state) &&
-            !location.state?.create
+            !location.state?.create &&
+            settings?.product_auto_approve !== '1'
             ? item.addons?.map((i) => i)
             : item.addons?.map((i) => i.value)
           : [],
@@ -74,7 +73,8 @@ const ProductStock = ({ prev, next, isRequest, mode }) => {
           quantity: stocks[0].quantity,
           addons: stocks[0].addons
             ? (isExtrasChanged.length > 0 || isRequest || location.state) &&
-              !location.state?.create
+              !location.state?.create &&
+              settings?.product_auto_approve !== '1'
               ? stocks[0].addons.map((i) => i)
               : stocks[0].addons.map((i) => i.value)
             : [],
@@ -85,7 +85,9 @@ const ProductStock = ({ prev, next, isRequest, mode }) => {
     }
 
     const delete_ids = stockIds.filter(
-      (stockId, index) => stocks[index]?.stock_id && !stocks.some((stock) => stock?.stock_id === stockId)
+      (stockId, index) =>
+        stocks[index]?.stock_id &&
+        !stocks.some((stock) => stock?.stock_id === stockId)
     );
 
     let tempState = location.state;
@@ -103,7 +105,8 @@ const ProductStock = ({ prev, next, isRequest, mode }) => {
     if (
       (isExtrasChanged.length > 0 || location.state) &&
       mode === 'edit' &&
-      !location.state?.create && settings?.product_auto_approve === '0'
+      !location.state?.create &&
+      settings?.product_auto_approve === '0'
     ) {
       if (location.state) {
         tempState.stocks = extras;
@@ -133,17 +136,22 @@ const ProductStock = ({ prev, next, isRequest, mode }) => {
             return item.some((addStock) => addStock.value === extra.id);
           });
         });
+        const selectedAddons = [];
+        selectedStock?.addons?.forEach((item) => {
+          if (item.product) {
+            selectedAddons.push({
+              label: item?.product?.translation?.title || item?.label,
+              value: item?.product?.id || item?.value,
+            });
+          }
+        });
         return {
           price: selectedStock?.price || 0,
           quantity: selectedStock?.quantity || 0,
           sku: selectedStock?.sku,
           stock_id: selectedStock?.id,
           tax: activeMenu?.data.tax || 0,
-          addons:
-            selectedStock?.addons?.map((item) => ({
-              label: item?.product?.translation?.title || item?.label,
-              value: item?.product?.id || item?.value,
-            })) || [],
+          addons: selectedAddons,
           ...Object.assign(
             {},
             ...item.map((extra, idx) => ({
@@ -177,18 +185,22 @@ const ProductStock = ({ prev, next, isRequest, mode }) => {
     let defaultStock = [];
     if (additionalStocks.length === 0 && actualStocks?.length !== 0) {
       const stockWithoutExtras = actualStocks?.at(0);
+      const selectedAddons = [];
+      stockWithoutExtras?.addons?.forEach((item) => {
+        if (item.product) {
+          selectedAddons.push({
+            label: item?.product?.translation?.title || item?.label,
+            value: item?.product?.id || item?.value,
+          });
+        }
+      });
       defaultStock = [
         {
           price: stockWithoutExtras?.price || 0,
           quantity: stockWithoutExtras?.quantity || 0,
           sku: stockWithoutExtras?.sku,
           tax: activeMenu.data?.tax || 0,
-          addons: stockWithoutExtras
-            ? stockWithoutExtras.addons?.map((item) => ({
-                label: item?.product?.translation?.title || item?.label,
-                value: item?.product?.id || item?.value,
-              }))
-            : [],
+          addons: stockWithoutExtras ? selectedAddons : [],
         },
       ];
     }
@@ -239,6 +251,9 @@ const ProductStock = ({ prev, next, isRequest, mode }) => {
       search,
       addon: 1,
       shop_id: myShop.id,
+      active: 1,
+      'statuses[0]': 'published',
+      'statuses[1]': 'pending',
     };
     return productService.getAll(params).then((res) =>
       res.data.map((item) => ({
@@ -266,17 +281,22 @@ const ProductStock = ({ prev, next, isRequest, mode }) => {
                 });
               }
             );
+            const selectedAddons = [];
+            selectedStock?.addons?.forEach((item) => {
+              if (item.product) {
+                selectedAddons.push({
+                  label: item?.product?.translation?.title || item?.label,
+                  value: item?.product?.id || item?.value,
+                });
+              }
+            });
             return {
               price: selectedStock?.price || 0,
               quantity: selectedStock?.quantity || 0,
               stock_id: selectedStock?.id,
               sku: selectedStock?.sku,
               tax: activeMenu?.data.tax || 0,
-              addons:
-                selectedStock?.addons?.map((item) => ({
-                  label: item?.product?.translation?.title || item?.label,
-                  value: item?.product?.id || item?.value,
-                })) || [],
+              addons: selectedAddons,
               ...Object.assign(
                 {},
                 ...item.map((extra, idx) => ({
@@ -313,23 +333,27 @@ const ProductStock = ({ prev, next, isRequest, mode }) => {
           activeMenu.data?.actualStocks?.length !== 0
         ) {
           const stockWithoutExtras = activeMenu.data.actualStocks?.at(0);
+          const selectedAddons = [];
+          stockWithoutExtras?.addons?.forEach((item) => {
+            if (item.product) {
+              selectedAddons.push({
+                label: item?.product?.translation?.title || item?.label,
+                value: item?.product?.id || item?.value,
+              });
+            }
+          });
           defaultStock = [
             {
               price: stockWithoutExtras?.price || 0,
               quantity: stockWithoutExtras?.quantity || 0,
               sku: stockWithoutExtras?.sku,
               tax: activeMenu.data?.tax || 0,
-              addons: stockWithoutExtras
-                ? stockWithoutExtras.addons?.map((item) => ({
-                    label: item?.product?.translation?.title || item?.label,
-                    value: item?.product?.id || item?.value,
-                  }))
-                : [],
+              addons: stockWithoutExtras ? selectedAddons : [],
             },
           ];
         }
         if (
-          additionalStocks.length === 0 &&
+          additionalStocks?.length === 0 &&
           activeMenu.data?.actualStocks?.length === 0
         ) {
           defaultStock = [
@@ -356,7 +380,7 @@ const ProductStock = ({ prev, next, isRequest, mode }) => {
           stock_id: stock.stock_id,
           ...Object.assign(
             {},
-            ...stock.ids.map((extra, idx) => ({
+            ...stock.ids?.map((extra, idx) => ({
               [`extras[${idx}]`]: {
                 label: extra.label,
                 value: extra.value,
@@ -376,7 +400,13 @@ const ProductStock = ({ prev, next, isRequest, mode }) => {
   }, [isRequest, location.state?.generate]);
 
   return (
-    <Card title={activeMenu.data[`title[${defaultLang}]`] ? `${activeMenu.data[`title[${defaultLang}]`]}` : ""}>
+    <Card
+      title={
+        activeMenu.data && activeMenu.data[`title[${defaultLang}]`]
+          ? `${activeMenu.data[`title[${defaultLang}]`]}`
+          : ''
+      }
+    >
       {loading ? (
         <Loading />
       ) : (
@@ -505,7 +535,11 @@ const ProductStock = ({ prev, next, isRequest, mode }) => {
                               const totalPrice =
                                 tax === 0 ? price : (price * tax) / 100 + price;
                               return (
-                                <Form.Item label={`${t('total.price')} (${defaultCurrency?.symbol})`}>
+                                <Form.Item
+                                  label={`${t('total.price')} (${
+                                    defaultCurrency?.symbol
+                                  })`}
+                                >
                                   <InputNumber
                                     min={1}
                                     disabled

@@ -51,21 +51,21 @@ export default function PushNotification({ refetch }) {
   const notifyOrder = () => {
     audioPlayer.current.play();
     const key = `open${Date.now()}`;
-    const btn = (
+    const btn = data?.data?.id ? (
       <Button
         type='primary'
         size='small'
         onClick={() => {
           notification.close(key);
-          goToShow(data.title);
+          goToShow(data?.data?.id);
         }}
       >
         {t('view.order')}
-      </Button>
-    );
+      </Button> 
+    ) : null;
     notification.open({
-      message: t('new.order'),
-      description: `${t('order.id')} #${data.title}`,
+      message: data.title,
+      description: data.body,
       btn,
       key,
       onClose: close,
@@ -83,7 +83,7 @@ export default function PushNotification({ refetch }) {
   const notifyParcel = () => {
     audioPlayer.current.play();
     const key = `open${Date.now()}`;
-    const btn = (
+    const btn = data?.data?.id ?  (
       <Button
         type='primary'
         size='small'
@@ -94,10 +94,10 @@ export default function PushNotification({ refetch }) {
       >
         {t('view.parcel')}
       </Button>
-    );
+    ) : null;
     notification.open({
-      message: t('new.parcel'),
-      description: `${t('parcel.id')} #${data.title}`,
+      message: data?.title,
+      description: data?.body,
       btn,
       key,
       onClose: close,
@@ -127,11 +127,13 @@ export default function PushNotification({ refetch }) {
     .then((payload) => {
       const title = payload?.notification?.title;
       const body = payload?.notification?.body;
+      console.log(title)
       setData({
         title,
         body,
+        data: payload?.data
       });
-      set(title, body);
+      set(payload?.data?.id || title, payload?.data ?  {...payload.data, title: body} : body);
       refetch();
     })
     .catch((err) => console.log('failed: ', err));

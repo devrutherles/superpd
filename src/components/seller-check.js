@@ -1,4 +1,4 @@
-import { Button, Card, Space, Table, Tag } from 'antd';
+import { Button, Card, Divider, Space, Table, Tag } from 'antd';
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -20,7 +20,7 @@ const SellerCheck = () => {
   const { settings } = useSelector((state) => state.globalSettings);
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
 
   const columns = [
@@ -133,7 +133,7 @@ const SellerCheck = () => {
                   </span>
                   <br />
                   <span>
-                    {t('delivery.address')}: {data?.address.city}
+                    {t('delivery.address')}: {data?.address?.city}
                   </span>
                   <br />
                   <span>
@@ -185,12 +185,49 @@ const SellerCheck = () => {
           />
           <footer>
             <span>
-              {' '}
-              <span>
-                {t('note')}: {data?.note}
-              </span>
+              {data?.note && (
+                <span>
+                  {t('note')}: {data?.note}
+                </span>
+              )}
             </span>
             <span>
+              {data?.delivery_fee && (
+                <>
+                  <span>{t('delivery.fee')}</span>
+                  <h3 style={{ marginBottom: '10px' }}>
+                    {numberToPrice(data?.delivery_fee, defaultCurrency?.symbol)}
+                  </h3>
+                </>
+              )}
+              {data?.service_fee && (
+                <>
+                  <span>{t('service.fee')}</span>
+                  <h3 style={{ marginBottom: '10px' }}>
+                    {numberToPrice(data?.service_fee, defaultCurrency?.symbol)}
+                  </h3>
+                </>
+              )}
+              {data?.tax && (
+                <>
+                  <span>{t('order.tax')}</span>
+                  <h3 style={{ marginBottom: '10px' }}>
+                    {numberToPrice(data?.tax, defaultCurrency?.symbol)}
+                  </h3>
+                </>
+              )}
+              {data?.total_discount && (
+                <>
+                  <span>{t('total.discount')}</span>
+                  <h3 style={{ marginBottom: '10px' }}>
+                    {numberToPrice(
+                      data?.total_discount,
+                      defaultCurrency?.symbol,
+                    )}
+                  </h3>
+                </>
+              )}
+              <Divider />
               <span>{t('total.price')}</span>
               <h1>
                 {numberToPrice(data?.total_price, defaultCurrency?.symbol)}

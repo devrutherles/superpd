@@ -11,6 +11,7 @@ import formatSortType from '../../helpers/formatSortType';
 import SearchInput from '../../components/search-input';
 import numberToPrice from '../../helpers/numberToPrice';
 import FilterColumns from '../../components/filter-column';
+import moment from "moment";
 
 const { TabPane } = Tabs;
 
@@ -100,6 +101,7 @@ export default function DeliverymanOrders() {
       dataIndex: 'created_at',
       key: 'created_at',
       is_show: true,
+      render: (_, row) => moment(row?.created_at).format('YYYY-MM-DD HH:mm')
     },
     {
       title: t('options'),

@@ -30,6 +30,11 @@ const SellerOrderRoutes = [
     path: 'seller/order/:id',
     component: lazy(() => import('views/seller-views/order/order-edit')),
   },
+  // waiting payment
+  {
+    path: 'seller/orders-list/waiting-payment',
+    component: lazy(() => import('views/seller-views/order/waiting-payment')),
+  },
 ];
 
 export default SellerOrderRoutes;

@@ -122,7 +122,7 @@ const ProductList = () => {
       key: 'status',
       render: (status) => (
         <div>
-          {status === 'published' ? (
+          {status === 'pending' ? (
             <Tag color='blue'>{t(status)}</Tag>
           ) : status === 'unpublished' ? (
             <Tag color='error'>{t(status)}</Tag>

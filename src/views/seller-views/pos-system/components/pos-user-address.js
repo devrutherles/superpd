@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Form, Input, Modal } from 'antd';
+import { Button, Form, Input, Modal, Select } from 'antd';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import Map from '../../../../components/map';
 import getDefaultLocation from '../../../../helpers/getDefaultLocation';
-import { usePlacesWidget } from 'react-google-autocomplete';
-import { MAP_API_KEY } from '../../../../configs/app-global';
 import { setCartData } from '../../../../redux/slices/cart';
 import { getCartData } from '../../../../redux/selectors/cartSelector';
+import useGoogle from 'react-google-autocomplete/lib/usePlacesAutocompleteService';
+import getAddress from 'helpers/getAddress';
+import { MAP_API_KEY } from 'configs/app-global';
 
 export default function PosUserAddress({ uuid, handleCancel }) {
   const { t } = useTranslation();
@@ -25,6 +26,14 @@ export default function PosUserAddress({ uuid, handleCancel }) {
       ? { lat: data.address.lat, lng: data.address.lng }
       : getDefaultLocation(settings)
   );
+
+  const [value, setValue] = useState('');
+
+  const { placePredictions, getPlacePredictions, isPlacePredictionsLoading } =
+    useGoogle({
+      apiKey: MAP_API_KEY,
+      libraries: ['places', 'geocode'],
+    });
 
   const onFinish = (values) => {
     const body = {
@@ -73,7 +82,30 @@ export default function PosUserAddress({ uuid, handleCancel }) {
           label={t('address')}
           rules={[{ required: true, message: t('required') }]}
         >
-          <Input />
+          <Select
+            allowClear
+            searchValue={value}
+            showSearch
+            autoClearSearchValue
+            loading={isPlacePredictionsLoading}
+            options={placePredictions?.map((prediction) => ({
+              label: prediction.description,
+              value: prediction.description,
+            }))}
+            onSearch={(searchValue) => {
+              setValue(searchValue);
+              if (searchValue.length > 0) {
+                getPlacePredictions({ input: searchValue });
+              }
+            }}
+            onSelect={async (value) => {
+              const address = await getAddress(value);
+              setLocation({
+                lat: address?.geometry.location.lat,
+                lng: address?.geometry.location.lng,
+              });
+            }}
+          />
         </Form.Item>
         <Form.Item label={t('map')}>
           <Map

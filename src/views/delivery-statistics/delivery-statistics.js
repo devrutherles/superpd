@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 import { Table, Card, Row, Col, Rate } from 'antd';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import { disableRefetch, setMenuData } from '../../redux/slices/menu';
+import { disableRefetch, setMenuData } from 'redux/slices/menu';
 import { useTranslation } from 'react-i18next';
 
-import formatSortType from '../../helpers/formatSortType';
-import numberToPrice from '../../helpers/numberToPrice';
+import formatSortType from 'helpers/formatSortType';
+import numberToPrice from 'helpers/numberToPrice';
 import {
   fetchLowMoney,
   fetchLowOrders,
@@ -13,14 +13,14 @@ import {
   fetchTopMoney,
   fetchTopOrders,
   fetchTopRating,
-} from '../../redux/slices/delivery-statistic';
+} from 'redux/slices/delivery-statistic';
 
 export default function DeliveryStatistics() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
 
   const columns = [
@@ -91,7 +91,11 @@ export default function DeliveryStatistics() {
       dataIndex: 'wallet_sum',
       key: 'wallet_sum',
       render: (_, data) =>
-        numberToPrice(data?.wallet?.price, defaultCurrency.symbol),
+        numberToPrice(
+          data?.wallet?.price,
+          defaultCurrency.symbol,
+          defaultCurrency?.position,
+        ),
     },
   ];
 
@@ -114,7 +118,7 @@ export default function DeliveryStatistics() {
       setMenuData({
         activeMenu,
         data: { ...activeMenu.data, perPage, page, column, sort },
-      })
+      }),
     );
   }
 

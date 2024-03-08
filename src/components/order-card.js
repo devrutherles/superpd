@@ -30,11 +30,14 @@ const OrderCard = ({
   setDowloadModal,
   setTabType,
 }) => {
+  const { t } = useTranslation();
   const data = [
     {
       title: 'Client',
       icon: <UserOutlined />,
-      data: `${item.user?.firstname || '-'} ${item.user?.lastname || '-'}`,
+      data: item?.user
+        ? `${item.user?.firstname || '-'} ${item.user?.lastname || '-'}`
+        : t('deleted.user'),
     },
     {
       title: 'Deliveryman',
@@ -46,7 +49,11 @@ const OrderCard = ({
     {
       title: 'Amount',
       icon: <DollarOutlined />,
-      data: numberToPrice(item?.total_price, item.currency?.symbol),
+      data: numberToPrice(
+        item?.total_price,
+        item.currency?.symbol,
+        item?.currency?.position,
+      ),
     },
     {
       title: 'Payment type',
@@ -69,7 +76,6 @@ const OrderCard = ({
       data: moment(item?.created_at).format('YYYY-MM-DD') || '-',
     },
   ];
-  const { t } = useTranslation();
   const { isDemo } = useDemo();
   const actions = [
     <BiMap

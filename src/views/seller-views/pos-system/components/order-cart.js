@@ -18,22 +18,19 @@ import {
   addCoupon,
   verifyCoupon,
   removeBag,
-} from '../../../../redux/slices/cart';
-import getImage from '../../../../helpers/getImage';
-import useDidUpdate from '../../../../helpers/useDidUpdate';
-import orderService from '../../../../services/seller/order';
-import invokableService from '../../../../services/rest/invokable';
+  clearData,
+} from 'redux/slices/cart';
+import getImage from 'helpers/getImage';
+import useDidUpdate from 'helpers/useDidUpdate';
+import orderService from 'services/seller/order';
+import invokableService from 'services/rest/invokable';
 import { useTranslation } from 'react-i18next';
-import numberToPrice from '../../../../helpers/numberToPrice';
-import {
-  getCartData,
-  getCartItems,
-} from '../../../../redux/selectors/cartSelector';
+import numberToPrice from 'helpers/numberToPrice';
+import { getCartData, getCartItems } from 'redux/selectors/cartSelector';
 import PreviewInfo from './preview-info';
 import { toast } from 'react-toastify';
-import { fetchSellerProducts } from '../../../../redux/slices/product';
-import transactionService from '../../../../services/transaction';
-
+// import { fetchSellerProducts } from 'redux/slices/product';
+import transactionService from 'services/transaction';
 import moment from 'moment';
 import QueryString from 'qs';
 import { useLocation } from 'react-router-dom';
@@ -56,6 +53,7 @@ export default function OrderCart() {
   const deleteCard = (e) => dispatch(removeFromCart(e));
   const clearAll = () => {
     dispatch(clearCart());
+    dispatch(clearData());
     if (currentBag !== 0) {
       dispatch(removeBag(currentBag));
     }
@@ -92,7 +90,7 @@ export default function OrderCart() {
         quantity: addon.quantity,
         stock_id: addon.stockID,
         parent_id: item.stockID ? item.stockID?.id : item.stock?.id,
-      }))
+      })),
     );
 
     const combine = addons.concat(products);
@@ -103,9 +101,7 @@ export default function OrderCart() {
       coupon: data?.coupon?.name,
       shop_id: shop.id,
       // type: data?.deliveries?.label?.toLowerCase(),
-      type: delivery_type
-        ? delivery_type
-        : data?.deliveries?.label?.toLowerCase(),
+      type: data?.deliveries?.value,
       address: {
         latitude: data?.address?.lat,
         longitude: data?.address?.lng,
@@ -115,14 +111,6 @@ export default function OrderCart() {
   }
 
   useDidUpdate(() => {
-    dispatch(
-      fetchSellerProducts({
-        perPage: 12,
-        currency_id: currency?.id,
-        status: 'published',
-        active: 1,
-      })
-    );
     if (filteredCartItems.length) {
       productCalculate();
     }
@@ -134,7 +122,14 @@ export default function OrderCart() {
     } else {
       dispatch(clearCartShops());
     }
-  }, [cartItems, currentBag, data?.address, currency]);
+  }, [
+    cartItems,
+    currentBag,
+    data?.address,
+    currency,
+    data?.coupon,
+    data?.deliveries,
+  ]);
 
   function productCalculate() {
     const products = formatProducts(filteredCartItems);
@@ -156,7 +151,7 @@ export default function OrderCart() {
         const orderData = {
           product_total: product.stocks?.reduce(
             (acc, curr) => acc + (curr.total_price || curr.price),
-            0
+            0,
           ),
           product_tax: product.total_tax,
           shop_tax: product.total_shop_tax,
@@ -171,14 +166,6 @@ export default function OrderCart() {
 
   const handleSave = (id) => {
     setOrderId(id);
-    dispatch(
-      fetchSellerProducts({
-        perPage: 12,
-        currency_id: currency?.id,
-        status: 'published',
-        active: 1,
-      })
-    );
   };
 
   const handleCloseInvoice = () => {
@@ -201,8 +188,8 @@ export default function OrderCart() {
             shop_id: shopId,
             price: res.data.price,
             verified: true,
-          })
-        )
+          }),
+        ),
       )
       .catch(() =>
         dispatch(
@@ -210,8 +197,8 @@ export default function OrderCart() {
             shop_id: shopId,
             price: 0,
             verified: false,
-          })
-        )
+          }),
+        ),
       )
       .finally(() => setLoadingCoupon(null));
   }
@@ -244,18 +231,18 @@ export default function OrderCart() {
         stock_id: addon.id,
         quantity: addon.quantity,
         parent_id: product.stockID.id,
-      }))
+      })),
     );
     const defaultBody = {
       user_id: data.user?.value,
       currency_id: currency?.id,
       rate: currency?.rate,
       shop_id: shop.id,
-      delivery_id: data?.deliveries?.label,
-      delivery_fee: data.delivery_fee,
+      delivery_id: data.deliveries?.value,
+      // delivery_fee: data.delivery_fee,
       coupon: coupons[0]?.coupon,
       tax: total.order_tax,
-      payment_type: data.paymentType?.label,
+      payment_type: data.paymentType?.value,
       delivery_date: data.delivery_date,
       delivery_address_id: data.address?.address,
       address: {
@@ -269,8 +256,8 @@ export default function OrderCart() {
         longitude: data.address?.lng,
       },
       delivery_time: moment(data.delivery_time, 'HH:mm').format('HH:mm'),
-      delivery_type: data?.deliveries?.label?.toLowerCase(),
-      delivery_type_id: data?.deliveries?.value,
+      delivery_type: data.deliveries.value,
+      delivery_type_id: data.deliveries.key,
       products: products.concat(...addons),
       phone: data?.phone?.toString(),
     };
@@ -278,7 +265,7 @@ export default function OrderCart() {
     const dineInBody = {
       currency_id: currency?.id,
       delivery_type: delivery_type,
-      payment_type: data.paymentType?.label,
+      payment_type: data.paymentType?.value,
       products: products.concat(...addons),
       shop_id: shop.id,
     };
@@ -286,7 +273,7 @@ export default function OrderCart() {
     const body = delivery_type ? dineInBody : defaultBody;
 
     const payment = {
-      payment_sys_id: data.paymentType.value,
+      payment_sys_id: data.paymentType.key,
     };
 
     orderService
@@ -360,7 +347,8 @@ export default function OrderCart() {
                           <span>
                             {numberToPrice(
                               item?.total_price || item?.price,
-                              currency?.symbol
+                              currency?.symbol,
+                              currency?.position,
                             )}
                           </span>
                         </span>
@@ -437,7 +425,8 @@ export default function OrderCart() {
                           <span>
                             {numberToPrice(
                               item?.total_price || item?.price,
-                              currency?.symbol
+                              currency?.symbol,
+                              currency?.position,
                             )}
                           </span>
 
@@ -492,7 +481,7 @@ export default function OrderCart() {
                     user_id: data.user?.value,
                     shop_id: cartShops[0].shop_id,
                     verified: false,
-                  })
+                  }),
                 )
               }
             />
@@ -512,32 +501,56 @@ export default function OrderCart() {
             <div className='all-price-container'>
               <span>{t('sub.total')}</span>
               <span>
-                {numberToPrice(total.product_total, currency?.symbol)}
+                {numberToPrice(
+                  total.product_total,
+                  currency?.symbol,
+                  currency?.position,
+                )}
               </span>
             </div>
             <div className='all-price-container'>
               <span>{t('product.tax')}</span>
-              <span>{numberToPrice(total.product_tax, currency?.symbol)}</span>
+              <span>
+                {numberToPrice(
+                  total.product_tax,
+                  currency?.symbol,
+                  currency?.position,
+                )}
+              </span>
             </div>
             <div className='all-price-container'>
               <span>{t('shop.tax')}</span>
-              <span>{numberToPrice(total.shop_tax, currency?.symbol)}</span>
+              <span>
+                {numberToPrice(
+                  total.shop_tax,
+                  currency?.symbol,
+                  currency?.position,
+                )}
+              </span>
             </div>
             <div className='all-price-container'>
               <span>{t('delivery.fee')}</span>
-              <span>{numberToPrice(total.delivery_fee, currency?.symbol)}</span>
+              <span>
+                {numberToPrice(
+                  total.delivery_fee,
+                  currency?.symbol,
+                  currency?.position,
+                )}
+              </span>
             </div>
-            {/* <div className='all-price-container'>
-              <span>{t('cashback')}</span>
-              <span>{numberToPrice(total?.cashback, currency?.symbol)}</span>
-            </div> */}
           </Col>
         </Row>
 
         <Row className='submit-row'>
           <Col span={14} className='col'>
             <span>{t('total.amount')}</span>
-            <span>{numberToPrice(total.order_total, currency?.symbol)}</span>
+            <span>
+              {numberToPrice(
+                total.order_total,
+                currency?.symbol,
+                currency?.position,
+              )}
+            </span>
           </Col>
           <Col className='col2'>
             <Button

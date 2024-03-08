@@ -13,7 +13,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import smsService from '../../services/smsPayloads';
 import { fetchSms } from '../../redux/slices/sms-geteways';
-import { shallowEqual, useDispatch } from 'react-redux';
+import { batch, shallowEqual, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { removeFromMenu } from '../../redux/slices/menu';
 import { useNavigate } from 'react-router-dom';
@@ -46,12 +46,15 @@ export default function SmsPayloadAdd() {
       },
     };
     const nextUrl = 'settings/sms-payload';
+
     smsService
       .create(data)
       .then(() => {
-        dispatch(fetchSms());
-        toast.success(t('successfully.updated'));
-        dispatch(removeFromMenu({ ...activeMenu, nextUrl }));
+        batch(() => {
+          dispatch(fetchSms());
+          dispatch(removeFromMenu({ ...activeMenu, nextUrl }));
+        });
+        toast.success(t('successfully.created'));
         navigate(`/${nextUrl}`);
       })
       .finally(() => setLoadingBtn(false));
@@ -77,7 +80,7 @@ export default function SmsPayloadAdd() {
                 className='w-100'
                 onChange={handleChange}
                 options={options.filter(
-                  (i) => !smsGatewaysList.some((e) => e.type === i.value)
+                  (i) => !smsGatewaysList.some((e) => e.type === i.value),
                 )}
               />
             </Form.Item>

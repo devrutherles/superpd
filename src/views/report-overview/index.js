@@ -49,11 +49,11 @@ const ReportOverview = () => {
   } = useContext(ReportContext);
   const { loading, carts, products, categories } = useSelector(
     (state) => state.overviewReport,
-    shallowEqual
+    shallowEqual,
   );
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const dispatch = useDispatch();
@@ -73,7 +73,12 @@ const ReportOverview = () => {
       title: t('net.sales'),
       dataIndex: 'total_price',
       key: 'total_price',
-      render: (price) => numberToPrice(price, defaultCurrency?.symbol),
+      render: (price) =>
+        numberToPrice(
+          price,
+          defaultCurrency?.symbol,
+          defaultCurrency?.position,
+        ),
     },
     {
       title: t('orders'),
@@ -216,7 +221,8 @@ const ReportOverview = () => {
                         {item.price
                           ? numberToPrice(
                               carts[item.qty],
-                              defaultCurrency?.symbol
+                              defaultCurrency?.symbol,
+                              defaultCurrency?.position,
                             )
                           : carts[item.qty]}
                       </Title>

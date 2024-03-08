@@ -72,10 +72,10 @@ export default function NotificationDrawer({
         itemLayout='horizontal'
         dataSource={list}
         renderItem={(item) => (
-          <List.Item className='list-clickable' onClick={() => goToShow(item)}>
+          <List.Item className='list-clickable' onClick={() => item?.id ? goToShow(item.id) : undefined}>
             <div className='py-1'>
               <span className='font-weight-bold'>
-                {t('new.order')} #{item}
+               {item?.title || item?.type || item}
               </span>
             </div>
           </List.Item>

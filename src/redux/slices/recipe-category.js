@@ -52,6 +52,8 @@ const recipeCategorySlice = createSlice({
         locales: item.locales,
         deleted_at: item.deleted_at,
         status: item.status,
+        shop: item.shop,
+        shop_id: item.shop_id
       }));
       state.meta = payload.meta;
       state.params.page = payload.meta.current_page;
@@ -78,6 +80,9 @@ const recipeCategorySlice = createSlice({
         id: item.id,
         locales: item.locales,
         deleted_at: item.deleted_at,
+        status: item.status,
+        shop: item.shop,
+        shop_id: item.shop_id
       }));
       state.meta = payload.meta;
       state.params.page = payload.meta.current_page;

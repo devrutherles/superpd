@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Badge, Button, Card, Col, Row, Space, Spin } from 'antd';
-import subscriptionService from '../../services/subscriptions';
+import subscriptionService from 'services/subscriptions';
 import { shallowEqual, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import SubscriptionEditModal from './subscriptions-edit';
 import SubscriptionAddModal from './subscriptions-add';
 import { EditOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useDispatch } from 'react-redux';
-import { disableRefetch } from '../../redux/slices/menu';
+import { disableRefetch } from 'redux/slices/menu';
 
 const features = [];
 
@@ -15,7 +15,7 @@ const Subscriptions = () => {
   const { t } = useTranslation();
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
   const [add, setAdd] = useState(null);
   const [edit, setEdit] = useState(null);
@@ -83,16 +83,37 @@ const Subscriptions = () => {
                   <div className='p-3'>
                     <div className='text-center'>
                       <h1 className='display-4 mt-4'>
-                        <span
-                          className='font-size-md d-inline-block mr-1'
-                          style={{ transform: 'translate(0px, -17px)' }}
-                        >
-                          {defaultCurrency?.symbol}
-                        </span>
+                        {defaultCurrency?.position === 'before' && (
+                          <span
+                            className='font-size-md d-inline-block mr-1'
+                            style={{ transform: 'translate(0px, -17px)' }}
+                          >
+                            {defaultCurrency?.symbol}
+                          </span>
+                        )}
                         <span>{elm.price}</span>
+                        {defaultCurrency?.position === 'after' && (
+                          <span
+                            className='font-size-md d-inline-block mr-1'
+                            style={{ transform: 'translate(0px, -17px)' }}
+                          >
+                            {defaultCurrency?.symbol}
+                          </span>
+                        )}
                       </h1>
                       <p className='mb-0 text-lowercase'>
                         {elm.month} {t('month')}
+                      </p>
+                      <p className='mb-0 text-lowercase'>
+                        {t('order.limit')} {elm?.order_limit}
+                      </p>
+                      <p className='mb-0 text-lowercase'>
+                        {t('product.limit')} {elm?.product_limit}
+                      </p>
+                      <p className='mb-0 text-lowercase'>
+                        {Boolean(elm?.with_report)
+                          ? t('with.report')
+                          : t('without.report')}
                       </p>
                     </div>
                     <div className='mt-4'>

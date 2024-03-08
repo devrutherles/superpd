@@ -13,7 +13,7 @@ export const fetchExtraGroups = createAsyncThunk(
   'extra/fetchExtraGroups',
   (params = {}) => {
     return extraService
-      .getAllGroups({ ...initialState.params, ...params })
+      .getAllGroups(params)
       .then((res) => res);
   }
 );
@@ -22,7 +22,7 @@ export const fetchSelletExtraGroups = createAsyncThunk(
   'extra/fetchSellerExtraGroups',
   (params = {}) => {
     return extraSellerService
-      .getAllGroups({ ...initialState.params, ...params })
+      .getAllGroups(params)
       .then((res) => res);
   }
 );

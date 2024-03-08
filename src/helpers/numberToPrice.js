@@ -1,9 +1,11 @@
-export default function numberToPrice(number, symbol = '$') {
-  if (!number) {
-    return '0';
-  }
+export default function numberToPrice(
+  number = 0,
+  symbol = '$',
+  position = 'after',
+) {
   const price = Number(number)
     .toFixed(2)
     .replace(/\d(?=(\d{3})+\.)/g, '$&,');
-  return symbol + ' ' + price;
+
+  return position === 'after' ? `${price} ${symbol}` : `${symbol} ${price}`;
 }

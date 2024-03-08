@@ -229,7 +229,7 @@ const Permission = () => {
               </Col>
             </Row>
           </Col>
-          {/* <Col span={24}>
+          <Col span={24}>
             <Row gutter={24}>
               <Col span={12}>
                 <b>{t('by.subscription')}</b>
@@ -249,7 +249,7 @@ const Permission = () => {
                 </Form.Item>
               </Col>
             </Row>
-          </Col> */}
+          </Col>
           <Col span={24}>
             <Row gutter={24}>
               <Col span={12}>

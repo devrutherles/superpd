@@ -28,6 +28,7 @@ import ResultModal from '../../components/result-modal';
 import { FaTrashRestoreAlt } from 'react-icons/fa';
 import userService from '../../services/user';
 import useDemo from '../../helpers/useDemo';
+import hideEmail from '../../components/hideEmail';
 const { TabPane } = Tabs;
 
 const roles = [
@@ -52,7 +53,7 @@ export default function Admin() {
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { users, loading, meta, params } = useSelector(
     (state) => state.user,
-    shallowEqual
+    shallowEqual,
   );
   const [uuid, setUuid] = useState(null);
   const [userRole, setUserRole] = useState(null);
@@ -91,7 +92,7 @@ export default function Admin() {
         url: `user/${row.uuid}`,
         id: 'user_edit',
         name: 'User edit',
-      })
+      }),
     );
     navigate(`/user/${row.uuid}`);
   };
@@ -102,7 +103,7 @@ export default function Admin() {
         url: `user-clone/${row.uuid}`,
         id: 'user-clone',
         name: 'user.clone',
-      })
+      }),
     );
     navigate(`/user-clone/${row.uuid}`);
   };
@@ -113,7 +114,7 @@ export default function Admin() {
         url: `/users/user/${row.uuid}`,
         id: 'user_info',
         name: t('user.info'),
-      })
+      }),
     );
     navigate(`/users/user/${row.uuid}`, { state: { user_id: row.id } });
   };
@@ -139,7 +140,7 @@ export default function Admin() {
       title: t('email'),
       dataIndex: 'email',
       is_show: true,
-      render: (email) => <div>{isDemo ? '' : email}</div>,
+      render: (email) => <div>{isDemo ? hideEmail(email) : email}</div>,
     },
     {
       title: t('role'),
@@ -212,7 +213,7 @@ export default function Admin() {
         id: 'user-add-role',
         url: `user/add/${e}`,
         name: t(`add.${e}`),
-      })
+      }),
     );
     navigate(`/user/add/${e}`);
   };
@@ -225,7 +226,7 @@ export default function Admin() {
       setMenuData({
         activeMenu,
         data: { ...activeMenu.data, perPage, page, column, sort },
-      })
+      }),
     );
   }
 
@@ -236,7 +237,7 @@ export default function Admin() {
         {},
         ...id.map((item, index) => ({
           [`ids[${index}]`]: item,
-        }))
+        })),
       ),
     };
 
@@ -296,7 +297,7 @@ export default function Admin() {
       setMenuData({
         activeMenu,
         data: { ...data, ...items },
-      })
+      }),
     );
   };
 

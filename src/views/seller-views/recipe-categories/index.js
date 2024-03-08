@@ -29,6 +29,7 @@ import { CgExport, CgImport } from 'react-icons/cg';
 import ResultModal from '../../../components/result-modal';
 import formatSortType from '../../../helpers/formatSortType';
 import { fetchSellerRecipeCategories } from '../../../redux/slices/recipe-category';
+import getImage from 'helpers/getImage';
 const colors = ['blue', 'red', 'gold', 'volcano', 'cyan', 'lime'];
 
 const { TabPane } = Tabs;
@@ -90,16 +91,17 @@ const RecipeCategories = () => {
 
   const [columns, setColumns] = useState([
     {
-      title: t('id'),
-      dataIndex: 'id',
-      key: 'id',
-      is_show: true,
-    },
-    {
       title: t('name'),
       dataIndex: 'name',
       key: 'name',
       is_show: true,
+    },
+    {
+      title: t('created.by'),
+      dataIndex: 'shop',
+      key: 'shop',
+      is_show: true,
+      render: (shop) => (shop ? t('you') : t('admin')),
     },
     {
       title: t('translations'),
@@ -118,28 +120,8 @@ const RecipeCategories = () => {
       },
     },
     {
-      title: t('image'),
-      dataIndex: 'img',
-      key: 'img',
-      is_show: true,
-      render: (img, row) => {
-        return (
-          <Image
-            src={row.deleted_at ? 'https://via.placeholder.com/150' : img}
-            alt='img_gallery'
-            width={100}
-            className='rounded'
-            preview
-            placeholder
-            key={img + row.id}
-          />
-        );
-      },
-    },
-    {
       title: t('active'),
       dataIndex: 'active',
-      key: 'active',
       is_show: true,
       render: (active, row) => {
         return (
@@ -149,8 +131,43 @@ const RecipeCategories = () => {
               setId(row.uuid);
               setActive(true);
             }}
-            disabled={row.deleted_at}
+            disabled={row.deleted_at || !row?.shop_id}
             checked={active}
+          />
+        );
+      },
+    },
+    {
+      title: t('status'),
+      dataIndex: 'status',
+      is_show: true,
+      render: (status) => (
+        <div>
+          {status === 'pending' ? (
+            <Tag color='blue'>{t(status)}</Tag>
+          ) : status === 'unpublished' ? (
+            <Tag color='error'>{t(status)}</Tag>
+          ) : (
+            <Tag color='cyan'>{t(status)}</Tag>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: t('image'),
+      dataIndex: 'img',
+      key: 'img',
+      is_show: true,
+      render: (img, row) => {
+        return (
+          <Image
+            src={getImage(img)}
+            alt='img_gallery'
+            width={100}
+            className='rounded'
+            preview
+            placeholder
+            key={img + row.id}
           />
         );
       },
@@ -167,15 +184,10 @@ const RecipeCategories = () => {
               type='primary'
               icon={<EditOutlined />}
               onClick={() => goToEdit(row)}
-              disabled={row.deleted_at}
+              disabled={!row?.shop_id}
             />
-            <Button
-              icon={<CopyOutlined />}
-              onClick={() => goToClone(row.uuid)}
-              disabled={row.deleted_at}
-            />
-            <DeleteButton
-              disabled={row.deleted_at}
+             <DeleteButton
+              disabled={row.deleted_at || !row?.shop_id}
               icon={<DeleteOutlined />}
               onClick={() => {
                 setId([row.id]);

@@ -6,7 +6,6 @@ import deLang from 'antd/es/locale/de_DE';
 import ruLang from 'antd/es/locale/ru_RU';
 import esLang from 'antd/es/locale/es_ES';
 import itLang from 'antd/es/locale/it_IT';
-import ptLang from 'antd/es/locale/pt_BR';
 
 const AppLocale = {
   en: enLang,
@@ -17,7 +16,6 @@ const AppLocale = {
   ru: ruLang,
   es: esLang,
   it: itLang,
-  pt: ptLang,
 };
 
 export default AppLocale;

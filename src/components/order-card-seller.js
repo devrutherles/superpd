@@ -36,6 +36,13 @@ const OrderCardSeller = ({
   const { t } = useTranslation();
   const data = [
     {
+      title: 'Client',
+      icon: <UserOutlined />,
+      data: item?.user
+        ? `${item.user?.firstname || '-'} ${item.user?.lastname || '-'}`
+        : t('deleted.user'),
+    },
+    {
       title: 'Number of products',
       icon: <ContainerOutlined />,
       data: item?.order_details_count,
@@ -52,7 +59,11 @@ const OrderCardSeller = ({
     {
       title: 'Amount',
       icon: <DollarOutlined />,
-      data: numberToPrice(item.total_price, item.currency?.symbol),
+      data: numberToPrice(
+        item.total_price,
+        item.currency?.symbol,
+        item.currency?.position,
+      ),
     },
     {
       title: 'Payment type',

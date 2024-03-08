@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from 'antd';
 import { shallowEqual, useSelector } from 'react-redux';
-import numberToPrice from '../../helpers/numberToPrice';
+import numberToPrice from 'helpers/numberToPrice';
 
 export default function StatisticPriceWidget({
   title = 'Orders',
@@ -10,7 +10,7 @@ export default function StatisticPriceWidget({
 }) {
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
 
   return (
@@ -20,7 +20,11 @@ export default function StatisticPriceWidget({
         <div>
           <div className='d-flex align-items-center'>
             <h1 className='mb-0 font-weight-bold'>
-              {numberToPrice(value, defaultCurrency?.symbol)}
+              {numberToPrice(
+                value,
+                defaultCurrency?.symbol,
+                defaultCurrency?.position,
+              )}
             </h1>
           </div>
           {subtitle && <div className='text-gray-light mt-1'>{subtitle}</div>}

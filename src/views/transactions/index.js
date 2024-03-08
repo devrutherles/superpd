@@ -12,6 +12,7 @@ import { fetchTransactions } from '../../redux/slices/transaction';
 import TransactionShowModal from './transactionShowModal';
 import numberToPrice from '../../helpers/numberToPrice';
 import FilterColumns from '../../components/filter-column';
+import moment from 'moment/moment';
 const { TabPane } = Tabs;
 
 const statuses = ['all', 'progress', 'paid', 'rejected'];
@@ -19,6 +20,10 @@ const statuses = ['all', 'progress', 'paid', 'rejected'];
 export default function Transactions() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const { defaultCurrency } = useSelector(
+    (state) => state.currency,
+    shallowEqual,
+  );
   const [showId, setShowId] = useState(null);
 
   const goToShow = (row) => {
@@ -50,7 +55,11 @@ export default function Transactions() {
       key: 'price',
       is_show: true,
       render: (price, row) =>
-        numberToPrice(price, row.payable?.order?.currency?.symbol),
+        numberToPrice(
+          price,
+          defaultCurrency?.symbol,
+          defaultCurrency?.position,
+        ),
     },
     {
       title: t('payment.type'),
@@ -87,6 +96,7 @@ export default function Transactions() {
       dataIndex: 'created_at',
       key: 'created_at',
       is_show: true,
+      render: (_, row) => moment(row?.created_at).format('YYYY-MM-DD HH:mm'),
     },
     {
       title: t('options'),
@@ -102,7 +112,7 @@ export default function Transactions() {
   const [role, setRole] = useState('all');
   const { transactions, meta, loading, params } = useSelector(
     (state) => state.transaction,
-    shallowEqual
+    shallowEqual,
   );
   const immutable = activeMenu.data?.role || role;
   const data = activeMenu.data;
@@ -123,7 +133,7 @@ export default function Transactions() {
       setMenuData({
         activeMenu,
         data: { ...data, perPage, page, column, sort },
-      })
+      }),
     );
   }
 
@@ -136,6 +146,7 @@ export default function Transactions() {
       dispatch(fetchTransactions(params));
       dispatch(disableRefetch(activeMenu));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu.refetch]);
 
   const handleFilter = (items) => {
@@ -144,7 +155,7 @@ export default function Transactions() {
       setMenuData({
         activeMenu,
         data: { ...data, ...items },
-      })
+      }),
     );
   };
 

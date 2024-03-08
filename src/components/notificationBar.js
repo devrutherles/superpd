@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BellOutlined } from '@ant-design/icons';
 import NotificationDrawer from './notification-drawer';
-import { delMany, keys } from 'idb-keyval';
+import { delMany, values } from 'idb-keyval';
 import { Badge } from 'antd';
 import { toast } from 'react-toastify';
 import PushNotification from './push-notification';
@@ -21,7 +21,7 @@ export default function NotificationBar() {
   }, []);
 
   function getNotifications() {
-    keys().then((val) => setNotifications(val));
+    values().then((val) => setNotifications(val));
   }
 
   function clearNotifications() {

@@ -27,7 +27,7 @@ export default function PaymentToPartnersList() {
   const { t } = useTranslation();
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
   const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
 
@@ -37,7 +37,7 @@ export default function PaymentToPartnersList() {
         url: `order/details/${id}`,
         id: 'order_details',
         name: t('order.details'),
-      })
+      }),
     );
     navigate(`/order/details/${id}`);
   };
@@ -78,7 +78,13 @@ export default function PaymentToPartnersList() {
         const status = row.transaction?.status;
         return (
           <>
-            <span>{numberToPrice(total_price, defaultCurrency.symbol)}</span>
+            <span>
+              {numberToPrice(
+                total_price,
+                defaultCurrency?.symbol,
+                defaultCurrency?.position,
+              )}
+            </span>
             <br />
             <span
               className={
@@ -104,7 +110,12 @@ export default function PaymentToPartnersList() {
             is_show: true,
             dataIndex: 'coupon_sum_price',
             key: 'coupon_sum_price',
-            render: (couponPrice) => numberToPrice(couponPrice),
+            render: (couponPrice) =>
+              numberToPrice(
+                couponPrice,
+                defaultCurrency?.symbol,
+                defaultCurrency?.position,
+              ),
           },
         ]
       : []),
@@ -115,7 +126,12 @@ export default function PaymentToPartnersList() {
             is_show: true,
             dataIndex: 'point_history_sum_price',
             key: 'point_history_sum_price',
-            render: (cashback) => numberToPrice(cashback),
+            render: (cashback) =>
+              numberToPrice(
+                cashback,
+                defaultCurrency?.symbol,
+                defaultCurrency?.position,
+              ),
           },
         ]
       : []),
@@ -124,7 +140,12 @@ export default function PaymentToPartnersList() {
       is_show: true,
       dataIndex: 'delivery_fee',
       key: 'delivery_fee',
-      render: (deliveryFee) => numberToPrice(deliveryFee),
+      render: (deliveryFee) =>
+        numberToPrice(
+          deliveryFee,
+          defaultCurrency?.symbol,
+          defaultCurrency?.position,
+        ),
     },
     ...(type === 'seller'
       ? [
@@ -134,7 +155,11 @@ export default function PaymentToPartnersList() {
             dataIndex: 'service_fee',
             key: 'service_fee',
             render: (_, row) =>
-              numberToPrice((row.service_fee || 0) + (row.commission_fee || 0)),
+              numberToPrice(
+                (row.service_fee || 0) + (row.commission_fee || 0),
+                defaultCurrency?.symbol,
+                defaultCurrency?.position,
+              ),
           },
         ]
       : []),
@@ -145,7 +170,12 @@ export default function PaymentToPartnersList() {
             is_show: true,
             dataIndex: 'seller_fee',
             key: 'seller_fee',
-            render: (sellerFee) => numberToPrice(sellerFee),
+            render: (sellerFee) =>
+              numberToPrice(
+                sellerFee,
+                defaultCurrency?.symbol,
+                defaultCurrency?.position,
+              ),
           },
         ]
       : []),
@@ -163,11 +193,11 @@ export default function PaymentToPartnersList() {
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [dateRange, setDateRange] = useState(
     moment().subtract(1, 'month'),
-    moment()
+    moment(),
   );
   const { list, loading, params, meta } = useSelector(
     (state) => state.paymentToPartners,
-    shallowEqual
+    shallowEqual,
   );
   const data = activeMenu.data;
   const paramsData = {
@@ -196,7 +226,7 @@ export default function PaymentToPartnersList() {
       setMenuData({
         activeMenu,
         data: { ...data, perPage, page, column, sort },
-      })
+      }),
     );
   }
 
@@ -244,7 +274,7 @@ export default function PaymentToPartnersList() {
       setMenuData({
         activeMenu,
         data: { ...data, ...{ [name]: item } },
-      })
+      }),
     );
   };
 
@@ -254,7 +284,7 @@ export default function PaymentToPartnersList() {
       data.map((item) => ({
         label: item.translation?.title,
         value: item.id,
-      }))
+      })),
     );
   }
 
@@ -337,72 +367,88 @@ export default function PaymentToPartnersList() {
           <Col flex='0 0 25%'>
             <StatisticNumberWidget
               title={t('commission.fee')}
-              value={list?.total_commission_fee}
+              value={numberToPrice(
+                list?.total_commission_fee,
+                defaultCurrency?.symbol,
+                defaultCurrency?.position,
+              )}
               color='purple'
             />
           </Col>
           <Col flex='0 0 25%'>
             <StatisticNumberWidget
               title={t('coupon')}
-              value={list?.total_coupon}
+              value={numberToPrice(
+                list?.total_coupon,
+                defaultCurrency?.symbol,
+                defaultCurrency?.position,
+              )}
               color='red'
             />
           </Col>
           <Col flex='0 0 25%'>
             <StatisticNumberWidget
               title={t('delivery.fee')}
-              value={
-                !!list?.total_delivery_fee
-                  ? Math.trunc(list?.total_delivery_fee)
-                  : 0
-              }
+              value={numberToPrice(
+                list?.total_delivery_fee,
+                defaultCurrency?.symbol,
+                defaultCurrency?.position,
+              )}
               color='green'
             />
           </Col>
           <Col flex='0 0 25%'>
             <StatisticNumberWidget
               title={t('point.history')}
-              value={
-                !!list?.total_point_history
-                  ? Math.trunc(list?.total_point_history)
-                  : 0
-              }
+              value={numberToPrice(
+                list?.total_point_history,
+                defaultCurrency?.symbol,
+                defaultCurrency?.position,
+              )}
               color='purple'
             />
           </Col>
           <Col flex='0 0 25%'>
             <StatisticNumberWidget
               title={t('price')}
-              value={!!list?.total_price ? Math.trunc(list?.total_price) : 0}
+              value={numberToPrice(
+                list?.total_price,
+                defaultCurrency?.symbol,
+                defaultCurrency?.position,
+              )}
               color='red'
             />
           </Col>
           <Col flex='0 0 25%'>
             <StatisticNumberWidget
               title={t('seller.fee')}
-              value={
-                !!list?.total_seller_fee
-                  ? Math.trunc(list?.total_seller_fee)
-                  : 0
-              }
+              value={numberToPrice(
+                list?.total_seller_fee,
+                defaultCurrency?.symbol,
+                defaultCurrency?.position,
+              )}
               color='purple'
             />
           </Col>
           <Col flex='0 0 25%'>
             <StatisticNumberWidget
               title={t('service.fee')}
-              value={
-                !!list?.total_service_fee
-                  ? Math.trunc(list?.total_service_fee)
-                  : 0
-              }
+              value={numberToPrice(
+                list?.total_service_fee,
+                defaultCurrency?.symbol,
+                defaultCurrency?.position,
+              )}
               color='red'
             />
           </Col>
           <Col flex='0 0 25%'>
             <StatisticNumberWidget
               title={t('tax')}
-              value={!!list?.total_tax ? Math.trunc(list?.total_tax) : 0}
+              value={numberToPrice(
+                list?.total_tax,
+                defaultCurrency?.symbol,
+                defaultCurrency?.position,
+              )}
               color='green'
             />
           </Col>

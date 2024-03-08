@@ -23,6 +23,10 @@ const SettingsRoutes = [
     component: lazy(() => import('views/translations')),
   },
   {
+    path: 'settings/translations/import',
+    component: lazy(() => import('views/translations/import')),
+  },
+  {
     path: 'settings/backup',
     component: lazy(() => import('views/backup')),
   },

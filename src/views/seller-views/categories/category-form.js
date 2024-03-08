@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Col, Form, Input, Row, Select } from 'antd';
+import { Button, Col, Form, Input, InputNumber, Row, Select } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { DebounceSelect } from 'components/search';
 import MediaUpload from 'components/upload';
@@ -51,8 +51,6 @@ export default function CategoryForm({
     setLoadingBtn(true);
     handleSubmit(values, image).finally(() => setLoadingBtn(false));
   };
-
-  console.log('activeMenu', activeMenu.data);
 
   return (
     <Form
@@ -140,6 +138,25 @@ export default function CategoryForm({
             </Form.Item>
           </Col>
         )}
+        <Col span={12}>
+          <Form.Item
+            name='input'
+            label={t('input')}
+            rules={[
+              {
+                required: true,
+                message: t('required'),
+              },
+            ]}
+          >
+            <InputNumber
+              min={0}
+              parser={(value) => parseInt(value, 10)}
+              max={9999999}
+              className='w-100'
+            />
+          </Form.Item>
+        </Col>
         <Col span={4}>
           <Form.Item label={t('image')}>
             <MediaUpload

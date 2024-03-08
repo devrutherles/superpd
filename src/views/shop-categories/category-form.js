@@ -59,7 +59,6 @@ export default function ShopCategoryForm({ form, handleSubmit, error }) {
     setLoadingBtn(true);
     handleSubmit(values, image).finally(() => setLoadingBtn(false));
   };
-  console.log('this', location?.state, location?.state?.type !== 'clone');
 
   return (
     <Form
@@ -69,6 +68,7 @@ export default function ShopCategoryForm({ form, handleSubmit, error }) {
       initialValues={{
         active: true,
         ...activeMenu.data,
+        input: activeMenu.data?.input || 0,
       }}
       form={form}
     >
@@ -168,6 +168,25 @@ export default function ShopCategoryForm({ form, handleSubmit, error }) {
             ]}
           >
             <InputNumber className='w-100' />
+          </Form.Item>
+        </Col>
+        <Col span={12}>
+          <Form.Item
+            name='input'
+            label={t('input')}
+            rules={[
+              {
+                required: true,
+                message: t('required'),
+              },
+            ]}
+          >
+            <InputNumber
+              min={0}
+              parser={(value) => parseInt(value, 10)}
+              max={9999999}
+              className='w-100'
+            />
           </Form.Item>
         </Col>
         <Col span={4}>

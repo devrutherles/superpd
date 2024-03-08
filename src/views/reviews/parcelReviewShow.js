@@ -3,6 +3,7 @@ import { Button, Descriptions, Modal } from 'antd';
 import { useTranslation } from 'react-i18next';
 import Loading from '../../components/loading';
 import reviewService from '../../services/review';
+import moment from 'moment';
 
 export default function ParcelReviewShowModal({ id, handleCancel }) {
   const [data, setData] = useState({});
@@ -38,10 +39,16 @@ export default function ParcelReviewShowModal({ id, handleCancel }) {
             {data.id}
           </Descriptions.Item>
           <Descriptions.Item span={3} label={t('user')}>
-            {data?.parcel_order?.username_from} <a href={`tel:${data?.parcel_order?.phone_from}`}>{data?.parcel_order?.phone_from}</a>
+            {data?.parcel_order?.username_from}{' '}
+            <a href={`tel:${data?.parcel_order?.phone_from}`}>
+              {data?.parcel_order?.phone_from}
+            </a>
           </Descriptions.Item>
           <Descriptions.Item span={3} label={t('receiver')}>
-            {data?.parcel_order?.username_to} <a href={`tel:${data?.parcel_order?.phone_to}`}>{data?.parcel_order?.phone_to} </a> 
+            {data?.parcel_order?.username_to}{' '}
+            <a href={`tel:${data?.parcel_order?.phone_to}`}>
+              {data?.parcel_order?.phone_to}{' '}
+            </a>
           </Descriptions.Item>
           <Descriptions.Item span={3} label={t('deliveryman')}>
             {data.deliveryman?.firstname} {data.deliveryman?.lastname || ''}
@@ -56,7 +63,7 @@ export default function ParcelReviewShowModal({ id, handleCancel }) {
             {data?.parcel_order?.id}
           </Descriptions.Item>
           <Descriptions.Item span={3} label={t('created.at')}>
-            {data.created_at}
+            {moment(data?.created_at).format('YYYY-MM-DD HH:mm')}
           </Descriptions.Item>
         </Descriptions>
       ) : (

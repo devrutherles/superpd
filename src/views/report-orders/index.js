@@ -45,7 +45,7 @@ const ReportOrder = () => {
   } = useSelector((state) => state.orderReport, shallowEqual);
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
   const [selectedShop, setSelectedShop] = useState();
 
@@ -136,7 +136,15 @@ const ReportOrder = () => {
       is_show: true,
       sorter: (a, b) => a.price - b.price,
       render: (_, data) => {
-        return <>{numberToPrice(data.price, defaultCurrency?.symbol)}</>;
+        return (
+          <>
+            {numberToPrice(
+              data.price,
+              defaultCurrency?.symbol,
+              defaultCurrency?.position,
+            )}
+          </>
+        );
       },
     },
   ]);
@@ -174,7 +182,7 @@ const ReportOrder = () => {
         url: `order/details/${row.id}`,
         id: 'order_details',
         name: t('order.details'),
-      })
+      }),
     );
     navigate(`/order/details/${row.id}`);
   };
@@ -202,7 +210,7 @@ const ReportOrder = () => {
         page,
         perPage,
         shop_id: selectedShop?.value,
-      })
+      }),
     );
   };
 
@@ -237,7 +245,7 @@ const ReportOrder = () => {
       res.data.map((item) => ({
         label: item.translation ? item.translation.title : 'no name',
         value: item.id,
-      }))
+      })),
     );
   }
 
@@ -251,7 +259,7 @@ const ReportOrder = () => {
               onChange={handleDateRange}
             />
             <DebounceSelect
-              style={{width: "200px"}}
+              style={{ width: '200px' }}
               value={selectedShop}
               onClear={() => setSelectedShop(undefined)}
               onSelect={(value) => setSelectedShop(value)}
@@ -281,7 +289,8 @@ const ReportOrder = () => {
                       ? reportData[item.qty]
                       : numberToPrice(
                           reportData[item.qty],
-                          defaultCurrency?.symbol
+                          defaultCurrency?.symbol,
+                          defaultCurrency?.position,
                         )}
                   </Title>
                 </Col>

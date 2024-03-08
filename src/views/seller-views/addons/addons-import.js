@@ -37,7 +37,7 @@ export default function SellerAddonsImport() {
   };
 
   const downloadFile = () => {
-    const body = example + 'import-example/addons.xls';
+    const body = example + 'import-example/addons.xlsx';
     window.location.href = body;
   };
 

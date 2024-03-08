@@ -8,7 +8,6 @@ import {
   Button,
   DatePicker,
   Spin,
-  Tag,
 } from 'antd';
 import React, { useContext, useEffect } from 'react';
 import { CloudDownloadOutlined } from '@ant-design/icons';
@@ -44,11 +43,11 @@ const ReportRevenue = () => {
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
   const { loading, revenueList, chartData } = useSelector(
     (state) => state.revenueReport,
-    shallowEqual
+    shallowEqual,
   );
   const [columns, setColumns] = useState([
     {
@@ -77,7 +76,11 @@ const ReportRevenue = () => {
       key: 'delivery_fee',
       dataIndex: 'delivery_fee',
       render: (_, row) =>
-        numberToPrice(row.delivery_fee, defaultCurrency?.symbol),
+        numberToPrice(
+          row.delivery_fee,
+          defaultCurrency?.symbol,
+          defaultCurrency?.position,
+        ),
       is_show: true,
       sorter: (a, b) => a.delivery_fee - b.delivery_fee,
     },
@@ -86,7 +89,11 @@ const ReportRevenue = () => {
       key: 'canceled_sum',
       dataIndex: 'canceled_sum',
       render: (_, row) =>
-        numberToPrice(row.canceled_sum, defaultCurrency?.symbol),
+        numberToPrice(
+          row.canceled_sum,
+          defaultCurrency?.symbol,
+          defaultCurrency?.position,
+        ),
       is_show: true,
       sorter: (a, b) => a.canceled_sum - b.canceled_sum,
     },
@@ -95,7 +102,11 @@ const ReportRevenue = () => {
       key: 'total_price',
       dataIndex: 'total_price',
       render: (_, row) =>
-        numberToPrice(row.total_price, defaultCurrency?.symbol),
+        numberToPrice(
+          row.total_price,
+          defaultCurrency?.symbol,
+          defaultCurrency?.position,
+        ),
       is_show: true,
       sorter: (a, b) => a.total_price - b.total_price,
     },
@@ -103,7 +114,12 @@ const ReportRevenue = () => {
       title: 'Tax',
       key: 'tax',
       dataIndex: 'tax',
-      render: (_, row) => numberToPrice(row.tax, defaultCurrency?.symbol),
+      render: (_, row) =>
+        numberToPrice(
+          row.tax,
+          defaultCurrency?.symbol,
+          defaultCurrency?.position,
+        ),
       is_show: true,
       sorter: (a, b) => a.tax - b.tax,
     },
@@ -176,7 +192,7 @@ const ReportRevenue = () => {
         price: false,
       },
     ],
-    []
+    [],
   );
 
   useEffect(() => {
@@ -233,7 +249,8 @@ const ReportRevenue = () => {
                       ? chartData[item.qty]
                       : numberToPrice(
                           chartData[item.qty],
-                          defaultCurrency?.symbol
+                          defaultCurrency?.symbol,
+                          defaultCurrency?.position,
                         )}
                   </Title>
                 </Col>

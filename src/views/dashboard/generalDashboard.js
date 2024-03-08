@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Card, Col, Row, Typography } from 'antd';
+import { Col, Row } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { shallowEqual, useSelector } from 'react-redux';
@@ -51,13 +51,6 @@ export default function GeneralDashboard() {
       {!parcelMode ? (
         <>
           <Row gutter={16} className='mt-3'>
-            <Col span={24}>
-              <Card>
-                <span style={{ fontSize: '1rem' }}>
-                  {t('last.30.days.statistics')}
-                </span>
-              </Card>
-            </Col>
             <Col flex='0 0 16.6%'>
               <StatisticNumberWidget
                 title={t('in.progress.orders')}

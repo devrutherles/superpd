@@ -53,7 +53,7 @@ const ReportExtras = () => {
   const [search, setSearch] = useState('');
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
 
   const expandedRowRender = (row) => {
@@ -129,7 +129,12 @@ const ReportExtras = () => {
       dataIndex: 'price',
       key: 'price',
       is_show: true,
-      render: (_, data) => numberToPrice(data?.price, defaultCurrency?.symbol),
+      render: (_, data) =>
+        numberToPrice(
+          data?.price,
+          defaultCurrency?.symbol,
+          defaultCurrency?.position,
+        ),
       sorter: (a, b) => a.price - b.price,
     },
     {
@@ -180,7 +185,7 @@ const ReportExtras = () => {
         price: false,
       },
     ],
-    []
+    [],
   );
 
   const fetchReport = () => {
@@ -293,7 +298,8 @@ const ReportExtras = () => {
                       ? reportData[item.qty]
                       : numberToPrice(
                           reportData[item.qty],
-                          defaultCurrency?.symbol
+                          defaultCurrency?.symbol,
+                          defaultCurrency?.position,
                         )}
                   </Title>
                 </Col>

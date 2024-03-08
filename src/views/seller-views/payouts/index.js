@@ -11,6 +11,7 @@ import numberToPrice from '../../../helpers/numberToPrice';
 import PayoutStatusModal from './payoutStatusModal';
 import PayoutRequest from './payoutRequest';
 import FilterColumns from '../../../components/filter-column';
+import moment from 'moment/moment';
 
 export default function SellerPayouts() {
   const { t } = useTranslation();
@@ -19,7 +20,7 @@ export default function SellerPayouts() {
   const [withdrawModal, setWithdrawModal] = useState(false);
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
 
   const [columns, setColumns] = useState([
@@ -35,7 +36,12 @@ export default function SellerPayouts() {
       dataIndex: 'price',
       key: 'price',
       is_show: true,
-      render: (price) => numberToPrice(price, defaultCurrency?.symbol),
+      render: (price) =>
+        numberToPrice(
+          price,
+          defaultCurrency?.symbol,
+          defaultCurrency?.position,
+        ),
     },
     {
       title: t('status'),
@@ -70,13 +76,14 @@ export default function SellerPayouts() {
       dataIndex: 'created_at',
       key: 'created_at',
       is_show: true,
+      render: (_, row) => moment(row?.created_at).format('YYYY-MM-DD HH:mm'),
     },
   ]);
 
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { wallets, meta, loading, params } = useSelector(
     (state) => state.wallet,
-    shallowEqual
+    shallowEqual,
   );
 
   useEffect(() => {
@@ -102,7 +109,7 @@ export default function SellerPayouts() {
     const { field: column, order } = sorter;
     const sort = formatSortType(order);
     dispatch(
-      setMenuData({ activeMenu, data: { perPage, page, column, sort } })
+      setMenuData({ activeMenu, data: { perPage, page, column, sort } }),
     );
   }
 

@@ -11,10 +11,6 @@ import sellerDeliverymenService from 'services/seller/user';
 export default function OrderDeliveryman({ orderDetails: data, handleCancel }) {
   const { t } = useTranslation();
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
-  const { deliverymans } = useSelector(
-    (state) => state.deliveryman,
-    shallowEqual
-  );
   const [form] = Form.useForm();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);

@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Descriptions, Modal, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
-import Loading from '../../components/loading';
-import transactionService from '../../services/transaction';
-import numberToPrice from '../../helpers/numberToPrice';
+import Loading from 'components/loading';
+import transactionService from 'services/transaction';
+import numberToPrice from 'helpers/numberToPrice';
+import moment from 'moment/moment';
+import { shallowEqual, useSelector } from 'react-redux';
 
 export default function TransactionShowModal({ id, handleCancel }) {
+  const { defaultCurrency } = useSelector(
+    (state) => state.currency,
+    shallowEqual,
+  );
   const [data, setData] = useState({});
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
@@ -42,13 +48,17 @@ export default function TransactionShowModal({ id, handleCancel }) {
             {data.user?.firstname} {data.user?.lastname || ''}
           </Descriptions.Item>
           <Descriptions.Item span={3} label={t('price')}>
-            {numberToPrice(data.price, data.payable?.order?.currency?.symbol)}
+            {numberToPrice(
+              data.price,
+              defaultCurrency?.symbol,
+              defaultCurrency?.position,
+            )}
           </Descriptions.Item>
           <Descriptions.Item span={3} label={t('payment.type')}>
             {t(data.payment_system?.tag)}
           </Descriptions.Item>
           <Descriptions.Item span={3} label={t('created.at')}>
-            {data.created_at}
+            {moment(data?.created_at).format('YYYY-MM-DD HH:mm')}
           </Descriptions.Item>
           <Descriptions.Item span={3} label={t('status')}>
             {data.status === 'progress' ? (

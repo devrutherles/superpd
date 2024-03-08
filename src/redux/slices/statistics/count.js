@@ -8,6 +8,9 @@ const initialState = {
   loading: false,
   counts: {},
   error: '',
+  params: {
+    type: 'subMonth'
+  }
 };
 
 export const fetchStatistics = createAsyncThunk(
@@ -113,6 +116,13 @@ const statisticsCountSlice = createSlice({
       state.error = action.error.message;
     });
   },
+  reducers: {
+    updateParams: (state, action) => {
+      state.params = action.payload
+    }
+  }
 });
+
+export const {updateParams} = statisticsCountSlice.actions
 
 export default statisticsCountSlice.reducer;

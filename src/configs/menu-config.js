@@ -45,6 +45,13 @@ const adminRoutes = [
         children: [],
       },
       {
+        name: 'waiting.payment.orders',
+        icon: 'wallet',
+        url: 'orders-list/waiting-payment',
+        id: 'order-list-waiting-payment',
+        children: [],
+      },
+      {
         name: 'reviews',
         icon: 'star',
         url: 'reviews/order',
@@ -98,6 +105,13 @@ const adminRoutes = [
         icon: 'TbTruckDelivery',
         url: 'reviews/deliveryboy',
         id: 'deliveryboy-reviews_01',
+        children: [],
+      },
+      {
+        name: 'deliveryman.request',
+        icon: 'QuestionCircleOutlined',
+        url: 'deliveryman/request',
+        id: 'deliveryman-request_01',
         children: [],
       },
     ],
@@ -327,6 +341,7 @@ const adminRoutes = [
         name: 'payment.to.sellers',
         icon: 'moneyOut',
         id: 'withdraws',
+        url: 'payments/sellers',
         children: [
           {
             name: 'payment.to.sellers',
@@ -346,6 +361,7 @@ const adminRoutes = [
         name: 'payment.to.deliverymans',
         icon: 'TbTruckDelivery',
         id: 'withdraw.deliverymans',
+        url: 'payments/deliverymans',
         children: [
           {
             name: 'payment.to.deliverymans',
@@ -1347,6 +1363,13 @@ const sellerRoutes = [
         icon: 'MdOutlineTableBar',
         url: 'seller/orders-board/dine_in',
         id: 'orders-board-dine-in',
+        children: [],
+      },
+      {
+        name: 'waiting.payment.orders',
+        icon: 'wallet',
+        url: 'seller/orders-list/waiting-payment',
+        id: 'order-list-waiting-payment',
         children: [],
       },
       {

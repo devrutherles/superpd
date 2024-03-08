@@ -59,7 +59,7 @@ export default function OrderBoard() {
 
   const { statusList } = useSelector(
     (state) => state.orderStatus,
-    shallowEqual
+    shallowEqual,
   );
 
   const [orderDetails, setOrderDetails] = useState(null);
@@ -76,7 +76,7 @@ export default function OrderBoard() {
         url: `order/${row.id}`,
         id: 'order_edit',
         name: t('edit.order'),
-      })
+      }),
     );
     navigate(`/order/${row.id}`);
   };
@@ -87,7 +87,7 @@ export default function OrderBoard() {
         url: `order/details/${row.id}`,
         id: 'order_details',
         name: t('order.details'),
-      })
+      }),
     );
     navigate(`/order/details/${row.id}`);
   };
@@ -99,7 +99,10 @@ export default function OrderBoard() {
         id: 'pos.system_01',
         url: 'pos-system',
         name: 'pos.system',
-      })
+        icon: 'laptop',
+        data: activeMenu.data,
+        refetch: true,
+      }),
     );
     navigate('/pos-system');
   };
@@ -136,7 +139,7 @@ export default function OrderBoard() {
         {},
         ...id.map((item, index) => ({
           [`ids[${index}]`]: item,
-        }))
+        })),
       ),
     };
     orderService
@@ -175,7 +178,7 @@ export default function OrderBoard() {
         setMenuData({
           activeMenu,
           data: { ...data, ...{ [name]: item } },
-        })
+        }),
       );
     });
   };
@@ -206,7 +209,7 @@ export default function OrderBoard() {
       data.map((item) => ({
         label: item.translation?.title,
         value: item.id,
-      }))
+      })),
     );
   }
 
@@ -271,7 +274,7 @@ export default function OrderBoard() {
         setMenuData({
           activeMenu,
           data: null,
-        })
+        }),
       );
     });
     fetchOrderAllItem();

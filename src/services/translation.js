@@ -1,4 +1,5 @@
 import request from './request';
+import requestWithoutTimeout from './requestWithoutTimeout';
 
 const translationService = {
   getAll: (params) =>
@@ -10,6 +11,10 @@ const translationService = {
     request.post(`dashboard/admin/translations`, {}, { params }),
   update: (key, params) =>
     request.put(`dashboard/admin/translations/${key}`, {}, { params }),
+  export: (params) =>
+    request.get(`dashboard/admin/translations/export`, { params }),
+  import: (data) =>
+    requestWithoutTimeout.post('dashboard/admin/translations/import', data),
 };
 
 export default translationService;

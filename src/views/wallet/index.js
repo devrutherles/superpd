@@ -16,11 +16,11 @@ export default function Wallets() {
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { wallets, loading, meta, params } = useSelector(
     (state) => state.wallet,
-    shallowEqual
+    shallowEqual,
   );
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
 
   const [columns, setColumns] = useState([
@@ -48,7 +48,12 @@ export default function Wallets() {
       dataIndex: 'wallet',
       key: 'wallet',
       is_show: true,
-      render: (wallet) => numberToPrice(wallet?.price, defaultCurrency.symbol),
+      render: (wallet) =>
+        numberToPrice(
+          wallet?.price,
+          defaultCurrency?.symbol,
+          defaultCurrency?.position,
+        ),
     },
     {
       title: t('phone'),
@@ -69,7 +74,7 @@ export default function Wallets() {
     const { field: column, order } = sorter;
     const sort = formatSortType(order);
     dispatch(
-      setMenuData({ activeMenu, data: { perPage, page, column, sort } })
+      setMenuData({ activeMenu, data: { perPage, page, column, sort } }),
     );
   }
 
@@ -98,7 +103,7 @@ export default function Wallets() {
       setMenuData({
         activeMenu,
         data: { ...data, [name]: item },
-      })
+      }),
     );
   };
 

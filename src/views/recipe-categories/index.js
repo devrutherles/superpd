@@ -7,25 +7,27 @@ import {
   PlusCircleOutlined,
 } from '@ant-design/icons';
 import { Button, Card, Image, Space, Table, Tabs, Tag, Switch } from 'antd';
-import { export_url } from '../../configs/app-global';
-import { Context } from '../../context/context';
+import { export_url } from 'configs/app-global';
+import { Context } from 'context/context';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import CustomModal from '../../components/modal';
+import CustomModal from 'components/modal';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import { addMenu, disableRefetch, setMenuData } from '../../redux/slices/menu';
-import categoryService from '../../services/category';
+import { addMenu, disableRefetch, setMenuData } from 'redux/slices/menu';
+import categoryService from 'services/category';
 import { useTranslation } from 'react-i18next';
-import DeleteButton from '../../components/delete-button';
-import FilterColumns from '../../components/filter-column';
-import SearchInput from '../../components/search-input';
-import useDidUpdate from '../../helpers/useDidUpdate';
+import DeleteButton from 'components/delete-button';
+import FilterColumns from 'components/filter-column';
+import SearchInput from 'components/search-input';
+import useDidUpdate from 'helpers/useDidUpdate';
 import { FaTrashRestoreAlt } from 'react-icons/fa';
 import { CgExport, CgImport } from 'react-icons/cg';
-import ResultModal from '../../components/result-modal';
-import formatSortType from '../../helpers/formatSortType';
-import { fetchRecipeCategories } from '../../redux/slices/recipe-category';
+import ResultModal from 'components/result-modal';
+import formatSortType from 'helpers/formatSortType';
+import { fetchRecipeCategories } from 'redux/slices/recipe-category';
 import RecipeCategoryStatusModal from './categoryStatusModal';
+import shopService from 'services/restaurant';
+import { InfiniteSelect } from 'components/infinite-select';
 const colors = ['blue', 'red', 'gold', 'volcano', 'cyan', 'lime'];
 
 const { TabPane } = Tabs;
@@ -42,15 +44,32 @@ const RecipeCategories = () => {
   const [recipeData, setRecipeData] = useState(null);
   const immutable = activeMenu.data?.role || role;
 
+  const [links, setLinks] = useState(null);
+
+  async function fetchUserShop({ search, page }) {
+    const params = {
+      search: search?.length === 0 ? undefined : search,
+      status: 'approved',
+      page: page,
+    };
+    return shopService.search(params).then((res) => {
+      setLinks(res.links);
+      return res.data.map((item) => ({
+        label: item?.translation?.title || t('no.name'),
+        value: item?.id,
+      }));
+    });
+  }
+
   function goToEdit(row) {
     dispatch(
       addMenu({
         url: `recipe-category/edit/${row.uuid}`,
         id: 'category_edit',
         name: t('edit.category'),
-      })
+      }),
     );
-    navigate(`/recipe-category/edit/${row.uuid}`, { state: 'edit' });
+    navigate(`/recipe-category/edit/${row?.uuid}`, { state: 'edit' });
   }
 
   const goToAddCategory = () => {
@@ -59,7 +78,7 @@ const RecipeCategories = () => {
         id: 'category-add',
         url: 'recipe-category/add',
         name: t('add.category'),
-      })
+      }),
     );
     navigate('/recipe-category/add');
   };
@@ -70,9 +89,20 @@ const RecipeCategories = () => {
         url: `recipe-categories/import`,
         id: 'category_import',
         name: t('import.category'),
-      })
+      }),
     );
     navigate(`/recipe-categories/import`);
+  };
+
+  const goToShop = (row) => {
+    dispatch(
+      addMenu({
+        id: 'edit-shop',
+        url: `shop/${row.uuid}`,
+        name: t('edit.shop'),
+      }),
+    );
+    navigate(`/shop/${row.uuid}`, { state: 'edit' });
   };
 
   const goToClone = (uuid) => {
@@ -81,7 +111,7 @@ const RecipeCategories = () => {
         id: `category-clone`,
         url: `recipe-category-clone/${uuid}`,
         name: t('category.clone'),
-      })
+      }),
     );
     navigate(`/recipe-category-clone/${uuid}`, { state: 'clone' });
   };
@@ -98,6 +128,20 @@ const RecipeCategories = () => {
       dataIndex: 'name',
       key: 'name',
       is_show: true,
+    },
+    {
+      title: t('created.by'),
+      dataIndex: 'shop',
+      key: 'shop',
+      is_show: true,
+      render: (shop) =>
+        shop ? (
+          <span onClick={() => goToShop(shop)} className='text-hover'>
+            {shop?.translation?.title || t('no.name')}
+          </span>
+        ) : (
+          t('admin')
+        ),
     },
     {
       title: t('translations'),
@@ -137,7 +181,6 @@ const RecipeCategories = () => {
     {
       title: t('active'),
       dataIndex: 'active',
-      key: 'active',
       is_show: true,
       render: (active, row) => {
         return (
@@ -217,7 +260,7 @@ const RecipeCategories = () => {
 
   const { categories, meta, loading } = useSelector(
     (state) => state.recipeCategory,
-    shallowEqual
+    shallowEqual,
   );
 
   const data = activeMenu.data;
@@ -228,6 +271,7 @@ const RecipeCategories = () => {
     status:
       immutable === 'deleted_at' || immutable === 'all' ? undefined : immutable,
     deleted_at: immutable === 'deleted_at' ? immutable : undefined,
+    shop_id: data?.selectedShop?.value,
   };
 
   const categoryDelete = () => {
@@ -237,7 +281,7 @@ const RecipeCategories = () => {
         {},
         ...id.map((item, index) => ({
           [`ids[${index}]`]: item,
-        }))
+        })),
       ),
     };
     categoryService
@@ -260,7 +304,7 @@ const RecipeCategories = () => {
       .dropAll()
       .then(() => {
         toast.success(t('successfully.deleted'));
-        dispatch(fetchRecipeCategories());
+        dispatch(fetchRecipeCategories({}));
         setRestore(null);
       })
       .finally(() => setLoadingBtn(false));
@@ -297,7 +341,7 @@ const RecipeCategories = () => {
       setMenuData({
         activeMenu,
         data: { ...activeMenu.data, perPage, page, column, sort },
-      })
+      }),
     );
   }
 
@@ -340,7 +384,7 @@ const RecipeCategories = () => {
       setMenuData({
         activeMenu,
         data: { ...data, ...items },
-      })
+      }),
     );
   };
 
@@ -349,7 +393,7 @@ const RecipeCategories = () => {
       setMenuData({
         activeMenu,
         data: undefined,
-      })
+      }),
     );
   };
 
@@ -379,6 +423,16 @@ const RecipeCategories = () => {
             defaultValue={activeMenu.data?.search}
             resetSearch={!activeMenu.data?.search}
             style={{ minWidth: 300 }}
+          />
+
+          <InfiniteSelect
+            placeholder={t('select.shop')}
+            hasMore={links?.next}
+            loading={loading}
+            fetchOptions={fetchUserShop}
+            style={{ minWidth: 180 }}
+            onChange={(e) => handleFilter({ selectedShop: e })}
+            value={activeMenu.data?.selectedShop}
           />
 
           {immutable !== 'deleted_at' ? (

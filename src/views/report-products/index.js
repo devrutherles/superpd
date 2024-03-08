@@ -62,7 +62,7 @@ const ReportProducts = () => {
   const [search, setSearch] = useState('');
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
 
   const expandedRowRender = (row) => {
@@ -82,7 +82,12 @@ const ReportProducts = () => {
       {
         title: t('net.sales'),
         dataIndex: 'upgradeNum',
-        render: (_, data) => numberToPrice(data.price, defaultCurrency?.symbol),
+        render: (_, data) =>
+          numberToPrice(
+            data.price,
+            defaultCurrency?.symbol,
+            defaultCurrency?.position,
+          ),
         key: 'upgradeNum',
       },
       {
@@ -149,7 +154,12 @@ const ReportProducts = () => {
       dataIndex: 'price',
       key: 'price',
       is_show: true,
-      render: (price) => numberToPrice(price, defaultCurrency?.symbol),
+      render: (price) =>
+        numberToPrice(
+          price,
+          defaultCurrency?.symbol,
+          defaultCurrency?.position,
+        ),
       sorter: (a, b) => a.price - b.price,
     },
     {
@@ -199,7 +209,7 @@ const ReportProducts = () => {
       { label: 'net.sales', value: 'price', qty: 'price', price: true },
       { label: 'orders', value: 'count', qty: 'count', price: false },
     ],
-    []
+    [],
   );
 
   const fetchReport = () => {
@@ -227,7 +237,7 @@ const ReportProducts = () => {
         res?.map((shop) => ({
           label: shop?.translation?.title,
           value: shop?.id,
-        }))
+        })),
       )
       .catch((err) => console.log('report product ERROR => ', err));
   };
@@ -363,7 +373,8 @@ const ReportProducts = () => {
                       ? reportData[item.qty]
                       : numberToPrice(
                           reportData[item.qty],
-                          defaultCurrency?.symbol
+                          defaultCurrency?.symbol,
+                          defaultCurrency?.position,
                         )}
                   </Title>
                 </Col>
@@ -389,13 +400,6 @@ const ReportProducts = () => {
               onSelect={(value) => setShopId(value.value)}
               onClear={() => onShopSelectClear()}
             />
-            {/* <Button
-              color='geekblue'
-              onClick={Compare}
-              disabled={Boolean(!selectedRowKeys.length)}
-            >
-              {t('compare')}
-            </Button> */}
             <Button
               type={
                 Boolean(selectedRowKeys.length) ||

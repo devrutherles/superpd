@@ -16,7 +16,11 @@ import { WEBSITE_URL } from '../../../configs/app-global';
 import { EditOutlined } from '@ant-design/icons';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { addMenu, disableRefetch, setRefetch } from '../../../redux/slices/menu';
+import {
+  addMenu,
+  disableRefetch,
+  setRefetch,
+} from '../../../redux/slices/menu';
 import { useTranslation } from 'react-i18next';
 import { fetchMyShop } from '../../../redux/slices/myShop';
 import numberToPrice from '../../../helpers/numberToPrice';
@@ -31,11 +35,11 @@ export default function MyShop() {
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { myShop: data, loading } = useSelector(
     (state) => state.myShop,
-    shallowEqual
+    shallowEqual,
   );
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
   const { user } = useSelector((state) => state.auth, shallowEqual);
   const { isDemo, demoShop } = useDemo();
@@ -47,7 +51,7 @@ export default function MyShop() {
         id: 'edit-shop',
         url: `my-shop/edit`,
         name: t('edit.shop'),
-      })
+      }),
     );
     navigate(`/my-shop/edit`);
   };
@@ -75,11 +79,11 @@ export default function MyShop() {
 
   return (
     <Card
-      title={t('my.shop') }
+      title={t('my.shop')}
       extra={
         user?.role !== 'seller' ? null : (
           <Button type='primary' icon={<EditOutlined />} onClick={goToEdit}>
-            { t('shop.edit') }
+            {t('shop.edit')}
           </Button>
         )
       }
@@ -140,7 +144,8 @@ export default function MyShop() {
                 <Descriptions.Item label={t('wallet')} span={2}>
                   {numberToPrice(
                     data.seller?.wallet?.price,
-                    defaultCurrency?.symbol
+                    defaultCurrency?.symbol,
+                    defaultCurrency?.symbol,
                   )}
                 </Descriptions.Item>
               </Descriptions>
@@ -156,7 +161,8 @@ export default function MyShop() {
                   <Descriptions.Item label={t('price')} span={3}>
                     {numberToPrice(
                       data.subscription?.price,
-                      defaultCurrency?.symbol
+                      defaultCurrency?.symbol,
+                      defaultCurrency?.symbol,
                     )}
                   </Descriptions.Item>
                   <Descriptions.Item label={t('expired.at')} span={3}>

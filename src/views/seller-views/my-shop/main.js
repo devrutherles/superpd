@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Button, Form, Space } from 'antd';
 import ShopAddData from './shop-add-data';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import { setMenuData } from '../../../redux/slices/menu';
-import shopService from '../../../services/seller/shop';
+import { setMenuData } from 'redux/slices/menu';
+import shopService from 'services/seller/shop';
 import { useTranslation } from 'react-i18next';
-import getDefaultLocation from '../../../helpers/getDefaultLocation';
+import getDefaultLocation from 'helpers/getDefaultLocation';
 
 const ShopMain = ({ next }) => {
   const { t } = useTranslation();
@@ -15,7 +15,7 @@ const ShopMain = ({ next }) => {
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { settings } = useSelector(
     (state) => state.globalSettings,
-    shallowEqual
+    shallowEqual,
   );
 
   const [location, setLocation] = useState(
@@ -24,15 +24,15 @@ const ShopMain = ({ next }) => {
           lat: parseFloat(activeMenu?.data?.location?.latitude),
           lng: parseFloat(activeMenu?.data?.location?.longitude),
         }
-      : getDefaultLocation(settings)
+      : getDefaultLocation(settings),
   );
   const [loadingBtn, setLoadingBtn] = useState(false);
   const { myShop } = useSelector((state) => state.myShop, shallowEqual);
   const [logoImage, setLogoImage] = useState(
-    activeMenu.data?.logo_img ? [activeMenu.data?.logo_img] : []
+    activeMenu.data?.logo_img ? [activeMenu.data?.logo_img] : [],
   );
   const [backImage, setBackImage] = useState(
-    activeMenu.data?.background_img ? [activeMenu.data?.background_img] : []
+    activeMenu.data?.background_img ? [activeMenu.data?.background_img] : [],
   );
 
   useEffect(() => {
@@ -41,7 +41,7 @@ const ShopMain = ({ next }) => {
       data.open_time = JSON.stringify(data?.open_time);
       data.close_time = JSON.stringify(data?.close_time);
       dispatch(
-        setMenuData({ activeMenu, data: { ...activeMenu.data, ...data } })
+        setMenuData({ activeMenu, data: { ...activeMenu.data, ...data } }),
       );
     };
   }, []);
@@ -65,6 +65,8 @@ const ShopMain = ({ next }) => {
       type: myShop.type === 'shop' ? 'shop' : 'restaurant',
       tags: values.tags.map((e) => e.value),
     };
+    delete body?.background_img;
+    delete body?.logo_img;
     shopUpdate(values, body);
   };
 
@@ -76,7 +78,7 @@ const ShopMain = ({ next }) => {
           setMenuData({
             activeMenu,
             data: values,
-          })
+          }),
         );
         next();
       })

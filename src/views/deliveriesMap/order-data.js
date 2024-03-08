@@ -1,14 +1,19 @@
 import React from 'react';
 import { Avatar, Col, Rate, Row, Tabs } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { IMG_URL } from '../../configs/app-global';
-import { nFormatter } from '../../helpers/nFormatter';
-import useUserActivity from '../../helpers/useUserActivity';
-import numberToPrice from '../../helpers/numberToPrice';
+import { IMG_URL } from 'configs/app-global';
+import { nFormatter } from 'helpers/nFormatter';
+import useUserActivity from 'helpers/useUserActivity';
+import numberToPrice from 'helpers/numberToPrice';
+import { shallowEqual, useSelector } from 'react-redux';
 
 const OrderData = ({ data, order }) => {
   const { t } = useTranslation();
   const lastSeen = useUserActivity(data?.delivery_man_setting?.updated_at);
+  const { defaultCurrency } = useSelector(
+    (state) => state.currency,
+    shallowEqual,
+  );
   const rate = data?.assign_reviews_avg_rating;
   const phone = data?.phone;
   const ordersCount = data?.delivery_man_orders_count;
@@ -36,11 +41,23 @@ const OrderData = ({ data, order }) => {
               <div className='label'>{t('distance')}</div>
             </Col>
             <Col span={4}>
-              <div className='title'>{numberToPrice(order?.delivery_fee)}</div>
+              <div className='title'>
+                {numberToPrice(
+                  order?.delivery_fee,
+                  defaultCurrency?.symbol,
+                  defaultCurrency?.position,
+                )}
+              </div>
               <div className='label'>{t('delivery.fee')}</div>
             </Col>
             <Col span={4}>
-              <div className='title'>{numberToPrice(order?.total_price)}</div>
+              <div className='title'>
+                {numberToPrice(
+                  order?.total_price,
+                  defaultCurrency?.symbol,
+                  defaultCurrency?.position,
+                )}
+              </div>
               <div className='label'> {t('total.price')}</div>
             </Col>
             <Col span={4}>

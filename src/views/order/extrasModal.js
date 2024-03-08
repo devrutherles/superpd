@@ -28,7 +28,7 @@ export default function ExtrasModal({ extrasModal, setExtrasModal }) {
   const [data, setData] = useState({});
   const { t } = useTranslation();
   const [counter, setCounter] = useState(
-    extrasModal.quantity || data.quantity || data.min_qty
+    extrasModal.quantity || data.quantity || data.min_qty,
   );
   const [currentStock, setCurrentStock] = useState({});
   const { currency } = useSelector((state) => state.order.data, shallowEqual);
@@ -69,7 +69,7 @@ export default function ExtrasModal({ extrasModal, setExtrasModal }) {
     };
     if (orderItem.quantity > currentStock.quantity) {
       toast.warning(
-        `${t('you.cannot.order.more.than')} ${currentStock.quantity}`
+        `${t('you.cannot.order.more.than')} ${currentStock.quantity}`,
       );
       return;
     }
@@ -96,7 +96,7 @@ export default function ExtrasModal({ extrasModal, setExtrasModal }) {
 
   const handleExtrasClick = (e) => {
     const index = extrasIds.findIndex(
-      (item) => item.extra_group_id === e.extra_group_id
+      (item) => item.extra_group_id === e.extra_group_id,
     );
     let array = extrasIds;
     if (index > -1) array = array.slice(0, index);
@@ -108,7 +108,7 @@ export default function ExtrasModal({ extrasModal, setExtrasModal }) {
       const index = extrasIds.findIndex((item) =>
         element[0].extra_group_id != e.extra_group_id
           ? item.extra_group_id === element[0].extra_group_id
-          : item.extra_group_id === e.extra_group_id
+          : item.extra_group_id === e.extra_group_id,
       );
       if (element[0].level >= e.level) {
         var itemData =
@@ -143,7 +143,7 @@ export default function ExtrasModal({ extrasModal, setExtrasModal }) {
 
   useDidUpdate(() => {
     const addons = showExtras.stock.addons.filter((item) =>
-      selectedValues.includes(String(item.addon_id))
+      selectedValues.includes(String(item.addon_id)),
     );
 
     handleAddonClick(addons);
@@ -155,7 +155,7 @@ export default function ExtrasModal({ extrasModal, setExtrasModal }) {
         (total +=
           item.product.stock.price *
           (item.product.quantity || item.product.min_qty)),
-      0
+      0,
     );
     return addonPrice + showExtras.stock[priceKey || 'price'] * counter;
   }
@@ -182,7 +182,7 @@ export default function ExtrasModal({ extrasModal, setExtrasModal }) {
           };
         }
         return addon;
-      })
+      }),
     );
   }
 
@@ -202,13 +202,13 @@ export default function ExtrasModal({ extrasModal, setExtrasModal }) {
         getExtras('', myData.extras, myData.stock).extras?.forEach(
           (element) => {
             setExtrasIds((prev) => [...prev, element[0]]);
-          }
+          },
         );
         if (extrasModal?.addons) {
           setSelectedValues(
             extrasModal?.addons?.map((addon) =>
-              String(addon?.stock?.product?.id || addon.addon_id)
-            ) || []
+              String(addon?.stock?.product?.id || addon.addon_id),
+            ) || [],
           );
         }
       })
@@ -221,10 +221,11 @@ export default function ExtrasModal({ extrasModal, setExtrasModal }) {
       title={data?.translation?.title}
       onCancel={handleCancel}
       footer={[
-        loading ? null :
-        <Button key={'add-product'} type='primary' onClick={handleSubmit}>
-          {t('add')}
-        </Button>,
+        loading ? null : (
+          <Button key={'add-product'} type='primary' onClick={handleSubmit}>
+            {t('add')}
+          </Button>
+        ),
         <Button key={'cancel-modal'} type='default' onClick={handleCancel}>
           {t('cancel')}
         </Button>,
@@ -244,13 +245,18 @@ export default function ExtrasModal({ extrasModal, setExtrasModal }) {
             <Descriptions title={data.translation?.title}>
               <Descriptions.Item label={t('price')} span={3}>
                 <div className={currentStock?.discount ? 'strike' : ''}>
-                  {numberToPrice(calculateTotalPrice(), currency.symbol)}
+                  {numberToPrice(
+                    calculateTotalPrice(),
+                    currency?.symbol,
+                    currency?.position,
+                  )}
                 </div>
                 {currentStock?.discount ? (
                   <div className='ml-2 font-weight-bold'>
                     {numberToPrice(
                       calculateTotalPrice('total_price'),
-                      currency.symbol
+                      currency.symbol,
+                      currency?.position,
                     )}
                   </div>
                 ) : (
@@ -261,7 +267,11 @@ export default function ExtrasModal({ extrasModal, setExtrasModal }) {
                 {numberToQuantity(currentStock?.quantity, data.unit)}
               </Descriptions.Item>
               <Descriptions.Item label={t('tax')} span={3}>
-                {numberToPrice(currentStock?.tax, currency.symbol)}
+                {numberToPrice(
+                  currentStock?.tax,
+                  currency.symbol,
+                  currency?.position,
+                )}
               </Descriptions.Item>
             </Descriptions>
           </Col>
@@ -343,7 +353,7 @@ export default function ExtrasModal({ extrasModal, setExtrasModal }) {
                             e.stopPropagation();
                             addonCalculate(
                               item.addon_id,
-                              item.product.quantity - 1
+                              item.product.quantity - 1,
                             );
                           }}
                         />
@@ -364,7 +374,7 @@ export default function ExtrasModal({ extrasModal, setExtrasModal }) {
                               item.addon_id,
                               item.product.quantity
                                 ? item.product.quantity + 1
-                                : item.product.min_qty + 1
+                                : item.product.min_qty + 1,
                             );
                           }}
                         />
@@ -387,7 +397,8 @@ export default function ExtrasModal({ extrasModal, setExtrasModal }) {
                 icon={<MinusOutlined />}
                 onClick={reduceCounter}
               />
-              {(counter || 1) * (data?.interval || 1)}{data?.unit?.translation?.title}
+              {(counter || 1) * (data?.interval || 1)}
+              {data?.unit?.translation?.title}
               <Button
                 key={'minus'}
                 type='primary'

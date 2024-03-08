@@ -47,10 +47,10 @@ const Categories = () => {
         url: `shop/category/${row.uuid}`,
         id: 'category_edit',
         name: t('edit.category'),
-      })
+      }),
     );
     navigate(`/shop/category/${row.uuid}`, {
-      state: { type: 'edit', isParent: row.type === 'shop' },
+      state: { type: 'edit', isParent: row.type === 'shop', uuid: row?.uuid },
     });
   };
 
@@ -60,7 +60,7 @@ const Categories = () => {
         id: 'shop/category-add',
         url: 'shop/category/add',
         name: t('add.category'),
-      })
+      }),
     );
     navigate('/shop/category/add');
   };
@@ -72,7 +72,7 @@ const Categories = () => {
         url: `catalog/shop/categories/import`,
         id: 'category_import',
         name: t('import.category'),
-      })
+      }),
     );
     navigate(`/catalog/shop/categories/import`);
   };
@@ -84,9 +84,9 @@ const Categories = () => {
         id: `shop.category-clone`,
         url: `shop/category-clone/${uuid}`,
         name: t('shop.category.clone'),
-      })
+      }),
     );
-    navigate(`/shop/category-clone/${uuid}`, { state: 'clone' });
+    navigate(`/shop/category-clone/${uuid}`, { state: { type: 'clone' } });
   };
 
   const [columns, setColumns] = useState([
@@ -242,7 +242,7 @@ const Categories = () => {
   const immutable = activeMenu.data?.role || role;
   const { shopCategories, meta, loading } = useSelector(
     (state) => state.shopCategory,
-    shallowEqual
+    shallowEqual,
   );
   const data = activeMenu.data;
   const paramsData = {
@@ -261,7 +261,7 @@ const Categories = () => {
         {},
         ...id.map((item, index) => ({
           [`ids[${index}]`]: item,
-        }))
+        })),
       ),
     };
     categoryService
@@ -307,6 +307,7 @@ const Categories = () => {
       dispatch(fetchShopCategories(paramsData));
       dispatch(disableRefetch(activeMenu));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu.refetch]);
 
   useDidUpdate(() => {
@@ -319,7 +320,7 @@ const Categories = () => {
       setMenuData({
         activeMenu,
         data: { ...activeMenu.data, perPage: pageSize, page: current },
-      })
+      }),
     );
   };
 
@@ -328,7 +329,7 @@ const Categories = () => {
     categoryService
       .export({ type: 'shop' })
       .then((res) => {
-        const body = export_url + res.data.file_name;
+        const body = export_url + res?.data?.file_name;
         window.location.href = body;
       })
       .finally(() => setDownloading(false));
@@ -356,7 +357,7 @@ const Categories = () => {
       setMenuData({
         activeMenu,
         data: { ...data, ...items },
-      })
+      }),
     );
   };
 
@@ -365,7 +366,7 @@ const Categories = () => {
       setMenuData({
         activeMenu,
         data: undefined,
-      })
+      }),
     );
   };
 

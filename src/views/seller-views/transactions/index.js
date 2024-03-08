@@ -12,6 +12,7 @@ import { fetchSellerTransactions } from '../../../redux/slices/transaction';
 import TransactionShowModal from './transactionShowModal';
 import numberToPrice from '../../../helpers/numberToPrice';
 import FilterColumns from '../../../components/filter-column';
+import moment from 'moment';
 const { TabPane } = Tabs;
 
 const statuses = ['all', 'progress', 'paid', 'rejected'];
@@ -21,6 +22,10 @@ export default function SellerTransactions() {
   const { t } = useTranslation();
   const [showId, setShowId] = useState(null);
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
+  const { defaultCurrency } = useSelector(
+    (state) => state.currency,
+    shallowEqual,
+  );
   const [role, setRole] = useState('all');
   const immutable = activeMenu.data?.role || role;
   const goToShow = (row) => {
@@ -52,7 +57,11 @@ export default function SellerTransactions() {
       key: 'price',
       is_show: true,
       render: (price, row) =>
-        numberToPrice(price, row.payable?.order?.currency?.symbol),
+        numberToPrice(
+          price,
+          defaultCurrency?.symbol,
+          defaultCurrency?.position,
+        ),
     },
     {
       title: t('payment.type'),
@@ -89,6 +98,7 @@ export default function SellerTransactions() {
       dataIndex: 'created_at',
       key: 'created_at',
       is_show: true,
+      render: (_, row) => moment(row?.created_at).format('YYYY-MM-DD HH:mm'),
     },
     {
       title: t('options'),
@@ -102,7 +112,7 @@ export default function SellerTransactions() {
 
   const { transactions, meta, loading, params } = useSelector(
     (state) => state.transaction,
-    shallowEqual
+    shallowEqual,
   );
   const data = activeMenu.data;
   const paramsData = {
@@ -123,7 +133,7 @@ export default function SellerTransactions() {
       setMenuData({
         activeMenu,
         data: { ...data, perPage, page, column, sort },
-      })
+      }),
     );
   }
 
@@ -144,7 +154,7 @@ export default function SellerTransactions() {
       setMenuData({
         activeMenu,
         data: { ...data, ...items },
-      })
+      }),
     );
   };
 

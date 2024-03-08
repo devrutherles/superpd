@@ -3,7 +3,7 @@ import numberToPrice from 'helpers/numberToPrice';
 import moment from 'moment';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
+import { shallowEqual, useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 import { disableRefetch } from 'redux/slices/menu';
 import userService from 'services/user';
@@ -15,7 +15,11 @@ const SellerWallet = () => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const { activeMenu } = useSelector((state) => state.menu);
+  const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
+  const { defaultCurrency } = useSelector(
+    (state) => state.currency,
+    shallowEqual,
+  );
   const getProfile = useCallback(() => {
     setLoading(true);
     userService
@@ -33,6 +37,7 @@ const SellerWallet = () => {
       getProfile();
     }
     dispatch(disableRefetch(activeMenu));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu?.refetch]);
 
   const columns = [
@@ -73,12 +78,20 @@ const SellerWallet = () => {
   return (
     <Card
       title={t('user.wallet')}
-      extra={!loading ? <Button onClick={() => setOpen(true)}>{t('top.up')}</Button> : null}
+      extra={
+        !loading ? (
+          <Button onClick={() => setOpen(true)}>{t('top.up')}</Button>
+        ) : null
+      }
     >
       {user?.wallet ? (
         <>
           <Typography.Title>
-            {numberToPrice(user?.wallet.price)}
+            {numberToPrice(
+              user?.wallet.price,
+              defaultCurrency?.symbol,
+              defaultCurrency?.position,
+            )}
           </Typography.Title>
           <Table
             loading={loading}
@@ -89,7 +102,11 @@ const SellerWallet = () => {
       ) : (
         <Table dataSource={[]} columns={columns} loading={loading} />
       )}
-      <WalletTopUp refetch={getProfile} open={open} handleCancel={() => setOpen(false)}  />
+      <WalletTopUp
+        refetch={getProfile}
+        open={open}
+        handleCancel={() => setOpen(false)}
+      />
     </Card>
   );
 };

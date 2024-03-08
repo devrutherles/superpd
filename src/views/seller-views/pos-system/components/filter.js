@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Card, Col, Row } from 'antd';
-import { DebounceSelect } from '../../../../components/search';
-import brandService from '../../../../services/rest/brand';
-import categoryService from '../../../../services/rest/category';
-import useDidUpdate from '../../../../helpers/useDidUpdate';
+import { DebounceSelect } from 'components/search';
+import brandService from 'services/rest/brand';
+import categoryService from 'services/rest/category';
+import useDidUpdate from 'helpers/useDidUpdate';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import { fetchSellerProducts } from '../../../../redux/slices/product';
-import SearchInput from '../../../../components/search-input';
+import { fetchSellerProducts } from 'redux/slices/product';
+import SearchInput from 'components/search-input';
 import { useTranslation } from 'react-i18next';
 
 const Filter = () => {
@@ -19,26 +19,26 @@ const Filter = () => {
 
   async function fetchUserBrand(username) {
     const params = {
-      search: username.length === 0 ? null : username,
+      search: username?.length === 0 ? null : username,
     };
     return brandService.getAll(params).then((res) =>
       res.data.map((item) => ({
-        label: item.title,
-        value: item.id,
-      }))
+        label: item?.title,
+        value: item?.id,
+      })),
     );
   }
 
   async function fetchUserCategory(search) {
     const params = {
-      search: search.length === 0 ? null : search,
+      search: search?.length === 0 ? null : search,
       type: 'main',
     };
     return categoryService.search(params).then((res) =>
       res.data.map((item) => ({
-        label: item.translation !== null ? item.translation.title : 'no name',
+        label: item?.translation?.title || 'no name',
         value: item.id,
-      }))
+      })),
     );
   }
 

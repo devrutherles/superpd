@@ -246,7 +246,7 @@ export default function SellerProductRequest({ parentId }) {
         loading={loadingBtn}
       />
 
-      <Modal title="Reject message" closable={false} visible={isVisibleMsgModal} footer={null} centered>
+      <Modal title={t('reject.message')} closable={false} visible={isVisibleMsgModal} footer={null} centered>
         <p>{modalText}</p>
         <div className='d-flex justify-content-end'>
           <Button
@@ -255,7 +255,7 @@ export default function SellerProductRequest({ parentId }) {
             onClick={() => setIsVisibleMsgModal(false)}
           
           >
-            Close
+            {t('close')}            
           </Button>
         </div>
       </Modal>

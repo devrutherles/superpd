@@ -1,7 +1,16 @@
 import React, { useState } from 'react';
-import { Button, Col, Form, Input, Row, Select, Switch } from 'antd';
+import {
+  Button,
+  Col,
+  Form,
+  Input,
+  Row,
+  Select,
+  Switch,
+  InputNumber,
+} from 'antd';
 import TextArea from 'antd/es/input/TextArea';
-import MediaUpload from '../../components/upload';
+import MediaUpload from 'components/upload';
 import { shallowEqual, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 
@@ -72,7 +81,6 @@ export default function RecipeCategoryForm({ form, handleSubmit, error }) {
             </Form.Item>
           ))}
         </Col>
-
         <Col span={12}>
           {languages.map((item, index) => (
             <Form.Item
@@ -109,7 +117,25 @@ export default function RecipeCategoryForm({ form, handleSubmit, error }) {
             <Select mode='tags' style={{ width: '100%' }}></Select>
           </Form.Item>
         </Col>
-
+        <Col span={12}>
+          <Form.Item
+            name='input'
+            label={t('input')}
+            rules={[
+              {
+                required: true,
+                message: t('required'),
+              },
+            ]}
+          >
+            <InputNumber
+              min={0}
+              parser={(value) => parseInt(value, 10)}
+              max={9999999}
+              className='w-100'
+            />
+          </Form.Item>
+        </Col>
         <Col span={4}>
           <Form.Item
             label={t('image')}

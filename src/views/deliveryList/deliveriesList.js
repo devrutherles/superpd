@@ -58,12 +58,12 @@ const DeliveriesList = () => {
 
   const { delivery, loading, meta } = useSelector(
     (state) => state.deliveries,
-    shallowEqual
+    shallowEqual,
   );
 
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
 
   const goToEdit = (row) => {
@@ -72,7 +72,7 @@ const DeliveriesList = () => {
         url: `user/delivery/${row.uuid}`,
         id: 'delivery_edit',
         name: t('delivery.edit'),
-      })
+      }),
     );
     navigate(`/user/delivery/${row.uuid}`);
   };
@@ -83,7 +83,7 @@ const DeliveriesList = () => {
         name: 'delivery.orders',
         id: 'delivery_orders',
         url: `delivery/orders/${row.id}`,
-      })
+      }),
     );
     navigate(`/delivery/orders/${row.id}`);
   };
@@ -94,7 +94,7 @@ const DeliveriesList = () => {
         id: 'user-add-role',
         url: `add/user/delivery/${'deliveryman'}`,
         name: t(`add.${'deliveryman'}`),
-      })
+      }),
     );
     navigate(`/add/user/delivery/${'deliveryman'}`);
   };
@@ -152,7 +152,11 @@ const DeliveriesList = () => {
       is_show: true,
       sorter: true,
       render: (_, data) =>
-        numberToPrice(data?.wallet?.price, defaultCurrency.symbol),
+        numberToPrice(
+          data?.wallet?.price,
+          defaultCurrency?.symbol,
+          defaultCurrency?.position,
+        ),
     },
     {
       title: t('delivery.man.setting'),
@@ -232,7 +236,7 @@ const DeliveriesList = () => {
         {},
         ...id.map((item, index) => ({
           [`ids[${index}]`]: item,
-        }))
+        })),
       ),
     };
 
@@ -269,7 +273,7 @@ const DeliveriesList = () => {
       setMenuData({
         activeMenu,
         data: { ...data, perPage, page, column, sort },
-      })
+      }),
     );
   }
 
@@ -294,7 +298,7 @@ const DeliveriesList = () => {
       setMenuData({
         activeMenu,
         data: { ...activeMenu.data, [name]: item },
-      })
+      }),
     );
   };
 

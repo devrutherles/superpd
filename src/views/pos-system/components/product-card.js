@@ -3,14 +3,14 @@ import { Card, Col, Pagination, Row, Spin } from 'antd';
 import Meta from 'antd/es/card/Meta';
 import { PlusOutlined } from '@ant-design/icons';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import getImage from '../../../helpers/getImage';
-import { fetchRestProducts } from '../../../redux/slices/product';
+import getImage from 'helpers/getImage';
+import { fetchRestProducts } from 'redux/slices/product';
 import { toast } from 'react-toastify';
 import ProductModal from './product-modal';
 import { useTranslation } from 'react-i18next';
 import { BsFillGiftFill } from 'react-icons/bs';
-import { getCartData } from '../../../redux/selectors/cartSelector';
-import RiveResult from '../../../components/rive-result';
+import { getCartData } from 'redux/selectors/cartSelector';
+import RiveResult from 'components/rive-result';
 
 export default function ProductCard() {
   const colLg = {
@@ -23,14 +23,14 @@ export default function ProductCard() {
   const dispatch = useDispatch();
   const { products, loading, meta, params } = useSelector(
     (state) => state.product,
-    shallowEqual
+    shallowEqual,
   );
   const { data } = useSelector((state) => state.cart, shallowEqual);
   const currentData = useSelector((state) => getCartData(state.cart));
   const { currency } = useSelector((state) => state.cart, shallowEqual);
   const { before_order_phone_required } = useSelector(
     (state) => state.globalSettings.settings,
-    shallowEqual
+    shallowEqual,
   );
   function onChangePagination(page) {
     dispatch(
@@ -40,7 +40,7 @@ export default function ProductCard() {
         shop_id: data[0].shop.value,
         status: 'published',
         active: 1,
-      })
+      }),
     );
   }
 

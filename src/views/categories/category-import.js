@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card } from 'antd';
+import { Button, Card } from 'antd';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import Dragger from 'antd/lib/upload/Dragger';
@@ -7,6 +7,7 @@ import { InboxOutlined } from '@ant-design/icons';
 import { toast } from 'react-toastify';
 import { setMenuData } from '../../redux/slices/menu';
 import categoryService from '../../services/category';
+import { example } from 'configs/app-global';
 
 export default function CategoryImport() {
   const { t } = useTranslation();
@@ -38,8 +39,16 @@ export default function CategoryImport() {
       });
   };
 
+  const downloadFile = () => {
+    const body = example + 'import-example/categories.xlsx';
+    window.location.href = body;
+  };
+
   return (
     <Card title={t('import')}>
+      <Button type='primary' className='mb-4' onClick={downloadFile}>
+        {t('download.csv')}
+      </Button>
       <Dragger
         name='file'
         multiple={false}

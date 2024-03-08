@@ -54,8 +54,8 @@ const ShopsEdit = () => {
             label: res.data.seller.firstname + ' ' + res.data.seller.lastname,
             value: res.data.seller.id,
           },
-          delivery_time_from: res.data?.delivery_time.from,
-          delivery_time_to: res.data?.delivery_time.to,
+          delivery_time_from: res.data?.delivery_time?.from || 0,
+          delivery_time_to: res.data?.delivery_time.to || 0,
           delivery_time_type: res.data?.delivery_time.type,
           recommended: res.data.mark === 'recommended',
           categories: res.data?.categories?.map((item) => ({
@@ -68,6 +68,11 @@ const ShopsEdit = () => {
             value: item.id,
             key: item.id,
           })),
+          price: res.data?.price || 0,
+          price_per_km: res.data?.price_per_km || 0,
+          min_amount: res.data?.min_amount || 0,
+          tax: res.data?.tax || 0,
+          percentage: res.data?.percentage || 0,
         };
         dispatch(setMenuData({ activeMenu, data }));
       })
@@ -93,13 +98,13 @@ const ShopsEdit = () => {
     const { translations } = data;
     const result = languages.map((item) => ({
       [`title[${item.locale}]`]: translations.find(
-        (el) => el.locale === item.locale
+        (el) => el.locale === item.locale,
       )?.title,
       [`description[${item.locale}]`]: translations.find(
-        (el) => el.locale === item.locale
+        (el) => el.locale === item.locale,
       )?.description,
       [`address[${item.locale}]`]: translations.find(
-        (el) => el.locale === item.locale
+        (el) => el.locale === item.locale,
       )?.address,
     }));
     return Object.assign({}, ...result);

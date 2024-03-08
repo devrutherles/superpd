@@ -35,7 +35,6 @@ export default function MyShopEdit() {
   const current = Number(queryParams.values?.step || 0);
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { languages } = useSelector((state) => state.formLang, shallowEqual);
-  const { myShop } = useSelector((state) => state.myShop, shallowEqual);
 
   const [loading, setLoading] = useState(false);
 
@@ -56,9 +55,14 @@ export default function MyShopEdit() {
               (res.data.seller.lastname || ''),
             value: res.data.seller.id,
           },
-          delivery_time_from: res.data?.delivery_time.from,
-          delivery_time_to: res.data?.delivery_time.to,
+          delivery_time_from: res.data?.delivery_time.from || 0,
+          delivery_time_to: res.data?.delivery_time.to || 0,
           delivery_time_type: res.data?.delivery_time.type,
+          price: res.data?.price || 0,
+          price_per_km: res.data?.price_per_km || 0,
+          min_amount: res.data?.min_amount || 0,
+          tax: res.data?.tax || 0,
+          percentage: res.data?.percentage || 0,
 
           categories: res.data?.categories?.map((item) => ({
             label: item?.translation?.title,
@@ -95,13 +99,13 @@ export default function MyShopEdit() {
     const { translations } = data;
     const result = languages.map((item) => ({
       [`title[${item.locale}]`]: translations.find(
-        (el) => el.locale === item.locale
+        (el) => el.locale === item.locale,
       )?.title,
       [`description[${item.locale}]`]: translations.find(
-        (el) => el.locale === item.locale
+        (el) => el.locale === item.locale,
       )?.description,
       [`address[${item.locale}]`]: translations.find(
-        (el) => el.locale === item.locale
+        (el) => el.locale === item.locale,
       )?.address,
     }));
     return Object.assign({}, ...result);
@@ -111,6 +115,7 @@ export default function MyShopEdit() {
     if (activeMenu.refetch) {
       fetchShop();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu.refetch]);
 
   const next = () => {
@@ -128,10 +133,7 @@ export default function MyShopEdit() {
   };
 
   return (
-    <Card
-      title={t('shop.edit')}
-      extra={<LanguageList />}
-    >
+    <Card title={t('shop.edit')} extra={<LanguageList />}>
       <Steps current={current} onChange={onChange}>
         {steps.map((item) => (
           <Step title={t(item.title)} key={item.title} />

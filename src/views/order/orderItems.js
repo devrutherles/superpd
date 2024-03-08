@@ -26,7 +26,6 @@ import numberToPrice from '../../helpers/numberToPrice';
 import useDidUpdate from '../../helpers/useDidUpdate';
 import { useNavigate } from 'react-router-dom';
 import { addMenu, setMenuData } from '../../redux/slices/menu';
-import { fetchRestProducts } from '../../redux/slices/product';
 import { useTranslation } from 'react-i18next';
 import invokableService from '../../services/rest/invokable';
 import QueryString from 'qs';
@@ -39,7 +38,7 @@ export default function OrderItems() {
   const navigate = useNavigate();
   const { orderItems, data, total, coupon, orderProducts } = useSelector(
     (state) => state.order,
-    shallowEqual
+    shallowEqual,
   );
   const [loading, setLoading] = useState(false);
   const [extrasModal, setExtrasModal] = useState(null);
@@ -57,7 +56,7 @@ export default function OrderItems() {
         quantity: addon.quantity,
         stock_id: addon.stock_id,
         parent_id: item.stockID ? item.stockID?.id : item.stock?.id,
-      }))
+      })),
     );
 
     const combine = addons.concat(products);
@@ -125,7 +124,7 @@ export default function OrderItems() {
         id: `product-${item.uuid}`,
         url: `product/${item.uuid}`,
         name: t('edit.product'),
-      })
+      }),
     );
     navigate(`/product/${item.uuid}`);
   };
@@ -144,7 +143,7 @@ export default function OrderItems() {
           verifyOrderCoupon({
             price: res.data.price,
             verified: true,
-          })
+          }),
         );
       })
       .catch(() =>
@@ -152,8 +151,8 @@ export default function OrderItems() {
           verifyOrderCoupon({
             price: 0,
             verified: false,
-          })
-        )
+          }),
+        ),
       )
       .finally(() => setLoadingCoupon(false));
   }
@@ -168,7 +167,7 @@ export default function OrderItems() {
         setMenuData({
           activeMenu,
           data: { ...activeMenu.data, shop: res.data },
-        })
+        }),
       );
     });
   };
@@ -218,7 +217,8 @@ export default function OrderItems() {
                             <div className='product-price'>
                               {numberToPrice(
                                 item.price,
-                                data?.currency?.symbol
+                                data?.currency?.symbol,
+                                data?.currency?.position,
                               )}
                             </div>
                           </div>
@@ -231,7 +231,7 @@ export default function OrderItems() {
                                 onClick={() =>
                                   handleChangeProductQuantity(
                                     item.quantity - 1,
-                                    item.id
+                                    item.id,
                                   )
                                 }
                                 type='primary'
@@ -245,7 +245,7 @@ export default function OrderItems() {
                                 onClick={() =>
                                   handleChangeProductQuantity(
                                     item.quantity + 1,
-                                    item.id
+                                    item.id,
                                   )
                                 }
                                 type='primary'
@@ -297,7 +297,8 @@ export default function OrderItems() {
                                 <div className='product-price'>
                                   {numberToPrice(
                                     item.price,
-                                    data.currency?.symbol
+                                    data.currency?.symbol,
+                                    data?.currency?.position,
                                   )}
                                 </div>
                               </div>
@@ -311,7 +312,7 @@ export default function OrderItems() {
                     </Card>
                   </div>
                 </div>
-              )
+              ),
             )}
 
             <div className='d-flex align-items-center justify-content-between'>
@@ -341,7 +342,7 @@ export default function OrderItems() {
                         user_id: data.user?.value,
                         shop_id: data.shop.value,
                         verified: false,
-                      })
+                      }),
                     )
                   }
                 />
@@ -357,26 +358,44 @@ export default function OrderItems() {
                 <Space>
                   <p className='font-weight-bold'>{t('product.tax')}:</p>
                   <p>
-                    {numberToPrice(total.product_tax, data.currency?.symbol)}
+                    {numberToPrice(
+                      total.product_tax,
+                      data.currency?.symbol,
+                      data?.currency?.position,
+                    )}
                   </p>
                 </Space>
                 <div />
                 <Space>
                   <p className='font-weight-bold'>{t('shop.tax')}:</p>
-                  <p>{numberToPrice(total.shop_tax, data.currency?.symbol)}</p>
+                  <p>
+                    {numberToPrice(
+                      total.shop_tax,
+                      data.currency?.symbol,
+                      data?.currency?.position,
+                    )}
+                  </p>
                 </Space>
                 <div />
                 <Space>
                   <p className='font-weight-bold'>{t('delivery.fee')}:</p>
                   <p>
-                    {numberToPrice(total.delivery_fee, data.currency?.symbol)}
+                    {numberToPrice(
+                      total.delivery_fee,
+                      data.currency?.symbol,
+                      data?.currency?.position,
+                    )}
                   </p>
                 </Space>
                 <div />
                 <Space>
                   <p className='font-weight-bold'>{t('total')}:</p>
                   <p>
-                    {numberToPrice(total.order_total, data.currency?.symbol)}
+                    {numberToPrice(
+                      total.order_total,
+                      data.currency?.symbol,
+                      data?.currency?.position,
+                    )}
                   </p>
                 </Space>
               </div>

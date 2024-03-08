@@ -16,11 +16,11 @@ export default function TopCustomers() {
   const dispatch = useDispatch();
   const { topCustomers, loading, params } = useSelector(
     (state) => state.topCustomers,
-    shallowEqual
+    shallowEqual,
   );
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
   const { role } = useSelector((state) => state.auth.user, shallowEqual);
 
@@ -100,7 +100,11 @@ export default function TopCustomers() {
                     {item.count} {t('orders')}
                   </span>
                   <div className='mb-0 h5 font-weight-bold'>
-                    {numberToPrice(item.total_price, defaultCurrency.symbol)}
+                    {numberToPrice(
+                      item.total_price,
+                      defaultCurrency.symbol,
+                      defaultCurrency?.position,
+                    )}
                   </div>
                 </div>
               </div>

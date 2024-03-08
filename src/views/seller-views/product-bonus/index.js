@@ -31,7 +31,7 @@ const ProductBonus = () => {
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { bonus, meta, loading } = useSelector(
     (state) => state.bonus,
-    shallowEqual
+    shallowEqual,
   );
 
   const [columns, setColumns] = useState([
@@ -47,7 +47,7 @@ const ProductBonus = () => {
       key: 'bonusStock',
       is_show: true,
       render: (bonusStock, row) => {
-        return row.bonusStock?.product?.translation.title;
+        return row?.bonusable?.product?.translation.title;
       },
     },
     {
@@ -116,7 +116,7 @@ const ProductBonus = () => {
         url: `seller/product-bonus/${row.id}`,
         id: 'bonus_edit',
         name: t('edit.bonus'),
-      })
+      }),
     );
     navigate(`/seller/product-bonus/${row.id}`);
   };
@@ -128,13 +128,13 @@ const ProductBonus = () => {
         {},
         ...id.map((item, index) => ({
           [`ids[${index}]`]: item,
-        }))
+        })),
       ),
     };
     bonusService
       .delete(params)
       .then(() => {
-        dispatch(fetchBonus());
+        dispatch(fetchBonus({}));
         toast.success(t('successfully.deleted'));
         setText(null);
       })
@@ -150,7 +150,7 @@ const ProductBonus = () => {
       .setActive(activeId)
       .then(() => {
         setIsModalVisible(false);
-        dispatch(fetchBonus());
+        dispatch(fetchBonus({}));
         toast.success(t('successfully.updated'));
       })
       .finally(() => setLoadingBtn(false));
@@ -158,9 +158,10 @@ const ProductBonus = () => {
 
   useEffect(() => {
     if (activeMenu.refetch) {
-      dispatch(fetchBonus());
+      dispatch(fetchBonus({}));
       dispatch(disableRefetch(activeMenu));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu.refetch]);
 
   const onChangePagination = (pageNumber) => {
@@ -192,7 +193,7 @@ const ProductBonus = () => {
         id: 'add.bonus',
         url: `seller/product-bonus/add`,
         name: t('add.bonus'),
-      })
+      }),
     );
     navigate(`/seller/product-bonus/add`);
   };

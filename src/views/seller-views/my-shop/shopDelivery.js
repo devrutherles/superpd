@@ -35,7 +35,9 @@ const Delivery = ({ next, prev }) => {
   const { myShop: shop } = useSelector((state) => state.myShop, shallowEqual);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const disabledDays = [{ from: new Date(1900, 4, 18), to: new Date() }];
+  const disabledDays = [
+    { from: new Date(1900, 4, 18), to: new Date(moment().subtract(1, 'days')) },
+  ];
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const [list, setList] = useState(true);
 
@@ -84,7 +86,7 @@ const Delivery = ({ next, prev }) => {
       setDays(
         res.data.closed_dates
           .filter((date) => date.day > moment(new Date()).format('YYYY-MM-DD'))
-          .map((itm) => new Date(itm.day))
+          .map((itm) => new Date(itm.day)),
       );
     });
 
@@ -94,7 +96,7 @@ const Delivery = ({ next, prev }) => {
         setLines(
           res.data.dates.length !== 0
             ? res.data.dates.map((item) => item.disabled)
-            : []
+            : [],
         );
 
         res.data.dates.length !== 0 &&

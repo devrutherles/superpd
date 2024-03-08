@@ -284,6 +284,8 @@ export default function getSystemIcons(icon) {
       return <CheckOutlined />;
     case 'QrcodeOutlined':
       return <QrcodeOutlined />;
+    case 'QuestionCircleOutlined':
+      return <QuestionCircleOutlined />;
     default:
       break;
   }

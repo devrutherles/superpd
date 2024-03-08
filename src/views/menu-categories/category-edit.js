@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Card, Form, Input, Modal } from 'antd';
 import { toast } from 'react-toastify';
-import { useParams } from 'react-router-dom';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { disableRefetch } from '../../redux/slices/menu';
 import categoryService from '../../services/category';
@@ -18,7 +17,7 @@ const MenuCategoryEdit = ({ isModalOpen, handleCancel }) => {
   const [loadingBtn, setLoadingBtn] = useState(false);
   const { defaultLang, languages } = useSelector(
     (state) => state.formLang,
-    shallowEqual
+    shallowEqual,
   );
 
   const uuid = isModalOpen?.uuid;
@@ -30,7 +29,7 @@ const MenuCategoryEdit = ({ isModalOpen, handleCancel }) => {
     const { translations } = data;
     const result = languages.map((item) => ({
       [`title[${item.locale}]`]: translations.find(
-        (el) => el.locale === item.locale
+        (el) => el.locale === item.locale,
       )?.title,
     }));
     return Object.assign({}, ...result);
@@ -75,6 +74,7 @@ const MenuCategoryEdit = ({ isModalOpen, handleCancel }) => {
 
   useEffect(() => {
     if (isModalOpen) getCategory(isModalOpen.uuid);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isModalOpen]);
 
   return (

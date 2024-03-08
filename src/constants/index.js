@@ -7,3 +7,10 @@ export const mockOrderList = {
   canceled: [1, 2, 3, 4, 5],
   cooking: [1, 2, 3, 4, 5],
 };
+
+export const timeNamingsToDay = {
+  subMonth: 'month',
+  subYear: 'year',
+  subDay: 'day',
+  subWeek: 'week',
+};

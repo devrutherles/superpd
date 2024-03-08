@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Card, Modal, Space, Spin, Table, Tag } from 'antd';
-import orderService from '../../../../services/seller/order';
+import orderService from 'services/seller/order';
 import Column from 'antd/lib/table/Column';
 import { PrinterOutlined } from '@ant-design/icons';
 import moment from 'moment';
-import numberToPrice from '../../../../helpers/numberToPrice';
+import numberToPrice from 'helpers/numberToPrice';
 import { useTranslation } from 'react-i18next';
 
 const PreviewInfo = ({ orderId, handleClose }) => {
@@ -34,12 +34,13 @@ const PreviewInfo = ({ orderId, handleClose }) => {
     if (orderId) {
       fetchOrderDetails();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function calculateProductsPrice() {
     return data?.details.reduce(
       (total, item) => (total += item.total_price),
-      0
+      0,
     );
   }
 
@@ -153,7 +154,11 @@ const PreviewInfo = ({ orderId, handleClose }) => {
                   dataIndex='total_price'
                   key='total_price'
                   render={(total_price) =>
-                    numberToPrice(total_price, data?.currency?.symbol)
+                    numberToPrice(
+                      total_price,
+                      data?.currency?.symbol,
+                      data?.currency?.position,
+                    )
                   }
                 />
                 <Column
@@ -161,7 +166,11 @@ const PreviewInfo = ({ orderId, handleClose }) => {
                   dataIndex='numberTax'
                   key='numberTax'
                   render={(numberTax) =>
-                    numberToPrice(numberTax, data?.currency?.symbol)
+                    numberToPrice(
+                      numberTax,
+                      data?.currency?.symbol,
+                      data?.currency?.position,
+                    )
                   }
                 />
                 <Column
@@ -169,7 +178,11 @@ const PreviewInfo = ({ orderId, handleClose }) => {
                   dataIndex='discount'
                   key='discount'
                   render={(discount) =>
-                    numberToPrice(discount, data?.currency?.symbol)
+                    numberToPrice(
+                      discount,
+                      data?.currency?.symbol,
+                      data?.currency?.position,
+                    )
                   }
                 />
               </Table>
@@ -180,41 +193,45 @@ const PreviewInfo = ({ orderId, handleClose }) => {
                       <span>{t('sub-total.amount')}: </span>
                       {numberToPrice(
                         calculateProductsPrice(),
-                        data?.currency?.symbol
+                        data?.currency?.symbol,
+                        data?.currency?.position,
                       )}
                     </p>
                     <p>
                       {t('delivery.price')} :{' '}
                       {numberToPrice(
                         data?.delivery_fee,
-                        data?.currency?.symbol
+                        data?.currency?.symbol,
+                        data?.currency?.position,
                       )}
                     </p>
                     <p>
                       {t('shop.tax')} :{' '}
-                      {numberToPrice(data?.tax, data?.currency?.symbol)}
+                      {numberToPrice(
+                        data?.tax,
+                        data?.currency?.symbol,
+                        data?.currency?.position,
+                      )}
                     </p>
                     <p>
                       {t('product.tax')} :{' '}
                       {numberToPrice(
                         data?.details?.reduce(
                           (total, item) => (total += item.tax),
-                          0
+                          0,
                         ),
-                        data?.currency?.symbol
+                        data?.currency?.symbol,
+                        data?.currency?.position,
                       )}
                     </p>
-                    {/* <p>
-                      {t('coupon')} :{' '}
-                      {numberToPrice(
-                        data?.coupon?.price,
-                        data?.currency?.symbol
-                      )}
-                    </p> */}
                   </div>
                   <h2 className='font-weight-semibold mt-3'>
                     <span className='mr-1'>{t('grand.total')}: </span>
-                    {numberToPrice(data?.total_price, data?.currency?.symbol)}
+                    {numberToPrice(
+                      data?.total_price,
+                      data?.currency?.symbol,
+                      data?.currency?.position,
+                    )}
                   </h2>
                 </div>
               </div>

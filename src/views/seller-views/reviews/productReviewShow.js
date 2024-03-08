@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Loading from '../../../components/loading';
 import reviewService from '../../../services/seller/review';
 import getImage from '../../../helpers/getImage';
+import moment from 'moment';
 
 export default function SellerProductReviewShowModal({ id, handleCancel }) {
   const [data, setData] = useState({});
@@ -68,7 +69,7 @@ export default function SellerProductReviewShowModal({ id, handleCancel }) {
             {data.comment}
           </Descriptions.Item>
           <Descriptions.Item span={3} label={t('created.at')}>
-            {data.created_at}
+            {moment(data?.created_at).format('YYYY-MM-DD HH:mm')}
           </Descriptions.Item>
         </Descriptions>
       ) : (

@@ -7,31 +7,34 @@ import {
   PlusCircleOutlined,
 } from '@ant-design/icons';
 import { Button, Card, Image, Space, Switch, Table, Tabs, Tag } from 'antd';
-import { export_url } from '../../configs/app-global';
-import { Context } from '../../context/context';
+import { export_url } from 'configs/app-global';
+import { Context } from 'context/context';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import CustomModal from '../../components/modal';
+import CustomModal from 'components/modal';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import { addMenu, disableRefetch, setMenuData } from '../../redux/slices/menu';
-import categoryService from '../../services/category';
-import { fetchCategories } from '../../redux/slices/category';
+import { addMenu, disableRefetch, setMenuData } from 'redux/slices/menu';
+import categoryService from 'services/category';
+import { fetchCategories } from 'redux/slices/category';
 import { useTranslation } from 'react-i18next';
-import DeleteButton from '../../components/delete-button';
-import FilterColumns from '../../components/filter-column';
-import SearchInput from '../../components/search-input';
-import useDidUpdate from '../../helpers/useDidUpdate';
+import DeleteButton from 'components/delete-button';
+import FilterColumns from 'components/filter-column';
+import SearchInput from 'components/search-input';
+import useDidUpdate from 'helpers/useDidUpdate';
 import { FaTrashRestoreAlt } from 'react-icons/fa';
 import { CgExport, CgImport } from 'react-icons/cg';
-import ResultModal from '../../components/result-modal';
-import formatSortType from '../../helpers/formatSortType';
+import ResultModal from 'components/result-modal';
+import formatSortType from 'helpers/formatSortType';
 import CategoryStatusModal from './categoryStatusModal';
+import shopService from 'services/restaurant';
+import { InfiniteSelect } from 'components/infinite-select';
+
 const colors = ['blue', 'red', 'gold', 'volcano', 'cyan', 'lime'];
 
 const { TabPane } = Tabs;
 const roles = ['all', 'pending', 'published', 'unpublished', 'deleted_at'];
 
-const CategoryList = ({ parentId, type = 'main' }) => {
+const CategoryList = ({ parentId, type = 'main', activeTab = 'list' }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -42,6 +45,22 @@ const CategoryList = ({ parentId, type = 'main' }) => {
   const { uuid: parentUuid } = useParams();
   const [active, setActive] = useState(null);
   const [categoryDetails, setCategoryDetails] = useState(null);
+  const [links, setLinks] = useState(null);
+
+  async function fetchUserShop({ search, page }) {
+    const params = {
+      search: search?.length === 0 ? undefined : search,
+      status: 'approved',
+      page: page,
+    };
+    return shopService.search(params).then((res) => {
+      setLinks(res.links);
+      return res.data.map((item) => ({
+        label: item?.translation?.title || t('no.name'),
+        value: item?.id,
+      }));
+    });
+  }
 
   function goToEdit(row) {
     dispatch(
@@ -49,7 +68,7 @@ const CategoryList = ({ parentId, type = 'main' }) => {
         url: `category/${row.uuid}`,
         id: parentId ? 'category_sub_edit' : 'category_edit',
         name: parentId ? t('edit.sub.category') : t('edit.category'),
-      })
+      }),
     );
     navigate(`/category/${row.uuid}`, { state: { parentId, parentUuid } });
   }
@@ -60,7 +79,7 @@ const CategoryList = ({ parentId, type = 'main' }) => {
         id: parentId ? 'sub-category-add' : 'category-add',
         url: 'category/add',
         name: parentId ? t('add.sub.category') : t('add.category'),
-      })
+      }),
     );
     navigate('/category/add', { state: { parentId, parentUuid } });
   };
@@ -71,7 +90,7 @@ const CategoryList = ({ parentId, type = 'main' }) => {
         url: `catalog/categories/import`,
         id: parentId ? 'sub_category_import' : 'category_import',
         name: parentId ? t('import.sub.category') : t('import.category'),
-      })
+      }),
     );
     navigate(`/catalog/categories/import`, { state: { parentId, parentUuid } });
   };
@@ -82,9 +101,20 @@ const CategoryList = ({ parentId, type = 'main' }) => {
         id: parentId ? 'sub-category-clone' : `category-clone`,
         url: `category-clone/${uuid}`,
         name: parentId ? t('sub.category.clone') : t('category.clone'),
-      })
+      }),
     );
     navigate(`/category-clone/${uuid}`, { state: { parentId, parentUuid } });
+  };
+
+  const goToShop = (row) => {
+    dispatch(
+      addMenu({
+        id: 'edit-shop',
+        url: `shop/${row.uuid}`,
+        name: t('edit.shop'),
+      }),
+    );
+    navigate(`/shop/${row.uuid}`, { state: 'edit' });
   };
 
   const [columns, setColumns] = useState([
@@ -99,6 +129,20 @@ const CategoryList = ({ parentId, type = 'main' }) => {
       dataIndex: 'name',
       key: 'name',
       is_show: true,
+    },
+    {
+      title: t('created.by'),
+      dataIndex: 'shop',
+      key: 'shop',
+      is_show: true,
+      render: (shop) =>
+        shop ? (
+          <span onClick={() => goToShop(shop)} className='text-hover'>
+            {shop?.translation?.title}
+          </span>
+        ) : (
+          t('admin')
+        ),
     },
     {
       title: t('translations'),
@@ -217,7 +261,7 @@ const CategoryList = ({ parentId, type = 'main' }) => {
 
   const { categories, meta, loading } = useSelector(
     (state) => state.category,
-    shallowEqual
+    shallowEqual,
   );
 
   const data = activeMenu.data;
@@ -234,7 +278,9 @@ const CategoryList = ({ parentId, type = 'main' }) => {
     deleted_at: immutable === 'deleted_at' ? immutable : null,
     type: parentId ? 'sub_main' : type,
     parent_id: parentId,
+    shop_id: data?.selectedShop?.value,
   };
+  if (!paramsData?.search?.length) delete paramsData?.search;
 
   const categoryDelete = () => {
     setLoadingBtn(true);
@@ -243,7 +289,7 @@ const CategoryList = ({ parentId, type = 'main' }) => {
         {},
         ...id.map((item, index) => ({
           [`ids[${index}]`]: item,
-        }))
+        })),
       ),
     };
     categoryService
@@ -292,15 +338,18 @@ const CategoryList = ({ parentId, type = 'main' }) => {
   };
 
   useEffect(() => {
-    if (activeMenu.refetch) {
+    if (activeMenu.refetch && activeTab === 'list') {
       dispatch(fetchCategories(paramsData));
       dispatch(disableRefetch(activeMenu));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu.refetch]);
 
   useDidUpdate(() => {
-    dispatch(fetchCategories(paramsData));
-  }, [activeMenu.data]);
+    if (activeTab === 'list') {
+      dispatch(fetchCategories(paramsData));
+    }
+  }, [activeTab, activeMenu.data]);
 
   function onChangePagination(pagination, filter, sorter) {
     const { pageSize: perPage, current: page } = pagination;
@@ -310,7 +359,7 @@ const CategoryList = ({ parentId, type = 'main' }) => {
       setMenuData({
         activeMenu,
         data: { ...activeMenu.data, perPage, page, column, sort },
-      })
+      }),
     );
   }
 
@@ -319,8 +368,7 @@ const CategoryList = ({ parentId, type = 'main' }) => {
     categoryService
       .export(paramsData)
       .then((res) => {
-        const body = export_url + res.data.file_name;
-        window.location.href = body;
+        window.location.href = export_url + res.data?.file_name;
       })
       .finally(() => setDownloading(false));
   };
@@ -347,7 +395,7 @@ const CategoryList = ({ parentId, type = 'main' }) => {
       setMenuData({
         activeMenu,
         data: { ...data, ...items },
-      })
+      }),
     );
   };
 
@@ -356,7 +404,7 @@ const CategoryList = ({ parentId, type = 'main' }) => {
       setMenuData({
         activeMenu,
         data: undefined,
-      })
+      }),
     );
   };
 
@@ -387,6 +435,15 @@ const CategoryList = ({ parentId, type = 'main' }) => {
               defaultValue={activeMenu.data?.search}
               resetSearch={!activeMenu.data?.search}
               style={{ minWidth: 300 }}
+            />
+            <InfiniteSelect
+              placeholder={t('select.shop')}
+              hasMore={links?.next}
+              loading={loading}
+              fetchOptions={fetchUserShop}
+              style={{ minWidth: 180 }}
+              onChange={(e) => handleFilter({ selectedShop: e })}
+              value={activeMenu.data?.selectedShop}
             />
 
             {immutable !== 'deleted_at' ? (

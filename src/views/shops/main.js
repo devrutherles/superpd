@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Button, Form, Space } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import { replaceMenu, setMenuData } from '../../redux/slices/menu';
-import shopService from '../../services/shop';
+import { replaceMenu, setMenuData } from 'redux/slices/menu';
+import shopService from 'services/shop';
 import { useTranslation } from 'react-i18next';
-import getDefaultLocation from '../../helpers/getDefaultLocation';
+import getDefaultLocation from 'helpers/getDefaultLocation';
 import ShopFormData from 'components/forms/shop-form';
 
 const ShopMain = ({ next, action_type = '', user }) => {
@@ -17,7 +17,7 @@ const ShopMain = ({ next, action_type = '', user }) => {
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { settings } = useSelector(
     (state) => state.globalSettings,
-    shallowEqual
+    shallowEqual,
   );
 
   const [location, setLocation] = useState(
@@ -26,15 +26,15 @@ const ShopMain = ({ next, action_type = '', user }) => {
           lat: parseFloat(activeMenu?.data?.location?.latitude),
           lng: parseFloat(activeMenu?.data?.location?.longitude),
         }
-      : getDefaultLocation(settings)
+      : getDefaultLocation(settings),
   );
 
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [logoImage, setLogoImage] = useState(
-    activeMenu.data?.logo_img ? [activeMenu.data?.logo_img] : []
+    activeMenu.data?.logo_img ? [activeMenu.data?.logo_img] : [],
   );
   const [backImage, setBackImage] = useState(
-    activeMenu.data?.background_img ? [activeMenu.data?.background_img] : []
+    activeMenu.data?.background_img ? [activeMenu.data?.background_img] : [],
   );
 
   useEffect(() => {
@@ -43,9 +43,10 @@ const ShopMain = ({ next, action_type = '', user }) => {
       data.open_time = JSON.stringify(data?.open_time);
       data.close_time = JSON.stringify(data?.close_time);
       dispatch(
-        setMenuData({ activeMenu, data: { ...activeMenu.data, ...data } })
+        setMenuData({ activeMenu, data: { ...activeMenu.data, ...data } }),
       );
     };
+    // eslint-disable-next-line
   }, []);
 
   const onFinish = (values) => {
@@ -65,8 +66,10 @@ const ShopMain = ({ next, action_type = '', user }) => {
       'location[longitude]': location.lng,
       user: undefined,
       delivery_time: 0,
-   
     };
+    delete body?.background_img;
+    delete body?.logo_img;
+    console.log('body', body);
     if (action_type === 'edit') {
       shopUpdate(values, body);
     } else {
@@ -85,7 +88,7 @@ const ShopMain = ({ next, action_type = '', user }) => {
             name: t('add.shop'),
             data: { ...values, id: data?.id, seller: data?.seller },
             refetch: false,
-          })
+          }),
         );
         navigate(`/shop/${data.uuid}?step=1`);
       })
@@ -101,7 +104,7 @@ const ShopMain = ({ next, action_type = '', user }) => {
           setMenuData({
             activeMenu,
             data: values,
-          })
+          }),
         );
         next();
       })

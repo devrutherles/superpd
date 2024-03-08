@@ -27,6 +27,7 @@ import deliveryService from '../../services/delivery';
 import ResultModal from '../../components/result-modal';
 import userService from '../../services/user';
 import useDemo from '../../helpers/useDemo';
+import hideEmail from '../../components/hideEmail';
 
 const { TabPane } = Tabs;
 const roles = ['published', 'deleted_at'];
@@ -42,7 +43,7 @@ const User = () => {
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { clients, loading, meta, params } = useSelector(
     (state) => state.client,
-    shallowEqual
+    shallowEqual,
   );
   const { isDemo } = useDemo();
 
@@ -68,7 +69,7 @@ const User = () => {
         url: `user/${row.uuid}`,
         id: 'user_edit',
         name: 'User edit',
-      })
+      }),
     );
     navigate(`/user/${row.uuid}`, { state: 'user' });
   };
@@ -79,7 +80,7 @@ const User = () => {
         url: `users/user/${row.uuid}`,
         id: 'user_info',
         name: t('user.info'),
-      })
+      }),
     );
     navigate(`/users/user/${row.uuid}`, { state: { user_id: row.id } });
   };
@@ -109,7 +110,7 @@ const User = () => {
       dataIndex: 'email',
       key: 'email',
       is_show: true,
-      render: (email) => <div>{isDemo ? '' : email}</div>,
+      render: (email) => <div>{isDemo ? hideEmail(email) : email}</div>,
     },
     {
       title: t('role'),
@@ -171,7 +172,7 @@ const User = () => {
       setMenuData({
         activeMenu,
         data: { ...activeMenu.data, perPage, page, column, sort },
-      })
+      }),
     );
   }
 
@@ -182,7 +183,7 @@ const User = () => {
         {},
         ...id.map((item, index) => ({
           [`ids[${index}]`]: item,
-        }))
+        })),
       ),
     };
 
@@ -242,7 +243,7 @@ const User = () => {
         id: 'user-add',
         url: 'user/add',
         name: t('add.client'),
-      })
+      }),
     );
     navigate('/user/add');
   };
@@ -253,7 +254,7 @@ const User = () => {
       setMenuData({
         activeMenu,
         data: { ...data, ...items },
-      })
+      }),
     );
   };
 

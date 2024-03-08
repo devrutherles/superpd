@@ -38,7 +38,7 @@ const ShopAddData = ({
   const categories = Form.useWatch('categories', form);
   const { defaultLang, languages } = useSelector(
     (state) => state.formLang,
-    shallowEqual
+    shallowEqual,
   );
   const [value, setValue] = useState('');
 
@@ -49,7 +49,7 @@ const ShopAddData = ({
     });
 
   async function fetchShopCategory(search) {
-    const params = { search, type: 'shop', active: 1 };
+    const params = { search, type: 'shop', active: 1, lang: defaultLang };
     return categoryService.selectPaginate(params).then(({ data }) =>
       data.map((item) => ({
         label: item.translation?.title || 'no name',
@@ -63,7 +63,7 @@ const ShopAddData = ({
             value: item.id,
           },
         })),
-      }))
+      })),
     );
   }
   async function fetchShopTag(search) {
@@ -72,7 +72,7 @@ const ShopAddData = ({
       data.map((item) => ({
         label: item.translation?.title || 'no name',
         value: item.id,
-      }))
+      })),
     );
   }
 
@@ -80,11 +80,11 @@ const ShopAddData = ({
     if (node.children) {
       if (categories.some((category) => category.value === node.value)) {
         const categoriesWithoutParent = categories.filter(
-          (category) => category.value !== node.value
+          (category) => category.value !== node.value,
         );
         const filteredCategories = categoriesWithoutParent.filter(
           (category) =>
-            !node.children.some((child) => child.value === category.value)
+            !node.children.some((child) => child.value === category.value),
         );
         form.setFieldsValue({ categories: filteredCategories });
       } else {
@@ -102,7 +102,7 @@ const ShopAddData = ({
       if (categories?.some((category) => category.value === node.value)) {
         form.setFieldsValue({
           categories: categories.filter(
-            (category) => category.value !== node.value
+            (category) => category.value !== node.value,
           ),
         });
       } else {
@@ -267,6 +267,7 @@ const ShopAddData = ({
                   tagRender={tagRender}
                   showCheckedStrategy={SHOW_ALL}
                   treeCheckStrictly
+                  refetch
                   onSelect={(value, node) => handleCategorySelect(node)}
                   onDeselect={(value, node) => handleCategorySelect(node)}
                   fetchOptions={fetchShopCategory}
@@ -356,15 +357,6 @@ const ShopAddData = ({
                 rules={[{ required: true, message: t('required') }]}
               >
                 <InputNumber min={0} addonAfter={'%'} className='w-100' />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label={t('admin.comission')}
-                name='percentage'
-                rules={[{ required: true, message: t('required') }]}
-              >
-                <InputNumber min={0} className='w-100' addonAfter={'%'} />
               </Form.Item>
             </Col>
           </Row>

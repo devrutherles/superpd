@@ -56,6 +56,10 @@ const DeliveryRoutes = [
     path: 'deliveryman/order/details/:id',
     component: lazy(() => import('views/deliveryman-orders/order-details')),
   },
+  {
+    path: 'deliveryman/request',
+    component: lazy(() => import('views/deliveryman-request')),
+  },
 ];
 
 export default DeliveryRoutes;

@@ -1,12 +1,21 @@
 import React, { useState } from 'react';
-import { Button, Col, Form, Input, Row, Select, Switch } from 'antd';
+import {
+  Button,
+  Col,
+  Form,
+  Input,
+  Row,
+  Select,
+  Switch,
+  InputNumber,
+} from 'antd';
 import TextArea from 'antd/es/input/TextArea';
-import { RefetchSearch } from '../../components/refetch-search';
-import MediaUpload from '../../components/upload';
+import { RefetchSearch } from 'components/refetch-search';
+import MediaUpload from 'components/upload';
 import { useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
-import categoryService from '../../services/category';
+import categoryService from 'services/category';
 
 export default function CategoryForm({ form, handleSubmit, error }) {
   const { t } = useTranslation();
@@ -145,7 +154,25 @@ export default function CategoryForm({ form, handleSubmit, error }) {
             </Form.Item>
           </Col>
         )}
-
+        <Col span={12}>
+          <Form.Item
+            name='input'
+            label={t('input')}
+            rules={[
+              {
+                required: true,
+                message: t('required'),
+              },
+            ]}
+          >
+            <InputNumber
+              min={0}
+              parser={(value) => parseInt(value, 10)}
+              max={9999999}
+              className='w-100'
+            />
+          </Form.Item>
+        </Col>
         <Col span={4}>
           <Form.Item
             label={t('image')}

@@ -13,19 +13,14 @@ import {
 } from 'antd';
 import { toast } from 'react-toastify';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import LanguageList from '../../components/language-list';
+import LanguageList from 'components/language-list';
 import TextArea from 'antd/es/input/TextArea';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import {
-  disableRefetch,
-  removeFromMenu,
-  setMenuData,
-} from '../../redux/slices/menu';
-import sellerCategory from '../../services/seller/category';
-import { IMG_URL } from '../../configs/app-global';
+import { disableRefetch, removeFromMenu, setMenuData } from 'redux/slices/menu';
+import sellerCategory from 'services/seller/category';
+import { IMG_URL } from 'configs/app-global';
 import { useTranslation } from 'react-i18next';
-import MediaUpload from '../../components/upload';
-import { AsyncSelect } from 'components/async-select';
+import MediaUpload from 'components/upload';
 import requestModelsService from 'services/request-models';
 import { fetchRequestModels } from 'redux/slices/request-models';
 import { DebounceSelect } from 'components/search';
@@ -39,7 +34,7 @@ const SellerCategoryRequestEdit = () => {
 
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(
-    activeMenu.data?.image ? [activeMenu.data?.image] : []
+    activeMenu.data?.image ? [activeMenu.data?.image] : [],
   );
   const { state } = useLocation();
   const [form] = Form.useForm();
@@ -49,7 +44,7 @@ const SellerCategoryRequestEdit = () => {
   const { id } = useParams();
   const { defaultLang, languages } = useSelector(
     (state) => state.formLang,
-    shallowEqual
+    shallowEqual,
   );
 
   useEffect(() => {
@@ -57,6 +52,7 @@ const SellerCategoryRequestEdit = () => {
       const data = form.getFieldsValue(true);
       dispatch(setMenuData({ activeMenu, data }));
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const createImage = (name) => {
@@ -80,6 +76,7 @@ const SellerCategoryRequestEdit = () => {
             value: request.data.parent_id,
             key: request.data.parent_id,
           },
+          input: request?.data?.input || 0,
         };
         form.setFieldsValue(body);
         setImage([createImage(request.data.images?.at(0))]);
@@ -112,7 +109,7 @@ const SellerCategoryRequestEdit = () => {
         toast.success(t('successfully.updated'));
         dispatch(removeFromMenu({ ...activeMenu, nextUrl }));
         dispatch(fetchRequestModels(paramsData));
-        navigate(`/${nextUrl}`, {state: {tab: 'request'}});
+        navigate(`/${nextUrl}`, { state: { tab: 'request' } });
       })
       .catch((err) => setError(err.response.data.params))
       .finally(() => setLoadingBtn(false));
@@ -124,14 +121,19 @@ const SellerCategoryRequestEdit = () => {
     }
   }, [activeMenu.refetch]);
 
-  async function fetchUserCategoryList() {
-    const params = { perPage: 100, type: state?.parentId ? 'main' : 'sub_shop', active: 1 };
+  async function fetchUserCategoryList(search) {
+    const params = {
+      perPage: 100,
+      type: state?.parentId ? 'main' : 'sub_shop',
+      active: 1,
+      search,
+    };
     return sellerCategory.selectPaginate(params).then((res) =>
       res.data.map((item) => ({
         label: item.translation?.title,
         value: item.id,
         key: item.id,
-      }))
+      })),
     );
   }
 
@@ -216,7 +218,25 @@ const SellerCategoryRequestEdit = () => {
                 <DebounceSelect fetchOptions={fetchUserCategoryList} />
               </Form.Item>
             </Col>
-
+            <Col span={12}>
+              <Form.Item
+                name='input'
+                label={t('input')}
+                rules={[
+                  {
+                    required: true,
+                    message: t('required'),
+                  },
+                ]}
+              >
+                <InputNumber
+                  min={0}
+                  parser={(value) => parseInt(value, 10)}
+                  max={9999999}
+                  className='w-100'
+                />
+              </Form.Item>
+            </Col>
             <Col span={4}>
               <Form.Item label={t('image')}>
                 <MediaUpload

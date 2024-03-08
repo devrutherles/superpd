@@ -73,15 +73,18 @@ const ProductsIndex = ({ next, action_type = '', isRequest }) => {
       type: 'main',
       search,
       shop_id: shop?.value,
+      "statuses[0]": 'pending',
+      "statuses[1]": 'published',
+      active: 1
     };
     return categoryService.selectPaginate(params).then((res) => {
       return res.data.map((item) => ({
-        label: item.translation?.title,
+        label: item.translation?.title || "",
         value: item.id,
         key: item.id,
         disabled: item.children.length > 0,
         children: item.children?.map((child) => ({
-          label: child.translation?.title,
+          label: child.translation?.title || "",
           value: child.id,
           key: child.id,
         })),

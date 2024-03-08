@@ -4,12 +4,24 @@ import { disableRefetch } from 'redux/slices/menu';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
-import { Button, Card, Col, Descriptions, Row, Space, Spin, Alert } from 'antd';
+import {
+  Button,
+  Card,
+  Col,
+  Descriptions,
+  Row,
+  Space,
+  Spin,
+  Alert,
+  Typography,
+} from 'antd';
 import { IMG_URL } from '../../configs/app-global';
 import { removeFromMenu } from '../../redux/slices/menu';
 import { fetchRequestModels } from 'redux/slices/request-models';
 import requestAdminModelsService from 'services/request-models';
 import ProductRequestModal from './product-request-modal';
+
+const { Text } = Typography;
 
 const body = {
   type: 'product',
@@ -77,19 +89,55 @@ const ProductRequestDetail = () => {
       <Card>
         <Descriptions bordered title={t('changed.info')}>
           <Descriptions.Item label={`${t('title')} (${defaultLang})`} span={3}>
-            {changedInfo[`title[${defaultLang}]`]}
+            <Text
+              type={
+                changedInfo?.[`title[${defaultLang}]`] !==
+                originalInfo?.translation?.title
+                  ? 'danger'
+                  : undefined
+              }
+            >
+              {changedInfo?.[`title[${defaultLang}]`]}
+            </Text>
           </Descriptions.Item>
           <Descriptions.Item
             label={`${t('description')} (${defaultLang})`}
             span={3}
           >
-            {changedInfo[`description[${defaultLang}]`]}
+            <Text
+              type={
+                changedInfo[`description[${defaultLang}]`] !==
+                originalInfo?.translation?.description
+                  ? 'danger'
+                  : undefined
+              }
+            >
+              {changedInfo[`description[${defaultLang}]`]}
+            </Text>
           </Descriptions.Item>
           <Descriptions.Item label={t('shop')} span={1.5}>
-            {changedInfo?.shop?.translation.title}
+            <Text
+              type={
+                changedInfo?.shop?.translation.title !==
+                originalInfo?.shop?.translation.title
+                  ? 'danger'
+                  : undefined
+              }
+            >
+              {changedInfo?.shop?.translation.title}
+            </Text>
           </Descriptions.Item>
           <Descriptions.Item label={t('category')} span={1.5}>
-            {changedInfo?.category?.label}
+            <Text
+              type={
+                changedInfo?.category?.label !==
+                originalInfo?.category?.translation.title
+                  ? 'danger'
+                  : undefined
+              }
+            >
+              {changedInfo?.category?.label}
+            </Text>
           </Descriptions.Item>
           <Descriptions.Item label={t('brand')} span={1.5}>
             {changedInfo?.brand?.label}

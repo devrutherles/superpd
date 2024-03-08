@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Col, Empty, Pagination, Row, Spin } from 'antd';
+import { Card, Col, Pagination, Row, Spin } from 'antd';
 import Meta from 'antd/es/card/Meta';
 import { PlusOutlined } from '@ant-design/icons';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import getImage from '../../../../helpers/getImage';
-import { fetchSellerProducts } from '../../../../redux/slices/product';
-import { disableRefetch } from '../../../../redux/slices/menu';
+import getImage from 'helpers/getImage';
+import { fetchSellerProducts } from 'redux/slices/product';
+import { disableRefetch } from 'redux/slices/menu';
 import { toast } from 'react-toastify';
 import ProductModal from './product-modal';
-import { fetchRestPayments } from '../../../../redux/slices/payment';
+import { fetchRestPayments } from 'redux/slices/payment';
 import { useTranslation } from 'react-i18next';
-import { getCartData } from '../../../../redux/selectors/cartSelector';
+import { getCartData } from 'redux/selectors/cartSelector';
 import { BsFillGiftFill } from 'react-icons/bs';
-import RiveResult from '../../../../components/rive-result';
+import RiveResult from 'components/rive-result';
 import { useLocation } from 'react-router-dom';
 
 export default function ProductCard() {
@@ -26,21 +26,26 @@ export default function ProductCard() {
   const dispatch = useDispatch();
   const { products, loading, meta, params } = useSelector(
     (state) => state.product,
-    shallowEqual
+    shallowEqual,
   );
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { currency } = useSelector((state) => state.cart, shallowEqual);
   const currentData = useSelector((state) => getCartData(state.cart));
   const { before_order_phone_required } = useSelector(
     (state) => state.globalSettings.settings,
-    shallowEqual
+    shallowEqual,
   );
   const locat = useLocation();
   const delivery_type = locat?.state?.delivery_type;
 
   function onChangePagination(page) {
     dispatch(
-      fetchSellerProducts({ perPage: 10, page, status: 'published', active: 1 })
+      fetchSellerProducts({
+        perPage: 12,
+        page,
+        status: 'published',
+        active: 1,
+      }),
     );
   }
 
@@ -48,15 +53,16 @@ export default function ProductCard() {
     if (activeMenu.refetch) {
       dispatch(
         fetchSellerProducts({
-          perPage: 10,
+          perPage: 12,
           currency_id: currency?.id,
           status: 'published',
           active: 1,
-        })
+        }),
       );
-      dispatch(fetchRestPayments());
+      dispatch(fetchRestPayments({}));
       dispatch(disableRefetch(activeMenu));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu.refetch]);
 
   const addProductToCart = (item) => {

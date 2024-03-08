@@ -20,7 +20,7 @@ import {
 } from '@ant-design/icons';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import userService from '../../../services/user';
+import userService from 'services/user';
 import { isArray } from 'lodash';
 import {
   addBag,
@@ -28,12 +28,15 @@ import {
   setCartData,
   setCurrency,
   setCurrentBag,
-} from '../../../redux/slices/cart';
-import { getCartData } from '../../../redux/selectors/cartSelector';
+} from 'redux/slices/cart';
+import { getCartData } from 'redux/selectors/cartSelector';
 import PosUserModal from './pos-user-modal';
 import PosUserAddress from './pos-user-address';
 import DeliveryInfo from './delivery-info';
+import moment from 'moment';
 import { InfiniteSelect } from 'components/infinite-select';
+import { AsyncSelect } from 'components/async-select';
+import restPaymentService from 'services/rest/payment';
 
 export default function OrderTabs() {
   const { t } = useTranslation();
@@ -41,23 +44,23 @@ export default function OrderTabs() {
   const dispatch = useDispatch();
   const { currencies, loading } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
   const { currentBag, bags, currency } = useSelector(
     (state) => state.cart,
-    shallowEqual
+    shallowEqual,
   );
   const data = useSelector((state) => getCartData(state.cart));
-  const { payments } = useSelector((state) => state.payment, shallowEqual);
   const [users, setUsers] = useState([]);
   const [addressModal, setAddressModal] = useState(null);
   const [userModal, setUserModal] = useState(null);
   const [links, setLinks] = useState(null);
-  const cartData = useSelector((state) => getCartData(state.cart));
-  const { payment_type: paymentRole, before_order_phone_required } =
-    useSelector((state) => state.globalSettings.settings, shallowEqual);
+  const { before_order_phone_required } = useSelector(
+    (state) => state.globalSettings.settings,
+    shallowEqual,
+  );
 
-  async function getUsers({ search, page }) {
+  async function getUsers({ search }) {
     const params = {
       search,
       perPage: 10,
@@ -73,13 +76,13 @@ export default function OrderTabs() {
     if (!data) return;
     if (isArray(data)) {
       return data.map((item) => ({
-        label: `${item.firstname} ${item.lastname ? item.lastname : ''}`,
-        value: item.id,
+        label: `${item?.firstname || ''} ${item?.lastname || ''}`,
+        value: item?.id,
       }));
     } else {
       return {
-        label: `${data.firstname} ${data.lastname}`,
-        value: data.id,
+        label: `${data?.firstname || ''} ${data?.lastname || ''}`,
+        value: data?.id,
       };
     }
   }
@@ -93,7 +96,7 @@ export default function OrderTabs() {
         bag_id: currentBag,
         userOBJ: user,
         phone: user?.phone,
-      })
+      }),
     );
     form.setFieldsValue({ address: null, phone: user?.phone });
   }
@@ -130,7 +133,7 @@ export default function OrderTabs() {
         setCartData({
           currentCurrency,
           bag_id: currentBag,
-        })
+        }),
       );
       dispatch(setCurrency(currentCurrency));
       form.setFieldsValue({
@@ -145,13 +148,26 @@ export default function OrderTabs() {
         setCartData({
           formCurrency,
           bag_id: currentBag,
-        })
+        }),
       );
       form.setFieldsValue({
         currency: formCurrency,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  async function fetchPaymentList() {
+    return restPaymentService.getAll().then(({ data }) =>
+      data
+        .filter((el) => el.tag === 'cash' || el.tag === 'wallet')
+        .map((item) => ({
+          label: t(item.tag) || t('no.name'),
+          value: item?.tag,
+          key: item?.id,
+        })),
+    );
+  }
 
   useEffect(() => {
     form.setFieldsValue({
@@ -159,10 +175,13 @@ export default function OrderTabs() {
       payment_type: data.paymentType || null,
       address: data.address.address || null,
       delivery: data.deliveries || null,
-      delivery_time: data?.delivery_time || null,
-      delivery_date: data?.delivery_date || null,
+      delivery_time: data?.delivery_time
+        ? moment(`${data?.delivery_date} ${data?.delivery_time}`)
+        : null,
+      delivery_date: data?.delivery_date ? moment(data?.delivery_date) : null,
       phone: data?.phone || null,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentBag, data]);
 
   return (
@@ -178,7 +197,7 @@ export default function OrderTabs() {
               <Space>
                 <ShoppingCartOutlined />
                 <span>
-                  {t('bag')} - {item}
+                  {t('bag')} - {item + 1}
                 </span>
                 {item && item === currentBag ? (
                   <CloseOutlined
@@ -199,27 +218,10 @@ export default function OrderTabs() {
           shape='circle'
           icon={<PlusOutlined />}
           className='tab-add-button'
-          onClick={() => dispatch(addBag({ shop: cartData.shop }))}
+          onClick={() => dispatch(addBag({ shop: data.shop }))}
         />
       </div>
-      <Form
-        layout='vertical'
-        name='pos-form'
-        form={form}
-        initialValues={{
-          user: data.user || null,
-          currency: currency || undefined,
-          payment_type: data.paymentType || null,
-          deliveries: data.deliveries,
-          delivery: {
-            label: 'pickup',
-            value: '0',
-          },
-          delivery_time: null,
-          delivery_date: null,
-          phone: data.phone || null,
-        }}
-      >
+      <Form layout='vertical' name='pos-form' form={form}>
         <Card className={!!currentBag ? '' : 'tab-card'}>
           {loading && (
             <div className='loader'>
@@ -228,7 +230,7 @@ export default function OrderTabs() {
           )}
 
           <Row gutter={6} style={{ marginBottom: 15 }}>
-            <Col span={9}>
+            <Col span={21}>
               <Form.Item
                 name='user'
                 rules={[{ required: true, message: '' }]}
@@ -260,7 +262,7 @@ export default function OrderTabs() {
                       validator(_, value) {
                         if (value < 0) {
                           return Promise.reject(
-                            new Error(t('must.be.positive'))
+                            new Error(t('must.be.positive')),
                           );
                         }
                       },
@@ -273,7 +275,7 @@ export default function OrderTabs() {
                     disabled={data?.userOBJ?.phone}
                     onChange={(phone) =>
                       dispatch(
-                        setCartData({ phone: phone, bag_id: currentBag })
+                        setCartData({ phone: phone, bag_id: currentBag }),
                       )
                     }
                   />
@@ -305,7 +307,7 @@ export default function OrderTabs() {
                       setCartData({
                         currency,
                         bag_id: currentBag,
-                      })
+                      }),
                     );
                   }}
                 >
@@ -322,21 +324,14 @@ export default function OrderTabs() {
                 name='payment_type'
                 rules={[{ required: true, message: t('missing.payment.type') }]}
               >
-                <Select
+                <AsyncSelect
+                  fetchOptions={fetchPaymentList}
+                  className='w-100'
                   placeholder={t('select.payment.type')}
-                  labelInValue
-                  onSelect={(paymentType) =>
-                    dispatch(setCartData({ paymentType, bag_id: currentBag }))
-                  }
-                >
-                  {(paymentRole === 'admin' ? payments : cartData?.payment_type)
-                    ?.filter((el) => el.tag === 'cash' || el.tag === 'wallet')
-                    ?.map((item, index) => (
-                      <Select.Option key={index} value={item.id}>
-                        {item?.tag}
-                      </Select.Option>
-                    ))}
-                </Select>
+                  onSelect={(paymentType) => {
+                    dispatch(setCartData({ paymentType, bag_id: currentBag }));
+                  }}
+                />
               </Form.Item>
             </Col>
           </Row>

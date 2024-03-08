@@ -38,7 +38,7 @@ export default function OrderEdit() {
   const [loading, setLoading] = useState(false);
   const { data, total, coupon, orderProducts, orderItems } = useSelector(
     (state) => state.order,
-    shallowEqual
+    shallowEqual,
   );
   const { currencies } = useSelector((state) => state.currency, shallowEqual);
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
@@ -93,7 +93,7 @@ export default function OrderEdit() {
                 lng: order.location.longitude,
               },
             },
-          })
+          }),
         );
         dispatch(
           setOrderData({
@@ -112,7 +112,7 @@ export default function OrderEdit() {
             payment_type: order.transaction,
             deliveries: { label: order.delivery_type },
             status: order.status,
-          })
+          }),
         );
         form.setFieldsValue({
           delivery_time: moment(order?.delivery_time, 'HH:mm:ss'),
@@ -182,7 +182,7 @@ export default function OrderEdit() {
         quantity: addon.quantity,
         stock_id: addon.stock_id,
         parent_id: item.stockID ? item.stockID?.id : item.stock?.id,
-      }))
+      })),
     );
 
     const combine = addons.concat(products);
@@ -234,6 +234,7 @@ export default function OrderEdit() {
     if (activeMenu.refetch) {
       fetchOrder();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu.refetch]);
 
   return (
@@ -258,7 +259,7 @@ export default function OrderEdit() {
         onFinish={onFinish}
         className='order-add'
         initialValues={{
-          user: data.user || undefined,
+          user: data?.user || undefined,
           address: data.address || null,
           currency_id: data?.currency?.id,
           payment_type: data.payment_type || null,

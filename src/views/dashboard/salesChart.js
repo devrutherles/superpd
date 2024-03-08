@@ -17,18 +17,18 @@ export default function SalesChart() {
   const dispatch = useDispatch();
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
   const { sales, params, loading } = useSelector(
     (state) => state.orderSales,
-    shallowEqual
+    shallowEqual,
   );
 
   const { role } = useSelector((state) => state.auth.user, shallowEqual);
   const { direction } = useSelector((state) => state.theme.theme, shallowEqual);
   const categories = useMemo(
     () => sales.map((item) => moment(item.date).format('D MMM')),
-    [sales]
+    [sales],
   );
 
   const chartData = useMemo(() => {
@@ -83,7 +83,8 @@ export default function SalesChart() {
           <h2 className='font-weight-bold mb-1'>
             {numberToPrice(
               sales.reduce((total, item) => (total += item.total_price), 0),
-              defaultCurrency?.symbol
+              defaultCurrency?.symbol,
+              defaultCurrency?.position,
             )}
           </h2>
           <p>

@@ -22,37 +22,37 @@ import {
   InfoCircleOutlined,
 } from '@ant-design/icons';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import orderService from '../../services/order';
-import getImage from '../../helpers/getImage';
+import orderService from 'services/order';
+import getImage from 'helpers/getImage';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import { addMenu, disableRefetch, setMenuData } from '../../redux/slices/menu';
+import { addMenu, disableRefetch, setMenuData } from 'redux/slices/menu';
 import OrderStatusModal from './orderStatusModal';
 import OrderDeliveryman from './orderDeliveryman';
 import { useTranslation } from 'react-i18next';
-import numberToPrice from '../../helpers/numberToPrice';
-import { clearOrder } from '../../redux/slices/order';
+import numberToPrice from 'helpers/numberToPrice';
+import { clearOrder } from 'redux/slices/order';
 import { MdEmail, MdLocationOn } from 'react-icons/md';
 import ShowLocationsMap from './show-locations.map';
 import { FiShoppingCart } from 'react-icons/fi';
-import { IMG_URL } from '../../configs/app-global';
+import { IMG_URL } from 'configs/app-global';
 import {
   BsCalendarDay,
   BsFillTelephoneFill,
   BsFillPersonFill,
 } from 'react-icons/bs';
-import { BiDollar, BiMessageDots, BiMoney } from 'react-icons/bi';
+import { BiMessageDots, BiMoney } from 'react-icons/bi';
 import moment from 'moment';
 import { useRef } from 'react';
 import { IoMapOutline } from 'react-icons/io5';
-import { fetchOrderStatus } from '../../redux/slices/orderStatus';
-import useDemo from '../../helpers/useDemo';
-import hideEmail from '../../components/hideEmail';
+import { fetchOrderStatus } from 'redux/slices/orderStatus';
+import useDemo from 'helpers/useDemo';
+import hideEmail from 'components/hideEmail';
 
 export default function OrderDetails() {
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
   const data = activeMenu.data;
   const { t } = useTranslation();
@@ -65,11 +65,10 @@ export default function OrderDetails() {
   const [locationsMap, setLocationsMap] = useState(null);
   const [loading, setLoading] = useState(false);
   const [orderDetails, setOrderDetails] = useState(null);
-  const [totalPrice, setTotalPrice] = useState(null);
   const [orderDeliveryDetails, setOrderDeliveryDetails] = useState(null);
   const { statusList } = useSelector(
     (state) => state.orderStatus,
-    shallowEqual
+    shallowEqual,
   );
 
   const columns = [
@@ -120,7 +119,11 @@ export default function OrderDetails() {
       dataIndex: 'origin_price',
       key: 'origin_price',
       render: (origin_price) =>
-        numberToPrice(origin_price, defaultCurrency?.symbol),
+        numberToPrice(
+          origin_price || 0,
+          defaultCurrency?.symbol,
+          defaultCurrency?.position,
+        ),
     },
     {
       title: t('quantity'),
@@ -128,7 +131,7 @@ export default function OrderDetails() {
       key: 'quantity',
       render: (_, row) => (
         <span>
-          {row.quantity * (row?.stock?.product?.interval || 1)}
+          {(row.quantity || 1) * (row?.stock?.product?.interval || 1)}
           {row?.stock?.product?.unit?.translation?.title}
         </span>
       ),
@@ -138,14 +141,22 @@ export default function OrderDetails() {
       dataIndex: 'discount',
       key: 'discount',
       render: (discount = 0, row) =>
-        numberToPrice(discount / row.quantity, defaultCurrency?.symbol),
+        numberToPrice(
+          (discount || 0) / (row.quantity || 1),
+          defaultCurrency?.symbol,
+          defaultCurrency?.position,
+        ),
     },
     {
       title: t('tax'),
       dataIndex: 'tax',
       key: 'tax',
       render: (tax, row) =>
-        numberToPrice(tax / row.quantity, defaultCurrency?.symbol),
+        numberToPrice(
+          (tax || 0) / (row?.quantity || 1),
+          defaultCurrency?.symbol,
+          defaultCurrency?.position,
+        ),
     },
     {
       title: t('total.price'),
@@ -154,11 +165,23 @@ export default function OrderDetails() {
       render: (total_price, row) => {
         const data =
           total_price +
-          row?.addons?.reduce((total, item) => (total += item.total_price), 0);
+          row?.addons?.reduce(
+            (total, item) => (total += item.total_price || 0),
+            0,
+          );
 
-        setTotalPrice(data);
-        return numberToPrice(data, defaultCurrency?.symbol);
+        return numberToPrice(
+          data,
+          defaultCurrency?.symbol,
+          defaultCurrency?.position,
+        );
       },
+    },
+    {
+      title: t('note'),
+      dataIndex: 'note',
+      key: 'note',
+      render: (note) => note || '--',
     },
   ];
 
@@ -167,6 +190,7 @@ export default function OrderDetails() {
       title: t('date'),
       dataIndex: 'date',
       key: 'date',
+      render: (_, row) => moment(row?.date).format('YYYY-MM-DD HH:mm'),
     },
     {
       title: t('document'),
@@ -187,12 +211,16 @@ export default function OrderDetails() {
 
   const documents = [
     {
-      price: numberToPrice(data?.total_price, defaultCurrency.symbol),
+      price: numberToPrice(
+        data?.total_price,
+        defaultCurrency?.symbol,
+        defaultCurrency?.position,
+      ),
       number: (
         <Link to={`/orders/generate-invoice/${data?.id}`}>#{data?.id}</Link>
       ),
       document: t('invoice'),
-      date: data?.delivery_date,
+      date: moment(data?.transaction?.created_at).format('YYYY-MM-DD HH:mm'),
     },
     {
       price: '-',
@@ -200,7 +228,7 @@ export default function OrderDetails() {
         <Link to={`/orders/generate-invoice/${data?.id}`}>#{data?.id}</Link>
       ),
       document: t('delivery.reciept'),
-      date: data?.delivery_date,
+      date: moment(data?.transaction?.created_at).format('YYYY-MM-DD HH:mm'),
     },
   ];
 
@@ -230,7 +258,7 @@ export default function OrderDetails() {
         url: `order/${id}`,
         id: 'order_edit',
         name: t('edit.order'),
-      })
+      }),
     );
     navigate(`/order/${id}`);
   };
@@ -241,7 +269,7 @@ export default function OrderDetails() {
         url: `users/user/${data?.user.uuid}`,
         id: 'user_info',
         name: t('user.info'),
-      })
+      }),
     );
     navigate(`/users/user/${data?.user.uuid}`, {
       state: { user_id: data?.user.id },
@@ -252,9 +280,10 @@ export default function OrderDetails() {
     if (activeMenu.refetch) {
       fetchOrder();
       if (statusList.length === 0) {
-        dispatch(fetchOrderStatus());
+        dispatch(fetchOrderStatus({}));
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu.refetch]);
 
   const handleShowModal = () => setLocationsMap(id);
@@ -322,7 +351,8 @@ export default function OrderDetails() {
                     <Typography.Text className='order-card-title'>
                       {numberToPrice(
                         data?.total_price,
-                        defaultCurrency?.symbol
+                        defaultCurrency?.symbol,
+                        defaultCurrency?.position,
                       )}
                     </Typography.Text>
                   )}
@@ -356,7 +386,7 @@ export default function OrderDetails() {
                     <Typography.Text className='order-card-title'>
                       {data?.details?.reduce(
                         (total, item) => (total += item.quantity),
-                        0
+                        0,
                       )}
                     </Typography.Text>
                   )}
@@ -370,7 +400,7 @@ export default function OrderDetails() {
             <Card>
               <Steps
                 current={statusList?.findIndex(
-                  (item) => item.name === data?.status
+                  (item) => item.name === data?.status,
                 )}
               >
                 {statusList?.slice(0, -1).map((item) => (
@@ -389,7 +419,7 @@ export default function OrderDetails() {
                     {t('created.date.&.time')}:
                     <span className='ml-2'>
                       <BsCalendarDay className='mr-1' />{' '}
-                      {moment(data?.created_at).format('YYYY-MM-DD hh:mm')}{' '}
+                      {moment(data?.created_at).format('YYYY-MM-DD HH:mm')}{' '}
                     </span>
                   </div>
                   <br />
@@ -497,31 +527,75 @@ export default function OrderDetails() {
                 <br />
                 <span>{t('discount')}:</span>
                 <br />
+                {data?.coupon && (
+                  <>
+                    <span>{t('coupon')}:</span>
+                    <br />
+                  </>
+                )}
                 <span>{t('service.fee')}:</span>
                 <br />
                 <h3>{t('total.price')}:</h3>
               </div>
               <div>
                 <span>
-                  {numberToPrice(data?.delivery_fee, defaultCurrency?.symbol)}
-                </span>
-                <br />
-                <span>{numberToPrice(data?.tax, defaultCurrency?.symbol)}</span>
-                <br />
-                <span>
-                  {numberToPrice(totalPrice, defaultCurrency?.symbol)}
-                </span>
-                <br />
-                <span>
-                  {numberToPrice(data?.total_discount, defaultCurrency?.symbol)}
+                  {numberToPrice(
+                    data?.delivery_fee,
+                    defaultCurrency?.symbol,
+                    defaultCurrency?.position,
+                  )}
                 </span>
                 <br />
                 <span>
-                  {numberToPrice(data?.service_fee, defaultCurrency?.symbol)}
+                  {numberToPrice(
+                    data?.tax,
+                    defaultCurrency?.symbol,
+                    defaultCurrency?.position,
+                  )}
+                </span>
+                <br />
+                <span>
+                  {numberToPrice(
+                    data?.origin_price,
+                    defaultCurrency?.symbol,
+                    defaultCurrency?.position,
+                  )}
+                </span>
+                <br />
+                <span>
+                  {numberToPrice(
+                    data?.total_discount,
+                    defaultCurrency?.symbol,
+                    defaultCurrency?.position,
+                  )}
+                </span>
+                <br />
+                {data?.coupon && (
+                  <>
+                    <span>
+                      {numberToPrice(
+                        data?.coupon?.price,
+                        defaultCurrency?.symbol,
+                        defaultCurrency?.position,
+                      )}
+                    </span>
+                    <br />
+                  </>
+                )}
+                <span>
+                  {numberToPrice(
+                    data?.service_fee,
+                    defaultCurrency?.symbol,
+                    defaultCurrency?.position,
+                  )}
                 </span>
                 <br />
                 <h3 ref={totalPriceRef}>
-                  {numberToPrice(data?.total_price, defaultCurrency?.symbol)}
+                  {numberToPrice(
+                    data?.total_price,
+                    defaultCurrency?.symbol,
+                    defaultCurrency?.position,
+                  )}
                 </h3>
               </div>
             </Space>
@@ -533,7 +607,7 @@ export default function OrderDetails() {
               title={t('deliveryman')}
               extra={
                 data?.status === 'ready' &&
-                data?.delivery_type !== 'pickup' && (
+                data?.delivery_type === 'delivery' && (
                   <Button onClick={() => setOrderDeliveryDetails(data)}>
                     {t('change')}
                     <EditOutlined />
@@ -608,100 +682,107 @@ export default function OrderDetails() {
             </Card>
           )}
 
-          <Card
-            title={
-              <Space>
-                {t('customer.info')}
-                <EditOutlined onClick={() => goToUser()} />
-              </Space>
-            }
-          >
-            <div className='d-flex w-100 customer-info-container'>
-              {loading ? (
-                <Skeleton.Avatar size={64} shape='square' />
-              ) : (
-                <Avatar shape='square' size={64} src={data?.user?.img} />
-              )}
-
-              <h5 className='customer-name'>
+          {!!data?.user && (
+            <Card
+              title={
+                <Space>
+                  {t('customer.info')}
+                  <EditOutlined onClick={() => goToUser()} />
+                </Space>
+              }
+            >
+              <div className='d-flex w-100 customer-info-container'>
                 {loading ? (
-                  <Skeleton.Button size={20} style={{ width: 70 }} />
+                  <Skeleton.Avatar size={64} shape='square' />
                 ) : (
-                  data?.user?.firstname + ' ' + (data?.user?.lastname || '')
+                  <Avatar shape='square' size={64} src={data?.user?.img} />
                 )}
-              </h5>
 
-              <div className='customer-info-detail'>
-                <div className='customer-info'>
-                  <span className='title'>{t('phone')}</span>
-                  <span className='description'>
-                    <BsFillTelephoneFill />
-                    {loading ? (
-                      <Skeleton.Button size={16} />
-                    ) : (
-                      data?.user?.phone || 'none'
-                    )}
-                  </span>
-                </div>
+                <h5 className='customer-name'>
+                  {loading ? (
+                    <Skeleton.Button size={20} style={{ width: 70 }} />
+                  ) : (
+                    data?.user?.firstname + ' ' + (data?.user?.lastname || '')
+                  )}
+                </h5>
 
-                <div className='customer-info'>
-                  <span className='title'>{t('email')}</span>
-                  <span className='description'>
-                    <MdEmail />
-                    {loading ? (
-                      <Skeleton.Button size={16} />
-                    ) : isDemo ? (
-                      hideEmail(data?.user?.email)
-                    ) : (
-                      data?.user?.email
-                    )}
-                  </span>
-                </div>
-                <div className='customer-info'>
-                  <span className='title'>{t('registration.date')}</span>
-                  <span className='description'>
-                    <BsCalendarDay />
-                    {loading ? (
-                      <Skeleton.Button size={16} />
-                    ) : (
-                      moment(data?.user?.created_at).format('DD-MM-YYYY, hh:mm')
-                    )}
-                  </span>
-                </div>
-                <div className='customer-info'>
-                  <span className='title'>{t('orders.count')}</span>
-                  <span className='description'>
-                    {loading ? (
-                      <Skeleton.Button size={16} />
-                    ) : (
-                      <Badge
-                        showZero
-                        style={{ backgroundColor: '#3d7de3' }}
-                        count={data?.user?.orders_count || 0}
-                      />
-                    )}
-                  </span>
-                </div>
-                <div className='customer-info'>
-                  <span className='title'>{t('spent.since.registration')}</span>
-                  <span className='description'>
-                    {loading ? (
-                      <Skeleton.Button size={16} />
-                    ) : (
-                      <Badge
-                        showZero
-                        style={{ backgroundColor: '#48e33d' }}
-                        count={numberToPrice(
-                          data?.user?.orders_sum_price,
-                          defaultCurrency?.symbol
-                        )}
-                      />
-                    )}
-                  </span>
+                <div className='customer-info-detail'>
+                  <div className='customer-info'>
+                    <span className='title'>{t('phone')}</span>
+                    <span className='description'>
+                      <BsFillTelephoneFill />
+                      {loading ? (
+                        <Skeleton.Button size={16} />
+                      ) : (
+                        data?.user?.phone || 'none'
+                      )}
+                    </span>
+                  </div>
+
+                  <div className='customer-info'>
+                    <span className='title'>{t('email')}</span>
+                    <span className='description'>
+                      <MdEmail />
+                      {loading ? (
+                        <Skeleton.Button size={16} />
+                      ) : isDemo ? (
+                        hideEmail(data?.user?.email)
+                      ) : (
+                        data?.user?.email
+                      )}
+                    </span>
+                  </div>
+                  <div className='customer-info'>
+                    <span className='title'>{t('registration.date')}</span>
+                    <span className='description'>
+                      <BsCalendarDay />
+                      {loading ? (
+                        <Skeleton.Button size={16} />
+                      ) : (
+                        moment(data?.user?.created_at).format(
+                          'DD-MM-YYYY, HH:mm',
+                        )
+                      )}
+                    </span>
+                  </div>
+                  <div className='customer-info'>
+                    <span className='title'>{t('orders.count')}</span>
+                    <span className='description'>
+                      {loading ? (
+                        <Skeleton.Button size={16} />
+                      ) : (
+                        <Badge
+                          showZero
+                          style={{ backgroundColor: '#3d7de3' }}
+                          count={data?.user?.orders_count || 0}
+                        />
+                      )}
+                    </span>
+                  </div>
+                  <div className='customer-info'>
+                    <span className='title'>
+                      {t('spent.since.registration')}
+                    </span>
+                    <span className='description'>
+                      {loading ? (
+                        <Skeleton.Button size={16} />
+                      ) : (
+                        <Badge
+                          showZero
+                          style={{ backgroundColor: '#48e33d' }}
+                          count={numberToPrice(
+                            data?.user?.orders_sum_price,
+                            defaultCurrency?.symbol,
+                            defaultCurrency?.position,
+                          )}
+                        />
+                      )}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Card>
+            </Card>
+          )}
           {data?.review && !loading && (
             <Card title={t('messages')}>
               <div className='order-message'>
@@ -709,7 +790,7 @@ export default function OrderDetails() {
                 <Space className='w-100 justify-content-end'>
                   <span className='date'>
                     {moment(data?.review?.created_at).format(
-                      'YYYY-MM-DD hh:mm'
+                      'YYYY-MM-DD HH:mm',
                     )}
                   </span>
                 </Space>
@@ -737,11 +818,15 @@ export default function OrderDetails() {
                     </div>
                   )}
 
-                  <div className='delivery-info'>
-                    <b>
-                      <BiDollar size={16} />
-                    </b>
-                    <span>{data?.shop?.price}</span>
+                  <div className='delivery-info my-1'>
+                    <strong>{t('min.delivery.price')}:</strong>
+                    <span>
+                      {numberToPrice(
+                        data?.shop?.price,
+                        defaultCurrency?.symbol,
+                        defaultCurrency?.position,
+                      )}
+                    </span>
                   </div>
                   <div className='delivery-info'>
                     <b>

@@ -4,7 +4,7 @@ import {
   EditOutlined,
   PlusCircleOutlined,
 } from '@ant-design/icons';
-import { Button, Card, Image, Space, Table, Tabs, Tag } from 'antd';
+import { Button, Card, Image, Space, Table, Tabs } from 'antd';
 import { toast } from 'react-toastify';
 import { IMG_URL } from '../../../configs/app-global';
 import CustomModal from '../../../components/modal';
@@ -42,7 +42,7 @@ const Boxes = () => {
   const data = activeMenu?.data;
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
 
   const paramsData = {
@@ -56,7 +56,7 @@ const Boxes = () => {
 
   const { sellerBoxes, meta, loading } = useSelector(
     (state) => state.box,
-    shallowEqual
+    shallowEqual,
   );
 
   const goToEdit = (row) => {
@@ -65,7 +65,7 @@ const Boxes = () => {
         url: `seller/box/edit/${row.id}`,
         id: 'box_edit',
         name: t('edit.box'),
-      })
+      }),
     );
     navigate(`/seller/box/edit/${row.id}`, { state: 'edit' });
   };
@@ -76,7 +76,7 @@ const Boxes = () => {
         id: 'box_add',
         url: 'seller/box/add',
         name: t('add.box'),
-      })
+      }),
     );
     navigate('/seller/box/add');
   };
@@ -169,7 +169,7 @@ const Boxes = () => {
         {},
         ...id.map((item, index) => ({
           [`ids[${index}]`]: item,
-        }))
+        })),
       ),
     };
     sellerBoxService
@@ -179,6 +179,7 @@ const Boxes = () => {
         dispatch(fetchSellerBoxes(paramsData));
         setIsModalVisible(false);
         setText(null);
+        setId(null);
       })
       .finally(() => setLoadingBtn(false));
   };
@@ -191,7 +192,7 @@ const Boxes = () => {
       setMenuData({
         activeMenu,
         data: { ...data, perPage, page, column, sort },
-      })
+      }),
     );
   }
 
@@ -228,7 +229,7 @@ const Boxes = () => {
       setMenuData({
         activeMenu,
         data: { ...data, ...items },
-      })
+      }),
     );
   };
 

@@ -26,7 +26,7 @@ const ReceptMain = ({ next, image, setImage, back, setBack }) => {
     };
     return categoryService.getAll(params).then((res) => {
       return res.data.map((category) => ({
-        label: category.translation.title,
+        label: category?.translation?.title || 'no name',
         value: category.id,
       }));
     });

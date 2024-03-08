@@ -37,7 +37,7 @@ export const AsyncTreeSelect = ({
       showSearch
       labelInValue
       filterTreeNode={(value, node) => {
-        return node.label.localeCompare(value)
+        return node.label?.localeCompare(value)
       }}
       treeLine={true}
       onSearch={(value) => debounceFetcher(value)}

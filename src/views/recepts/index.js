@@ -41,7 +41,7 @@ const Reciepts = () => {
   const data = activeMenu?.data;
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
 
   const paramsData = {
@@ -55,7 +55,7 @@ const Reciepts = () => {
 
   const { recepts, meta, loading } = useSelector(
     (state) => state.reciept,
-    shallowEqual
+    shallowEqual,
   );
 
   const goToEdit = (row) => {
@@ -64,7 +64,7 @@ const Reciepts = () => {
         url: `recept/edit/${row.id}`,
         id: 'recepe_edit',
         name: t('edit.recepe'),
-      })
+      }),
     );
     navigate(`/recept/edit/${row.id}`, { state: 'edit' });
   };
@@ -75,7 +75,7 @@ const Reciepts = () => {
         id: 'recepe_add',
         url: 'recept/add',
         name: t('add.recepe'),
-      })
+      }),
     );
     navigate('/recept/add');
   };
@@ -86,7 +86,7 @@ const Reciepts = () => {
         id: 'edit-shop',
         url: `shop/${row.uuid}`,
         name: t('edit.shop'),
-      })
+      }),
     );
     navigate(`/shop/${row.uuid}`);
   };
@@ -190,7 +190,11 @@ const Reciepts = () => {
       is_show: true,
       render: (_, row) =>
         row.discount_type === 'fix'
-          ? numberToPrice(row.discount_price, defaultCurrency.symbol)
+          ? numberToPrice(
+              row.discount_price,
+              defaultCurrency.symbol,
+              defaultCurrency?.position,
+            )
           : `${row.discount_price} %`,
     },
     {
@@ -229,7 +233,7 @@ const Reciepts = () => {
         {},
         ...id.map((item, index) => ({
           [`ids[${index}]`]: item,
-        }))
+        })),
       ),
     };
     recieptService
@@ -254,7 +258,7 @@ const Reciepts = () => {
       setMenuData({
         activeMenu,
         data: { ...data, perPage, page, column, sort },
-      })
+      }),
     );
   }
 
@@ -291,7 +295,7 @@ const Reciepts = () => {
       setMenuData({
         activeMenu,
         data: { ...data, ...items },
-      })
+      }),
     );
   };
 

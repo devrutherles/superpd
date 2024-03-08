@@ -22,7 +22,11 @@ const body = {
   type: 'category',
 };
 
-export default function CategoryRequestList({ parentId, type = 'main' }) {
+export default function CategoryRequestList({
+  parentId,
+  type = 'main',
+  activeTab = 'request',
+}) {
   const { t } = useTranslation();
   const { setIsModalVisible } = useContext(Context);
   const [modalVisible, setModalVisible] = useState(false);
@@ -41,7 +45,6 @@ export default function CategoryRequestList({ parentId, type = 'main' }) {
   const { uuid: parentUuid } = useParams();
 
   const paramsData = {
-    search: data?.search,
     sort: data?.sort,
     column: data?.column,
     perPage: data?.perPage,
@@ -55,7 +58,7 @@ export default function CategoryRequestList({ parentId, type = 'main' }) {
         url: `category-request/${row.id}`,
         id: 'request_edit',
         name: t('request.edit'),
-      })
+      }),
     );
     navigate(`/category-request/${row.id}`, {
       state: { parentId, parentUuid },
@@ -89,8 +92,8 @@ export default function CategoryRequestList({ parentId, type = 'main' }) {
       is_show: true,
       render: (_, row) => (
         <Space>
-          {row.model.translation.title} <HiArrowNarrowRight />{' '}
-          {row.data.title[row.model.translation.locale]}
+          {row?.model?.translation?.title} <HiArrowNarrowRight />{' '}
+          {row?.data?.title?.[row?.model?.translation?.locale]}
         </Space>
       ),
     },
@@ -103,7 +106,7 @@ export default function CategoryRequestList({ parentId, type = 'main' }) {
         return (
           <Space>
             <Image
-              src={getImage(row.model.img)}
+              src={getImage(row?.model?.img)}
               alt='img_gallery'
               width={100}
               className='rounded'
@@ -112,7 +115,7 @@ export default function CategoryRequestList({ parentId, type = 'main' }) {
             />
             <HiArrowNarrowRight />
             <Image
-              src={getImage(row.data.images.at(0))}
+              src={getImage(row?.data?.images?.at(0))}
               alt='img_gallery'
               width={100}
               className='rounded'
@@ -122,6 +125,23 @@ export default function CategoryRequestList({ parentId, type = 'main' }) {
           </Space>
         );
       },
+    },
+    {
+      title: t('status'),
+      is_show: true,
+      dataIndex: 'status',
+      key: 'status',
+      render: (status, row) => (
+        <div>
+          {status === 'pending' ? (
+            <Tag color='blue'>{t(status)}</Tag>
+          ) : status === 'canceled' ? (
+            <Tag color='error'>{t(status)}</Tag>
+          ) : (
+            <Tag color='cyan'>{t(status)}</Tag>
+          )}
+        </div>
+      ),
     },
     {
       title: t('options'),
@@ -158,13 +178,18 @@ export default function CategoryRequestList({ parentId, type = 'main' }) {
   ]);
 
   useEffect(() => {
-    dispatch(fetchRequestModels(paramsData));
-    dispatch(disableRefetch(activeMenu));
+    if (activeMenu.refetch && activeTab === 'request') {
+      dispatch(fetchRequestModels(paramsData));
+      dispatch(disableRefetch(activeMenu));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu.refetch]);
 
   useDidUpdate(() => {
-    dispatch(fetchRequestModels(paramsData));
-  }, [activeMenu.data]);
+    if (activeTab === 'request') {
+      dispatch(fetchRequestModels(paramsData));
+    }
+  }, [activeTab, activeMenu.data]);
 
   function onChangePagination(pagination, filter, sorter) {
     const { pageSize: perPage, current: page } = pagination;
@@ -174,7 +199,7 @@ export default function CategoryRequestList({ parentId, type = 'main' }) {
       setMenuData({
         activeMenu,
         data: { ...activeMenu.data, perPage, page, column, sort },
-      })
+      }),
     );
   }
 
@@ -203,16 +228,6 @@ export default function CategoryRequestList({ parentId, type = 'main' }) {
     onChange: (key) => {
       setId(key);
     },
-  };
-
-  const handleFilter = (items) => {
-    const data = activeMenu.data;
-    dispatch(
-      setMenuData({
-        activeMenu,
-        data: { ...data, ...items },
-      })
-    );
   };
 
   return (

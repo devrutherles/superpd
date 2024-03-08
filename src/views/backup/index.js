@@ -11,6 +11,7 @@ import { fetchBackups } from '../../redux/slices/backup';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import useDemo from '../../helpers/useDemo';
+import moment from "moment/moment";
 
 export default function Backup() {
   const [loadingBtn, setLoadingBtn] = useState(false);
@@ -44,6 +45,7 @@ export default function Backup() {
       title: t('created.at'),
       dataIndex: 'created_at',
       key: 'created_at',
+      render: (_, row) => moment(row?.created_at).format('YYYY-MM-DD HH:mm')
     },
     {
       title: t('options'),

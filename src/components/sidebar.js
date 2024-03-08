@@ -35,11 +35,11 @@ const Sidebar = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { system_refund, payment_type } = useSelector(
     (state) => state.globalSettings.settings,
-    shallowEqual
+    shallowEqual,
   );
   const { navCollapsed } = useSelector(
     (state) => state.theme.theme,
-    shallowEqual
+    shallowEqual,
   );
   const { languages } = useSelector((state) => state.formLang, shallowEqual);
   const dispatch = useDispatch();
@@ -48,7 +48,7 @@ const Sidebar = () => {
   const { theme } = useSelector((state) => state.theme, shallowEqual);
   const parcelMode = useMemo(
     () => !!theme.parcelMode && user?.role === 'admin',
-    [theme, user]
+    [theme, user],
   );
   const routes = useMemo(() => filterUserRoutes(user.urls), [user]);
   const active = routes?.find((item) => pathname.includes(item.url));
@@ -61,7 +61,7 @@ const Sidebar = () => {
     } else {
       setData(routes);
     }
-  }, [theme]);
+  }, [theme, user]);
 
   const addNewItem = (item) => {
     if (typeof item.url === 'undefined') return;
@@ -137,9 +137,10 @@ const Sidebar = () => {
       ? optionList.filter((input) =>
           t(input?.name ?? '')
             .toUpperCase()
-            .includes(searchTerm.toUpperCase())
+            .includes(searchTerm.toUpperCase()),
         )
       : data;
+
   return (
     <>
       <Sider
@@ -152,6 +153,11 @@ const Sidebar = () => {
         <div className='menu-collapse' onClick={menuTrigger}>
           <MenuFoldOutlined />
         </div>
+        {navCollapsed && (
+          <div className='flex justify-content-center'>
+            <ThemeConfigurator />
+          </div>
+        )}
 
         {!navCollapsed ? (
           <Space className='mx-4 mt-2 d-flex justify-content-between'>
@@ -178,17 +184,19 @@ const Sidebar = () => {
         )}
         <Divider style={{ margin: '10px 0' }} />
 
-        <span className='mt-2 mb-2 d-flex justify-content-center'>
-          <Input
-            placeholder='search'
-            style={{ width: '90%' }}
-            value={searchTerm}
-            onChange={(event) => {
-              setSearchTerm(event.target.value);
-            }}
-            prefix={<SearchOutlined />}
-          />
-        </span>
+        {!navCollapsed && (
+          <span className='mt-2 mb-2 d-flex justify-content-center'>
+            <Input
+              placeholder='search'
+              style={{ width: '90%' }}
+              value={searchTerm}
+              onChange={(event) => {
+                setSearchTerm(event.target.value);
+              }}
+              prefix={<SearchOutlined />}
+            />
+          </span>
+        )}
 
         <Scrollbars
           autoHeight
@@ -200,7 +208,9 @@ const Sidebar = () => {
             theme='light'
             mode='inline'
             defaultSelectedKeys={[String(active?.id)]}
-            defaultOpenKeys={data?.map((i, idx) => i.id + '_' + idx)}
+            defaultOpenKeys={
+              !navCollapsed ? data?.map((i, idx) => i.id + '_' + idx) : []
+            }
           >
             {menuList?.map((item, idx) =>
               item.submenu?.length > 0 ? (
@@ -244,7 +254,7 @@ const Sidebar = () => {
                           <span>{t(submenu.name)}</span>
                         </Link>
                       </Menu.Item>
-                    )
+                    ),
                   )}
                 </SubMenu>
               ) : (
@@ -253,7 +263,7 @@ const Sidebar = () => {
                     <span>{t(item.name)}</span>
                   </Link>
                 </Menu.Item>
-              )
+              ),
             )}
           </Menu>
         </Scrollbars>

@@ -26,6 +26,10 @@ export default function Advert() {
     loading: listLoading,
     meta,
   } = useSelector((state) => state.advert, shallowEqual);
+  const { defaultCurrency } = useSelector(
+    (state) => state.currency,
+    shallowEqual,
+  );
 
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
@@ -80,7 +84,12 @@ export default function Advert() {
       title: t('price'),
       dataIndex: 'price',
       is_show: true,
-      render: (_, row) => numberToPrice(row?.ads_package?.price),
+      render: (_, row) =>
+        numberToPrice(
+          row?.ads_package?.price,
+          defaultCurrency?.symbol,
+          defaultCurrency?.position,
+        ),
     },
 
     {
@@ -162,6 +171,7 @@ export default function Advert() {
       dispatch(fetchShopAdverts(paramsData));
       dispatch(disableRefetch(activeMenu));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu.refetch]);
 
   useDidUpdate(() => {

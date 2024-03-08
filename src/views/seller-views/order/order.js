@@ -61,11 +61,11 @@ export default function SellerOrder() {
   const [loadingBtn, setLoadingBtn] = useState(false);
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
   const { statusList } = useSelector(
     (state) => state.orderStatus,
-    shallowEqual
+    shallowEqual,
   );
   const orderType = urlParams?.type;
   const statuses = [
@@ -87,7 +87,7 @@ export default function SellerOrder() {
         url: `seller/order/details/${row.id}`,
         id: 'order_details',
         name: t('order.details'),
-      })
+      }),
     );
     navigate(`/seller/order/details/${row.id}`);
   };
@@ -102,14 +102,19 @@ export default function SellerOrder() {
     },
     {
       title: t('client'),
+      is_show: true,
       dataIndex: 'user',
       key: 'user',
-      is_show: true,
-      render: (user) => (
-        <div>
-          {user?.firstname} {user?.lastname || ''}
-        </div>
-      ),
+      render: (user) => {
+        if (!user) {
+          return <Tag color='red'>{t('deleted.user')}</Tag>;
+        }
+        return (
+          <div>
+            {user?.firstname || ''} {user?.lastname || ''}
+          </div>
+        );
+      },
     },
     {
       title: t('status'),
@@ -188,7 +193,11 @@ export default function SellerOrder() {
       key: 'total_price',
       is_show: true,
       render: (total_price) => {
-        return numberToPrice(total_price, defaultCurrency?.symbol);
+        return numberToPrice(
+          total_price,
+          defaultCurrency?.symbol,
+          defaultCurrency?.position,
+        );
       },
     },
     {
@@ -203,6 +212,7 @@ export default function SellerOrder() {
       is_show: true,
       dataIndex: 'created_at',
       key: 'created_at',
+      render: (_, row) => moment(row?.created_at).format('YYYY-MM-DD HH:mm'),
     },
     {
       title: t('delivery.date'),
@@ -238,7 +248,7 @@ export default function SellerOrder() {
   const immutable = activeMenu.data?.role || role;
   const { orders, meta, loading, params } = useSelector(
     (state) => state.sellerOrders,
-    shallowEqual
+    shallowEqual,
   );
   const [dateRange, setDateRange] = useState(null);
   const data = activeMenu?.data;
@@ -275,7 +285,7 @@ export default function SellerOrder() {
       setMenuData({
         activeMenu,
         data: { ...data, perPage, page, column, sort },
-      })
+      }),
     );
   }
 
@@ -286,7 +296,7 @@ export default function SellerOrder() {
         {},
         ...id.map((item, index) => ({
           [`ids[${index}]`]: item,
-        }))
+        })),
       ),
     };
     orderService
@@ -317,7 +327,7 @@ export default function SellerOrder() {
       setMenuData({
         activeMenu,
         data: { ...data, [name]: item },
-      })
+      }),
     );
   };
 
@@ -341,7 +351,7 @@ export default function SellerOrder() {
         id: 'pos.system',
         url: 'seller/pos-system',
         name: t('add.order'),
-      })
+      }),
     );
     navigate('/seller/pos-system', { state: { delivery_type: orderType } });
   };
@@ -376,7 +386,7 @@ export default function SellerOrder() {
         setMenuData({
           activeMenu,
           data: null,
-        })
+        }),
       );
     });
     dispatch(fetchOrders({ status: 'all', page: data?.page, perPage: 10 }));

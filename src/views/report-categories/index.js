@@ -42,7 +42,7 @@ const ReportProducts = () => {
   } = useSelector((state) => state.categoryReport, shallowEqual);
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [search, setSearch] = useState();
@@ -54,7 +54,7 @@ const ReportProducts = () => {
         url: `report/products`,
         id: 'report.products',
         name: t('report.products'),
-      })
+      }),
     );
     navigate(`/report/products?category_id=${row.id}`);
   };
@@ -71,7 +71,7 @@ const ReportProducts = () => {
             <Link to={`/report/products?category_id=${data?.id}`}>{item}</Link>
           ) : (
             item
-          )
+          ),
         );
       },
       sorter: (a, b) => a?.title?.localeCompare(b?.title),
@@ -91,7 +91,11 @@ const ReportProducts = () => {
       is_show: true,
       sorter: (a, b) => a?.price - b?.price,
       render: (_, data) => {
-        return numberToPrice(data?.price, defaultCurrency?.symbol);
+        return numberToPrice(
+          data?.price,
+          defaultCurrency?.symbol,
+          defaultCurrency?.position,
+        );
       },
     },
     {
@@ -128,7 +132,7 @@ const ReportProducts = () => {
         qty: 'total_products_count',
       },
     ],
-    []
+    [],
   );
 
   const fetchReport = () => {
@@ -216,7 +220,11 @@ const ReportProducts = () => {
                 <Col span={12}>
                   <Title level={2}>
                     {item.qty === 'total_price'
-                      ? numberToPrice(reportData[item.qty])
+                      ? numberToPrice(
+                          reportData[item.qty],
+                          defaultCurrency?.symbol,
+                          defaultCurrency?.position,
+                        )
                       : reportData[item.qty]}
                   </Title>
                 </Col>

@@ -1,12 +1,17 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Card, Form, Input, Select, Space, Table } from 'antd';
-import translationService from '../../services/translation';
+import translationService from 'services/translation';
 import { toast } from 'react-toastify';
 import { EditOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import TranslationCreateModal from './translationCreateModal';
-import { shallowEqual, useSelector } from 'react-redux';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import SearchInput from '../../components/search-input';
+import SearchInput from 'components/search-input';
+import { CgImport } from 'react-icons/cg';
+import { addMenu } from 'redux/slices/menu';
+import { useNavigate } from 'react-router-dom';
+import { export_url } from 'configs/app-global';
+
 const EditableContext = React.createContext(null);
 
 const EditableRow = ({ index, ...props }) => {
@@ -101,6 +106,8 @@ const EditableCell = ({
 
 export default function Translations() {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [list, setList] = useState([]);
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
@@ -114,6 +121,7 @@ export default function Translations() {
   const { languages } = useSelector((state) => state.formLang, shallowEqual);
   const [locale, setLocale] = useState('');
   const [search, setSearch] = useState('');
+  const [downloading, setDownloading] = useState(false);
 
   const defaultColumns = useMemo(
     () => [
@@ -140,7 +148,7 @@ export default function Translations() {
           width: 300,
         })),
     ],
-    [languages, locale]
+    [languages, locale],
   );
 
   function sortTable(type, column) {
@@ -180,9 +188,9 @@ export default function Translations() {
             {},
             ...languages.map((lang) => ({
               [`value[${lang.locale}]`]: item[1].find(
-                (el) => el.locale === lang.locale
+                (el) => el.locale === lang.locale,
               )?.value,
-            }))
+            })),
           ),
         }));
         setList(translations);
@@ -193,6 +201,7 @@ export default function Translations() {
 
   useEffect(() => {
     fetchTranslations();
+    // eslint-disable-next-line
   }, [pageSize, group, sort, column, skipPage, search]);
 
   const onChangePagination = (pageNumber) => {
@@ -253,9 +262,29 @@ export default function Translations() {
     };
   });
 
+  const excelExport = () => {
+    setDownloading(true);
+    translationService
+      .export()
+      .then((res) => {
+        window.location.href = export_url + res.data.file_name;
+      })
+      .finally(() => setDownloading(false));
+  };
+
+  const goToImport = () => {
+    dispatch(
+      addMenu({
+        id: 'translation-import',
+        url: `settings/translations/import`,
+        name: t('translation.import'),
+      }),
+    );
+    navigate(`import`);
+  };
+
   return (
     <Card
-      title={t('translations')}
       extra={
         <Space wrap>
           <SearchInput
@@ -286,6 +315,14 @@ export default function Translations() {
             <Select.Option value='mobile'>{t('mobile')}</Select.Option>
             <Select.Option value='errors'>{t('errors')}</Select.Option>
           </Select>
+          <Button onClick={excelExport} loading={downloading}>
+            <CgImport className='mr-2' />
+            {t('export')}
+          </Button>
+          <Button onClick={goToImport}>
+            <CgImport className='mr-2' />
+            {t('import')}
+          </Button>
           <Button
             icon={<PlusCircleOutlined />}
             type='primary'

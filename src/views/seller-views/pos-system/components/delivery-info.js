@@ -3,30 +3,8 @@ import { Card, Col, DatePicker, Form, Row, Select } from 'antd';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import moment from 'moment';
-import { getCartData } from '../../../../redux/selectors/cartSelector';
-import { setCartData } from '../../../../redux/slices/cart';
-
-const weeks = [
-  {
-    title: 'sunday',
-  },
-  { title: 'monday' },
-  {
-    title: 'tuesday',
-  },
-  {
-    title: 'wednesday',
-  },
-  {
-    title: 'thursday',
-  },
-  {
-    title: 'friday',
-  },
-  {
-    title: 'saturday',
-  },
-];
+import { getCartData } from 'redux/selectors/cartSelector';
+import { setCartData } from 'redux/slices/cart';
 
 const DeliveryInfo = () => {
   const { t } = useTranslation();
@@ -34,15 +12,11 @@ const DeliveryInfo = () => {
   const data = useSelector((state) => getCartData(state.cart));
   const { myShop: shop } = useSelector((state) => state.myShop, shallowEqual);
   const { currentBag } = useSelector((state) => state.cart, shallowEqual);
-  const date = new Date(data.delivery_date);
-  const shopTime = shop?.shop_working_days?.find(
-    (item) => item?.day === weeks[date.getDay()]?.title
-  );
   const filter = shop?.shop_closed_date?.map((date) => date.day);
 
   function disabledDate(current) {
     const a = filter?.find(
-      (date) => date === moment(current).format('YYYY-MM-DD')
+      (date) => date === moment(current).format('YYYY-MM-DD'),
     );
     const b = moment().add(-1, 'days') >= current;
     if (a) {
@@ -65,39 +39,29 @@ const DeliveryInfo = () => {
     return number;
   };
 
-  const middle = (start, end) => {
-    const result = [];
-    for (let i = start; i < end; i++) {
-      result.push(i);
-    }
-    return result;
-  };
-
   const disabledDateTime = () => ({
     disabledHours: () =>
       range(
-        moment(new Date()).format('DD') ===
-          moment(data.delivery_date).format('DD')
-          ? shopTime?.from.substring(0, 2) >= moment(new Date()).format('HH')
-            ? shopTime?.from.substring(0, 2)
-            : moment(new Date()).format('HH')
-          : shopTime?.from.substring(0, 2),
-        shopTime?.to.substring(0, 2)
+        moment(data?.delivery_date).format('YYYYMMDD') ===
+          moment(new Date()).format('YYYYMMDD')
+          ? moment(new Date()).add(1, 'hour').format('HH')
+          : 0,
+        24,
       ),
-    disabledMinutes: () => middle(0, 60),
-    disabledSeconds: () => middle(0, 60),
+    disabledMinutes: () => [],
+    disabledSeconds: () => [],
   });
 
   const delivery = [
     {
-      label: 'delivery',
-      value: shop?.price || 0,
+      label: t('delivery'),
+      value: 'delivery',
       key: 1,
     },
     {
-      label: 'pickup',
-      value: '0',
-      key: 2,
+      label: t('pickup'),
+      value: 'pickup',
+      key: 0,
     },
   ];
 
@@ -114,6 +78,7 @@ const DeliveryInfo = () => {
             rules={[{ required: true, message: t('required') }]}
           >
             <Select
+              placeholder={t('delivery.type')}
               options={delivery}
               labelInValue
               onSelect={setDeliveryPrice}
@@ -122,7 +87,7 @@ const DeliveryInfo = () => {
                   setCartData({
                     deliveries,
                     bag_id: currentBag,
-                  })
+                  }),
                 )
               }
             />
@@ -140,22 +105,21 @@ const DeliveryInfo = () => {
                     message: t('required'),
                   },
                 ]}
-                valuePropName={'date'}
+                // valuePropName={'date'}
               >
                 <DatePicker
                   placeholder={t('delivery.date')}
                   className='w-100'
                   format='YYYY-MM-DD'
+                  allowClear={false}
                   disabledDate={disabledDate}
                   onChange={(e) => {
-                    const delivery_date = data?.delivery_date
-                      ? data?.delivery_date
-                      : moment(e).format('YYYY-MM-DD');
+                    const delivery_date = moment(e).format('YYYY-MM-DD');
                     dispatch(
                       setCartData({
                         delivery_date,
                         bag_id: currentBag,
-                      })
+                      }),
                     );
                   }}
                 />
@@ -171,7 +135,7 @@ const DeliveryInfo = () => {
                     message: t('required'),
                   },
                 ]}
-                valuePropName={'date'}
+                // valuePropName='date'
               >
                 <DatePicker
                   disabled={!data.delivery_date}
@@ -184,9 +148,10 @@ const DeliveryInfo = () => {
                   onChange={(e) => {
                     const delivery_time = moment(e).format('HH:mm:ss');
                     dispatch(
-                      setCartData({ delivery_time, bag_id: currentBag })
+                      setCartData({ delivery_time, bag_id: currentBag }),
                     );
                   }}
+                  allowClear={false}
                 />
               </Form.Item>
             </Col>

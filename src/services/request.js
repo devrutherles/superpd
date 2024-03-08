@@ -63,6 +63,12 @@ service.interceptors.response.use(
       notificationParam.message = error.response?.data?.message;
     }
 
+    if(error.response?.data?.params) {
+      if(Object.values(error.response?.data?.params)[0]){
+        notificationParam.message = Object.values(error.response?.data?.params)[0].at(0)
+      }
+    }
+
     toast.error(notificationParam.message, {
       toastId: error.response?.status,
     });

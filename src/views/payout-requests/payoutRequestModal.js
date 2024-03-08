@@ -11,7 +11,7 @@ export default function PayoutRequestModal({ data, handleCancel }) {
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
   const dispatch = useDispatch();
   const [loadingAccept, setLoadingAccept] = useState(false);
@@ -73,7 +73,11 @@ export default function PayoutRequestModal({ data, handleCancel }) {
           {data.user?.phone}
         </Descriptions.Item>
         <Descriptions.Item label={t('requested.amount')} span={3}>
-          {numberToPrice(data.price, defaultCurrency.symbol)}
+          {numberToPrice(
+            data.price,
+            defaultCurrency?.symbol,
+            defaultCurrency?.position,
+          )}
         </Descriptions.Item>
         <Descriptions.Item label={t('note')} span={3}>
           {data.note}

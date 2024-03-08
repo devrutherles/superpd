@@ -12,22 +12,18 @@ import {
   Spin,
   Switch,
 } from 'antd';
-import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import {
-  disableRefetch,
-  removeFromMenu,
-  setMenuData,
-} from '../../redux/slices/menu';
+import { batch, shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { disableRefetch, removeFromMenu, setMenuData } from 'redux/slices/menu';
 import { useTranslation } from 'react-i18next';
-import Paystack from '../../assets/images/paystack.svg';
+import Paystack from 'assets/images/paystack.svg';
 import { FaPaypal } from 'react-icons/fa';
 import { SiStripe, SiRazorpay, SiFlutter } from 'react-icons/si';
-import { paymentPayloadService } from '../../services/paymentPayload';
-import { AsyncSelect } from '../../components/async-select';
-import currencyService from '../../services/currency';
-import i18n from '../../configs/i18next';
-import { fetchPaymentPayloads } from '../../redux/slices/paymentPayload';
-import MediaUpload from '../../components/upload';
+import { paymentPayloadService } from 'services/paymentPayload';
+import { AsyncSelect } from 'components/async-select';
+import currencyService from 'services/currency';
+import i18n from 'configs/i18next';
+import { fetchPaymentPayloads } from 'redux/slices/paymentPayload';
+import MediaUpload from 'components/upload';
 
 const PaymentPayloadEdit = () => {
   const { t } = useTranslation();
@@ -41,11 +37,11 @@ const PaymentPayloadEdit = () => {
   const { languages } = useSelector((state) => state.formLang, shallowEqual);
   const [activePayment, setActivePayment] = useState(null);
   const [image, setImage] = useState(
-    activeMenu.data?.image ? [activeMenu.data?.image] : []
+    activeMenu.data?.image ? [activeMenu.data?.image] : [],
   );
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
 
   useEffect(() => {
@@ -68,15 +64,17 @@ const PaymentPayloadEdit = () => {
       .getById(id)
       .then(({ data }) => {
         setActivePayment({
-          label: data.payment.tag,
-          value: data.payment.id,
+          label: data?.payment?.tag,
+          value: data?.payment?.id,
+          key: data?.payment?.id,
         });
         form.setFieldsValue({
           ...data.payload,
-          payment_id: data.payment.tag,
-          paypal_validate_ssl: Boolean(data.payload.paypal_validate_ssl),
+          payment_id: data?.payment.tag,
+          paypal_validate_ssl: Boolean(data?.payload?.paypal_validate_ssl),
+          // sandbox: Boolean(data?.payload?.sandbox),
         });
-        setImage([createImage(data.payload.logo)]);
+        setImage([createImage(data?.payload.logo)]);
       })
       .finally(() => {
         setLoading(false);
@@ -96,10 +94,11 @@ const PaymentPayloadEdit = () => {
       payload: {
         ...values,
         logo: image[0] ? image[0].name : undefined,
-        currency: values.currency,
+        currency: values.currency?.label || values.currency,
         paypal_validate_ssl: values?.paypal_validate_ssl
           ? Number(values.paypal_validate_ssl)
           : undefined,
+        sandbox: Number(Boolean(values?.sandbox)),
       },
     };
 
@@ -108,9 +107,11 @@ const PaymentPayloadEdit = () => {
       .then(() => {
         const nextUrl = 'payment-payloads';
         toast.success(t('successfully.updated'));
-        dispatch(removeFromMenu({ ...activeMenu, nextUrl }));
+        batch(() => {
+          dispatch(removeFromMenu({ ...activeMenu, nextUrl }));
+          dispatch(fetchPaymentPayloads({}));
+        });
         navigate(`/${nextUrl}`);
-        dispatch(fetchPaymentPayloads());
       })
       .finally(() => setLoadingBtn(false));
   };
@@ -359,7 +360,7 @@ const PaymentPayloadEdit = () => {
                           placeholder={t('select.locale')}
                           defaultValue={{
                             label: languages.find(
-                              (item) => item.locale === i18n.language
+                              (item) => item.locale === i18n.language,
                             )?.title,
                             value: i18n.language,
                           }}
@@ -559,6 +560,313 @@ const PaymentPayloadEdit = () => {
                           form={form}
                           multiple={false}
                         />
+                      </Form.Item>
+                    </Col>
+                  </>
+                ) : activePayment?.label.toLowerCase() === 'mollie' ? (
+                  <>
+                    <Col span={12}>
+                      <Form.Item
+                        label={t('partner.id')}
+                        name='partner_id'
+                        rules={[{ required: true, message: t('required') }]}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        label={t('profile.id')}
+                        name='profile_id'
+                        rules={[{ required: true, message: t('required') }]}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        label={t('secret.key')}
+                        name='secret_key'
+                        rules={[{ required: true, message: t('required') }]}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        label={t('currency')}
+                        name='currency'
+                        rules={[{ required: true, message: t('required') }]}
+                      >
+                        <AsyncSelect
+                          placeholder={t('select.currency')}
+                          valuePropName='label'
+                          defaultValue={{
+                            value: defaultCurrency.id,
+                            label: defaultCurrency.title,
+                          }}
+                          fetchOptions={() =>
+                            currencyService.getAll().then(({ data }) => {
+                              return data
+                                .filter((item) => item.active)
+                                .map((item) => ({
+                                  value: item.id,
+                                  label: `${item.title}`,
+                                  key: item.id,
+                                }));
+                            })
+                          }
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                      <Form.Item rules={[{ required: true }]} label={t('logo')}>
+                        <MediaUpload
+                          type='brands'
+                          imageList={image}
+                          setImageList={setImage}
+                          form={form}
+                          multiple={false}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </>
+                ) : activePayment?.label?.toLowerCase() === 'moya-sar' ? (
+                  <>
+                    <Col span={12}>
+                      <Form.Item
+                        label={t('public.key')}
+                        name='public_key'
+                        rules={[{ required: true, message: t('required') }]}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        label={t('secret.key')}
+                        name='secret_key'
+                        rules={[{ required: true, message: t('required') }]}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        label={t('secret.token')}
+                        name='secret_token'
+                        rules={[{ required: true, message: t('required') }]}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        label={t('currency')}
+                        name='currency'
+                        rules={[{ required: true, message: t('required') }]}
+                      >
+                        <AsyncSelect
+                          placeholder={t('select.currency')}
+                          valuePropName='label'
+                          defaultValue={{
+                            value: defaultCurrency.id,
+                            label: defaultCurrency.title,
+                          }}
+                          fetchOptions={() =>
+                            currencyService.getAll().then(({ data }) => {
+                              return data
+                                .filter((item) => item.active)
+                                .map((item) => ({
+                                  value: item.id,
+                                  label: `${item.title}`,
+                                  key: item.id,
+                                }));
+                            })
+                          }
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                      <Form.Item rules={[{ required: true }]} label={t('logo')}>
+                        <MediaUpload
+                          type='brands'
+                          imageList={image}
+                          setImageList={setImage}
+                          form={form}
+                          multiple={false}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </>
+                ) : activePayment?.label?.toLowerCase() === 'paytabs' ? (
+                  <>
+                    <Col span={12}>
+                      <Form.Item
+                        label={t('server.key')}
+                        name='server_key'
+                        rules={[{ required: true, message: t('required') }]}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        label={t('profile.id')}
+                        name='profile_id'
+                        rules={[{ required: true, message: t('required') }]}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        label={t('client.key')}
+                        name='client_key'
+                        rules={[{ required: true, message: t('required') }]}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        label={t('currency')}
+                        name='currency'
+                        rules={[{ required: true, message: t('required') }]}
+                      >
+                        <AsyncSelect
+                          placeholder={t('select.currency')}
+                          valuePropName='label'
+                          defaultValue={{
+                            value: defaultCurrency.id,
+                            label: defaultCurrency.title,
+                          }}
+                          fetchOptions={() =>
+                            currencyService.getAll().then(({ data }) => {
+                              return data
+                                .filter((item) => item.active)
+                                .map((item) => ({
+                                  value: item.id,
+                                  label: `${item.title}`,
+                                  key: item.id,
+                                }));
+                            })
+                          }
+                        />
+                      </Form.Item>
+                    </Col>
+                  </>
+                ) : activePayment?.label?.toLowerCase() === 'zain-cash' ? (
+                  <>
+                    <Col span={12}>
+                      <Form.Item
+                        label={t('url')}
+                        name='url'
+                        rules={[{ required: true, message: t('required') }]}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        label={t('msisdn')}
+                        name='msisdn'
+                        rules={[{ required: true, message: t('required') }]}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        label={t('merchantId')}
+                        name='merchantId'
+                        rules={[{ required: true, message: t('required') }]}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        label={t('key')}
+                        name='key'
+                        rules={[{ required: true, message: t('required') }]}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        label={t('currency')}
+                        name='currency'
+                        rules={[{ required: true, message: t('required') }]}
+                      >
+                        <AsyncSelect
+                          placeholder={t('select.currency')}
+                          valuePropName='label'
+                          defaultValue={{
+                            value: defaultCurrency.id,
+                            label: defaultCurrency.title,
+                          }}
+                          fetchOptions={() =>
+                            currencyService.getAll().then(({ data }) => {
+                              return data
+                                .filter((item) => item.active)
+                                .map((item) => ({
+                                  value: item.id,
+                                  label: `${item.title}`,
+                                  key: item.id,
+                                }));
+                            })
+                          }
+                        />
+                      </Form.Item>
+                    </Col>
+                  </>
+                ) : activePayment?.label?.toLowerCase() === 'mercado-pago' ? (
+                  <>
+                    <Col span={12}>
+                      <Form.Item
+                        label={t('token')}
+                        name='token'
+                        rules={[{ required: true, message: t('required') }]}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        label={t('currency')}
+                        name='currency'
+                        rules={[{ required: true, message: t('required') }]}
+                      >
+                        <AsyncSelect
+                          placeholder={t('select.currency')}
+                          valuePropName='label'
+                          defaultValue={{
+                            value: defaultCurrency.id,
+                            label: defaultCurrency.title,
+                          }}
+                          fetchOptions={() =>
+                            currencyService.getAll().then(({ data }) => {
+                              return data
+                                .filter((item) => item.active)
+                                .map((item) => ({
+                                  value: item.id,
+                                  label: `${item.title}`,
+                                  key: item.id,
+                                }));
+                            })
+                          }
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        label={t('sandbox')}
+                        name='sandbox'
+                        valuePropName='checked'
+                      >
+                        <Switch />
                       </Form.Item>
                     </Col>
                   </>

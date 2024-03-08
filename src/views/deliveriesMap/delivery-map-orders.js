@@ -11,9 +11,36 @@ import userIcon from '../../assets/images/user.jpg';
 import shopIcon from '../../assets/images/shop.png';
 import courierIcon from '../../assets/images/courier.png';
 
-const CourierMarker = () => <img src={courierIcon} width={80} alt='user' />;
-const ShopMarker = () => <img src={shopIcon} width={50} alt='shop' />;
-const UserMarker = () => <img src={userIcon} width={50} alt='user' />;
+const CourierMarker = () => (
+  <div
+    style={{
+      position: 'absolute',
+      transform: 'translate(-50%, -100%)',
+    }}
+  >
+    <img src={courierIcon} width={80} alt='user' />
+  </div>
+);
+const ShopMarker = () => (
+  <div
+    style={{
+      position: 'absolute',
+      transform: 'translate(-50%, -100%)',
+    }}
+  >
+    <img src={shopIcon} width={50} alt='shop' />
+  </div>
+);
+const UserMarker = () => (
+  <div
+    style={{
+      position: 'absolute',
+      transform: 'translate(-50%, -100%)',
+    }}
+  >
+    <img src={userIcon} width={50} alt='user' />
+  </div>
+);
 
 export default function DeliveryMapOrders() {
   const { t } = useTranslation();
@@ -23,7 +50,7 @@ export default function DeliveryMapOrders() {
   const deliveryman = activeMenu?.data?.deliveryman;
   const { settings } = useSelector(
     (state) => state.globalSettings,
-    shallowEqual
+    shallowEqual,
   );
   const center = getDefaultLocation(settings);
 
@@ -31,10 +58,10 @@ export default function DeliveryMapOrders() {
     const markers = [
       {
         lat: Number(
-          deliveryman?.delivery_man_setting?.location?.latitude || '0'
+          deliveryman?.delivery_man_setting?.location?.latitude || '0',
         ),
         lng: Number(
-          deliveryman?.delivery_man_setting?.location?.longitude || '0'
+          deliveryman?.delivery_man_setting?.location?.longitude || '0',
         ),
       },
       {
@@ -82,10 +109,10 @@ export default function DeliveryMapOrders() {
             >
               <CourierMarker
                 lat={Number(
-                  deliveryman?.delivery_man_setting?.location?.latitude || '0'
+                  deliveryman?.delivery_man_setting?.location?.latitude || '0',
                 )}
                 lng={Number(
-                  deliveryman?.delivery_man_setting?.location?.longitude || '0'
+                  deliveryman?.delivery_man_setting?.location?.longitude || '0',
                 )}
                 url={IMG_URL + deliveryman?.img}
               />

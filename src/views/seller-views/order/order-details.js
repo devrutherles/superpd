@@ -40,7 +40,7 @@ import {
 } from 'react-icons/bs';
 import { MdEmail, MdLocationOn } from 'react-icons/md';
 import { IMG_URL } from '../../../configs/app-global';
-import { BiDollar, BiMessageDots, BiMoney } from 'react-icons/bi';
+import { BiMessageDots, BiMoney } from 'react-icons/bi';
 import { FiShoppingCart } from 'react-icons/fi';
 import { IoMapOutline } from 'react-icons/io5';
 import moment from 'moment';
@@ -51,11 +51,11 @@ export default function SellerOrderDetails() {
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
   const { statusList } = useSelector(
     (state) => state.orderStatus,
-    shallowEqual
+    shallowEqual,
   );
   const data = activeMenu?.data?.data;
   const { t } = useTranslation();
@@ -65,7 +65,6 @@ export default function SellerOrderDetails() {
   const productListRef = useRef();
 
   const { isDemo } = useDemo();
-  const [totalPrice, setTotalPrice] = useState(null);
   const [loading, setLoading] = useState(false);
   const [orderDetails, setOrderDetails] = useState(null);
   const [orderDeliveryDetails, setOrderDeliveryDetails] = useState(null);
@@ -114,7 +113,11 @@ export default function SellerOrderDetails() {
       dataIndex: 'origin_price',
       key: 'origin_price',
       render: (origin_price) =>
-        numberToPrice(origin_price, defaultCurrency?.symbol),
+        numberToPrice(
+          origin_price,
+          defaultCurrency?.symbol,
+          defaultCurrency?.symbol,
+        ),
     },
     {
       title: t('quantity'),
@@ -132,14 +135,22 @@ export default function SellerOrderDetails() {
       dataIndex: 'discount',
       key: 'discount',
       render: (discount = 0, row) =>
-        numberToPrice(discount / row.quantity, defaultCurrency?.symbol),
+        numberToPrice(
+          discount / row.quantity,
+          defaultCurrency?.symbol,
+          defaultCurrency?.symbol,
+        ),
     },
     {
       title: t('tax'),
       dataIndex: 'tax',
       key: 'tax',
       render: (tax, row) =>
-        numberToPrice(tax / row.quantity, defaultCurrency?.symbol),
+        numberToPrice(
+          tax / row.quantity,
+          defaultCurrency?.symbol,
+          defaultCurrency?.symbol,
+        ),
     },
     {
       title: t('total.price'),
@@ -150,9 +161,18 @@ export default function SellerOrderDetails() {
           total_price +
           row?.addons?.reduce((total, item) => (total += item.total_price), 0);
 
-        setTotalPrice(data);
-        return numberToPrice(data, defaultCurrency?.symbol);
+        return numberToPrice(
+          data,
+          defaultCurrency?.symbol,
+          defaultCurrency?.symbol,
+        );
       },
+    },
+    {
+      title: t('note'),
+      dataIndex: 'note',
+      key: 'note',
+      render: (note) => note || '--',
     },
   ];
 
@@ -161,6 +181,7 @@ export default function SellerOrderDetails() {
       title: t('date'),
       dataIndex: 'date',
       key: 'date',
+      render: (_, row) => moment(row?.date).format('YYYY-MM-DD HH:mm'),
     },
     {
       title: t('document'),
@@ -181,20 +202,24 @@ export default function SellerOrderDetails() {
 
   const documents = [
     {
-      price: numberToPrice(data?.total_price, defaultCurrency.symbol),
+      price: numberToPrice(
+        data?.total_price,
+        defaultCurrency.symbol,
+        defaultCurrency?.symbol,
+      ),
       number: (
-        <Link to={`/orders/generate-invoice/${data?.id}`}>#{data?.id}</Link>
+        <Link to={`/seller/generate-invoice/${data?.id}`}>#{data?.id}</Link>
       ),
       document: t('invoice'),
-      date: data?.delivery_date,
+      date: moment(data?.transaction?.created_at).format('YYYY-MM-DD HH:mm'),
     },
     {
       price: '-',
       number: (
-        <Link to={`/orders/generate-invoice/${data?.id}`}>#{data?.id}</Link>
+        <Link to={`/seller/generate-invoice/${data?.id}`}>#{data?.id}</Link>
       ),
       document: t('delivery.reciept'),
-      date: data?.delivery_date,
+      date: moment(data?.transaction?.created_at).format('YYYY-MM-DD HH:mm'),
     },
   ];
 
@@ -222,7 +247,7 @@ export default function SellerOrderDetails() {
           setMenuData({
             activeMenu,
             data: { details, currency, user, id, createdAt, price, data },
-          })
+          }),
         );
       })
       .finally(() => {
@@ -304,7 +329,8 @@ export default function SellerOrderDetails() {
                     <Typography.Text className='order-card-title'>
                       {numberToPrice(
                         data?.total_price,
-                        defaultCurrency?.symbol
+                        defaultCurrency?.symbol,
+                        defaultCurrency?.symbol,
                       )}
                     </Typography.Text>
                   )}
@@ -338,7 +364,7 @@ export default function SellerOrderDetails() {
                     <Typography.Text className='order-card-title'>
                       {data?.details?.reduce(
                         (total, item) => (total += item.quantity),
-                        0
+                        0,
                       )}
                     </Typography.Text>
                   )}
@@ -352,7 +378,7 @@ export default function SellerOrderDetails() {
             <Card>
               <Steps
                 current={statusList?.findIndex(
-                  (item) => item.name === data?.status
+                  (item) => item.name === data?.status,
                 )}
               >
                 {statusList?.slice(0, -1).map((item) => (
@@ -371,7 +397,7 @@ export default function SellerOrderDetails() {
                     {t('created.date.&.time')}:
                     <span className='ml-2'>
                       <BsCalendarDay className='mr-1' />{' '}
-                      {moment(data?.created_at).format('YYYY-MM-DD hh:mm')}{' '}
+                      {moment(data?.created_at).format('YYYY-MM-DD HH:mm')}{' '}
                     </span>
                   </div>
                   <br />
@@ -490,25 +516,75 @@ export default function SellerOrderDetails() {
                 <br />
                 <span>{t('discount')}:</span>
                 <br />
+                {data?.coupon && (
+                  <>
+                    <span>{t('coupon')}:</span>
+                    <br />
+                  </>
+                )}
+                <span>{t('service.fee')}:</span>
+                <br />
                 <h3>{t('total.price')}:</h3>
               </div>
               <div>
                 <span>
-                  {numberToPrice(data?.delivery_fee, defaultCurrency?.symbol)}
-                </span>
-                <br />
-                <span>{numberToPrice(data?.tax, defaultCurrency?.symbol)}</span>
-                <br />
-                <span>
-                  {numberToPrice(totalPrice, defaultCurrency?.symbol)}
+                  {numberToPrice(
+                    data?.delivery_fee,
+                    defaultCurrency?.symbol,
+                    defaultCurrency?.symbol,
+                  )}
                 </span>
                 <br />
                 <span>
-                  {numberToPrice(data?.total_discount, defaultCurrency?.symbol)}
+                  {numberToPrice(
+                    data?.tax,
+                    defaultCurrency?.symbol,
+                    defaultCurrency?.symbol,
+                  )}
+                </span>
+                <br />
+                <span>
+                  {numberToPrice(
+                    data?.origin_price,
+                    defaultCurrency?.symbol,
+                    defaultCurrency?.symbol,
+                  )}
+                </span>
+                <br />
+                <span>
+                  {numberToPrice(
+                    data?.total_discount,
+                    defaultCurrency?.symbol,
+                    defaultCurrency?.symbol,
+                  )}
+                </span>
+                <br />
+                {data?.coupon && (
+                  <>
+                    <span>
+                      {numberToPrice(
+                        data?.coupon?.price,
+                        defaultCurrency?.symbol,
+                        defaultCurrency?.symbol,
+                      )}
+                    </span>
+                    <br />
+                  </>
+                )}
+                <span>
+                  {numberToPrice(
+                    data?.service_fee,
+                    defaultCurrency?.symbol,
+                    defaultCurrency?.symbol,
+                  )}
                 </span>
                 <br />
                 <h3 ref={totalPriceRef}>
-                  {numberToPrice(data?.total_price, defaultCurrency?.symbol)}
+                  {numberToPrice(
+                    data?.total_price,
+                    defaultCurrency?.symbol,
+                    defaultCurrency?.symbol,
+                  )}
                 </h3>
               </div>
             </Space>
@@ -517,7 +593,7 @@ export default function SellerOrderDetails() {
         <Col span={8} className='order_info'>
           {data?.delivery_type !== 'dine_in' && (
             <>
-              {data?.delivery_type !== 'dine_in' && (
+              {data?.delivery_type === 'delivery' && (
                 <Card
                   title={t('deliveryman')}
                   extra={
@@ -540,7 +616,7 @@ export default function SellerOrderDetails() {
                   !data?.deliveryman ? (
                     <p>
                       {t(
-                        'The supplier is not assigned or delivery type pickup'
+                        'The supplier is not assigned or delivery type pickup',
                       )}
                     </p>
                   ) : (
@@ -600,97 +676,102 @@ export default function SellerOrderDetails() {
                 </Card>
               )}
 
-              <Card>
-                <div className='d-flex w-100 customer-info-container'>
-                  {loading ? (
-                    <Skeleton.Avatar size={64} shape='square' />
-                  ) : (
-                    <Avatar shape='square' size={64} src={data?.user?.img} />
-                  )}
-
-                  <h5 className='customer-name'>
+              {!!data?.user && (
+                <Card>
+                  <div className='d-flex w-100 customer-info-container'>
                     {loading ? (
-                      <Skeleton.Button size={20} style={{ width: 70 }} />
+                      <Skeleton.Avatar size={64} shape='square' />
                     ) : (
-                      data?.user?.firstname + ' ' + (data?.user?.lastname || '')
+                      <Avatar shape='square' size={64} src={data?.user?.img} />
                     )}
-                  </h5>
 
-                  <div className='customer-info-detail'>
-                    <div className='customer-info'>
-                      <span className='title'>{t('phone')}</span>
-                      <span className='description'>
-                        <BsFillTelephoneFill />
-                        {loading ? (
-                          <Skeleton.Button size={16} />
-                        ) : (
-                          data?.user?.phone || 'none'
-                        )}
-                      </span>
-                    </div>
+                    <h5 className='customer-name'>
+                      {loading ? (
+                        <Skeleton.Button size={20} style={{ width: 70 }} />
+                      ) : (
+                        data?.user?.firstname +
+                        ' ' +
+                        (data?.user?.lastname || '')
+                      )}
+                    </h5>
 
-                    <div className='customer-info'>
-                      <span className='title'>{t('email')}</span>
-                      <span className='description'>
-                        <MdEmail />
-                        {loading ? (
-                          <Skeleton.Button size={16} />
-                        ) : isDemo ? (
-                          hideEmail(data?.user?.email)
-                        ) : (
-                          data?.user?.email
-                        )}
-                      </span>
-                    </div>
-                    <div className='customer-info'>
-                      <span className='title'>{t('registration.date')}</span>
-                      <span className='description'>
-                        <BsCalendarDay />
-                        {loading ? (
-                          <Skeleton.Button size={16} />
-                        ) : (
-                          moment(data?.user?.created_at).format(
-                            'DD-MM-YYYY, hh:mm'
-                          )
-                        )}
-                      </span>
-                    </div>
-                    <div className='customer-info'>
-                      <span className='title'>{t('orders.count')}</span>
-                      <span className='description'>
-                        {loading ? (
-                          <Skeleton.Button size={16} />
-                        ) : (
-                          <Badge
-                            showZero
-                            style={{ backgroundColor: '#3d7de3' }}
-                            count={data?.user?.orders_count || 0}
-                          />
-                        )}
-                      </span>
-                    </div>
-                    <div className='customer-info'>
-                      <span className='title'>
-                        {t('spent.since.registration')}
-                      </span>
-                      <span className='description'>
-                        {loading ? (
-                          <Skeleton.Button size={16} />
-                        ) : (
-                          <Badge
-                            showZero
-                            style={{ backgroundColor: '#48e33d' }}
-                            count={numberToPrice(
-                              data?.user?.orders_sum_price,
-                              defaultCurrency?.symbol
-                            )}
-                          />
-                        )}
-                      </span>
+                    <div className='customer-info-detail'>
+                      <div className='customer-info'>
+                        <span className='title'>{t('phone')}</span>
+                        <span className='description'>
+                          <BsFillTelephoneFill />
+                          {loading ? (
+                            <Skeleton.Button size={16} />
+                          ) : (
+                            data?.user?.phone || 'none'
+                          )}
+                        </span>
+                      </div>
+
+                      <div className='customer-info'>
+                        <span className='title'>{t('email')}</span>
+                        <span className='description'>
+                          <MdEmail />
+                          {loading ? (
+                            <Skeleton.Button size={16} />
+                          ) : isDemo ? (
+                            hideEmail(data?.user?.email)
+                          ) : (
+                            data?.user?.email
+                          )}
+                        </span>
+                      </div>
+                      <div className='customer-info'>
+                        <span className='title'>{t('registration.date')}</span>
+                        <span className='description'>
+                          <BsCalendarDay />
+                          {loading ? (
+                            <Skeleton.Button size={16} />
+                          ) : (
+                            moment(data?.user?.created_at).format(
+                              'DD-MM-YYYY, hh:mm',
+                            )
+                          )}
+                        </span>
+                      </div>
+                      <div className='customer-info'>
+                        <span className='title'>{t('orders.count')}</span>
+                        <span className='description'>
+                          {loading ? (
+                            <Skeleton.Button size={16} />
+                          ) : (
+                            <Badge
+                              showZero
+                              style={{ backgroundColor: '#3d7de3' }}
+                              count={data?.user?.orders_count || 0}
+                            />
+                          )}
+                        </span>
+                      </div>
+                      <div className='customer-info'>
+                        <span className='title'>
+                          {t('spent.since.registration')}
+                        </span>
+                        <span className='description'>
+                          {loading ? (
+                            <Skeleton.Button size={16} />
+                          ) : (
+                            <Badge
+                              showZero
+                              style={{ backgroundColor: '#48e33d' }}
+                              count={numberToPrice(
+                                data?.user?.orders_sum_price,
+                                defaultCurrency?.symbol,
+                                defaultCurrency?.symbol,
+                              )}
+                            />
+                          )}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
+              )}
               {data?.review && !loading && (
                 <Card title={t('messages')}>
                   <div className='order-message'>
@@ -698,7 +779,7 @@ export default function SellerOrderDetails() {
                     <Space className='w-100 justify-content-end'>
                       <span className='date'>
                         {moment(data?.review?.created_at).format(
-                          'YYYY-MM-DD hh:mm'
+                          'YYYY-MM-DD HH:mm',
                         )}
                       </span>
                     </Space>
@@ -728,11 +809,15 @@ export default function SellerOrderDetails() {
                     </div>
                   )}
 
-                  <div className='delivery-info'>
-                    <b>
-                      <BiDollar size={16} />
-                    </b>
-                    <span>{data?.shop?.price}</span>
+                  <div className='delivery-info my-1'>
+                    <strong>{t('min.delivery.price')}:</strong>
+                    <span>
+                      {numberToPrice(
+                        data?.shop?.price,
+                        defaultCurrency?.symbol,
+                        defaultCurrency?.symbol,
+                      )}
+                    </span>
                   </div>
                   <div className='delivery-info'>
                     <b>

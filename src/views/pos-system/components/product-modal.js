@@ -10,20 +10,20 @@ import {
   Spin,
 } from 'antd';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import getImage from '../../../helpers/getImage';
+import getImage from 'helpers/getImage';
 import {
   MinusOutlined,
   PlusCircleOutlined,
   PlusOutlined,
 } from '@ant-design/icons';
-import numberToPrice from '../../../helpers/numberToPrice';
+import numberToPrice from 'helpers/numberToPrice';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
-import { addToCart } from '../../../redux/slices/cart';
-import numberToQuantity from '../../../helpers/numberToQuantity';
-import getImageFromStock from '../../../helpers/getImageFromStock';
-import { getExtras, sortExtras } from '../../../helpers/getExtras';
-import useDidUpdate from '../../../helpers/useDidUpdate';
+import { addToCart } from 'redux/slices/cart';
+import numberToQuantity from 'helpers/numberToQuantity';
+import getImageFromStock from 'helpers/getImageFromStock';
+import { getExtras, sortExtras } from 'helpers/getExtras';
+import useDidUpdate from 'helpers/useDidUpdate';
 import AddonsItem from './addons';
 import productService from 'services/product';
 
@@ -47,12 +47,12 @@ export default function ProductModal({ extrasModal, setExtrasModal }) {
     },
   });
   const [counter, setCounter] = useState(
-    extrasModal.quantity || data.quantity || data.min_qty
+    extrasModal.quantity || data.quantity || data.min_qty,
   );
 
   const { currentBag, currency } = useSelector(
     (state) => state.cart,
-    shallowEqual
+    shallowEqual,
   );
 
   const handleSubmit = () => {
@@ -73,7 +73,7 @@ export default function ProductModal({ extrasModal, setExtrasModal }) {
     };
     if (orderItem.quantity > currentStock.quantity) {
       toast.warning(
-        `${t('you.cannot.order.more.than')} ${currentStock.quantity}`
+        `${t('you.cannot.order.more.than')} ${currentStock.quantity}`,
       );
       return;
     }
@@ -83,7 +83,7 @@ export default function ProductModal({ extrasModal, setExtrasModal }) {
 
   const handleExtrasClick = (e) => {
     const index = extrasIds.findIndex(
-      (item) => item.extra_group_id === e.extra_group_id
+      (item) => item.extra_group_id === e.extra_group_id,
     );
     let array = extrasIds;
     if (index > -1) array = array.slice(0, index);
@@ -95,7 +95,7 @@ export default function ProductModal({ extrasModal, setExtrasModal }) {
       const index = extrasIds.findIndex((item) =>
         element[0].extra_group_id != e.extra_group_id
           ? item.extra_group_id === element[0].extra_group_id
-          : item.extra_group_id === e.extra_group_id
+          : item.extra_group_id === e.extra_group_id,
       );
       if (element[0].level >= e.level) {
         var itemData =
@@ -147,9 +147,11 @@ export default function ProductModal({ extrasModal, setExtrasModal }) {
         (total +=
           item.product.stock.price *
           (item.product.quantity || item.product.min_qty)),
-      0
+      0,
     );
-    return addonPrice + showExtras?.stock[priceKey || 'price'] * counter;
+    return addonPrice + showExtras?.stock
+      ? showExtras?.stock[priceKey || 'price']
+      : 0 * counter;
   }
 
   function addonCalculate(id, quantity) {
@@ -174,13 +176,13 @@ export default function ProductModal({ extrasModal, setExtrasModal }) {
           };
         }
         return addon;
-      })
+      }),
     );
   }
 
   useDidUpdate(() => {
-    const addons = showExtras.stock.addons.filter((item) =>
-      selectedValues.includes(String(item.addon_id))
+    const addons = showExtras?.stock?.addons.filter((item) =>
+      selectedValues.includes(String(item?.addon_id)),
     );
 
     handleAddonClick(addons);
@@ -201,19 +203,19 @@ export default function ProductModal({ extrasModal, setExtrasModal }) {
         setData(data);
         const myData = sortExtras(data, extrasModal?.addons);
         setExtras(myData.extras);
-        setCounter(extrasModal.quantity || data.quantity || data.min_qty);
+        setCounter(extrasModal?.quantity || data?.quantity || data?.min_qty);
         setStock(myData.stock);
         setShowExtras(getExtras(extrasIds, myData.extras, myData.stock));
         getExtras('', myData.extras, myData.stock).extras?.forEach(
           (element) => {
             setExtrasIds((prev) => [...prev, element[0]]);
-          }
+          },
         );
         if (extrasModal?.addons) {
           setSelectedValues(
             extrasModal?.addons?.map((addon) =>
-              String(addon?.countable?.id || addon.countable_id)
-            ) || []
+              String(addon?.countable?.id || addon.countable_id),
+            ) || [],
           );
         }
       })
@@ -256,13 +258,18 @@ export default function ProductModal({ extrasModal, setExtrasModal }) {
             <Descriptions title={data.translation?.title}>
               <Descriptions.Item label={t('price')} span={3}>
                 <div className={currentStock?.discount ? 'strike' : ''}>
-                  {numberToPrice(calculateTotalPrice(), currency?.symbol)}
+                  {numberToPrice(
+                    calculateTotalPrice(),
+                    currency?.symbol,
+                    currency?.position,
+                  )}
                 </div>
                 {currentStock?.discount ? (
                   <div className='ml-2 font-weight-bold'>
                     {numberToPrice(
                       calculateTotalPrice('total_price'),
-                      currency?.symbol
+                      currency?.symbol,
+                      currency?.position,
                     )}
                   </div>
                 ) : (
@@ -273,7 +280,11 @@ export default function ProductModal({ extrasModal, setExtrasModal }) {
                 {numberToQuantity(currentStock?.quantity, data.unit)}
               </Descriptions.Item>
               <Descriptions.Item label={t('tax')} span={3}>
-                {numberToPrice(currentStock?.tax, currency?.symbol)}
+                {numberToPrice(
+                  currentStock?.tax,
+                  currency?.symbol,
+                  currency?.position,
+                )}
               </Descriptions.Item>
             </Descriptions>
           </Col>

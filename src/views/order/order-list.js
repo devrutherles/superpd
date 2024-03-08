@@ -26,6 +26,7 @@ import {
   disableRefetch,
   setMenu,
   setMenuData,
+  setRefetch,
 } from '../../redux/slices/menu';
 import { useTranslation } from 'react-i18next';
 
@@ -70,11 +71,11 @@ export default function OrderList() {
   const { t } = useTranslation();
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
   const { statusList } = useSelector(
     (state) => state.orderStatus,
-    shallowEqual
+    shallowEqual,
   );
   const { isDemo } = useDemo();
   const [orderDetails, setOrderDetails] = useState(null);
@@ -100,7 +101,7 @@ export default function OrderList() {
         url: `order/${row.id}`,
         id: 'order_edit',
         name: t('edit.order'),
-      })
+      }),
     );
     navigate(`/order/${row.id}`);
   };
@@ -111,7 +112,7 @@ export default function OrderList() {
         url: `order/details/${row.id}`,
         id: 'order_details',
         name: t('order.details'),
-      })
+      }),
     );
     navigate(`/order/details/${row.id}`);
   };
@@ -129,11 +130,16 @@ export default function OrderList() {
       is_show: true,
       dataIndex: 'user',
       key: 'user',
-      render: (user) => (
-        <div>
-          {user?.firstname} {user?.lastname || ''}
-        </div>
-      ),
+      render: (user) => {
+        if (!user) {
+          return <Tag color='red'>{t('deleted.user')}</Tag>;
+        }
+        return (
+          <div>
+            {user?.firstname || ''} {user?.lastname || ''}
+          </div>
+        );
+      },
     },
     {
       title: t('status'),
@@ -172,7 +178,7 @@ export default function OrderList() {
       key: 'deliveryman',
       render: (deliveryman, row) => (
         <div>
-          {row.status === 'ready' && row.delivery_type !== 'pickup' ? (
+          {row.status === 'ready' && row.delivery_type === 'delivery' ? (
             <Button
               disabled={row.deleted_at}
               type='link'
@@ -215,7 +221,13 @@ export default function OrderList() {
         const status = row.transaction?.status;
         return (
           <>
-            <span>{numberToPrice(total_price, defaultCurrency.symbol)}</span>
+            <span>
+              {numberToPrice(
+                total_price,
+                defaultCurrency?.symbol,
+                defaultCurrency?.position,
+              )}
+            </span>
             <br />
             <span
               className={
@@ -246,6 +258,7 @@ export default function OrderList() {
       is_show: true,
       dataIndex: 'created_at',
       key: 'created_at',
+      render: (_, row) => moment(row?.created_at).format('YYYY-MM-DD HH:mm'),
     },
     {
       title: t('delivery.date'),
@@ -324,11 +337,11 @@ export default function OrderList() {
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [dateRange, setDateRange] = useState(
     moment().subtract(1, 'months'),
-    moment()
+    moment(),
   );
   const { orders, loading, params, statistic, meta } = useSelector(
     (state) => state.orders,
-    shallowEqual
+    shallowEqual,
   );
   const data = activeMenu.data;
   const paramsData = {
@@ -364,7 +377,7 @@ export default function OrderList() {
       setMenuData({
         activeMenu,
         data: { ...data, perPage, page, column, sort },
-      })
+      }),
     );
   }
 
@@ -375,7 +388,7 @@ export default function OrderList() {
         {},
         ...id.map((item, index) => ({
           [`ids[${index}]`]: item,
-        }))
+        })),
       ),
     };
 
@@ -426,7 +439,7 @@ export default function OrderList() {
       setMenuData({
         activeMenu,
         data: { ...data, ...{ [name]: item } },
-      })
+      }),
     );
   };
 
@@ -450,7 +463,10 @@ export default function OrderList() {
         id: 'pos.system_01',
         url: 'pos-system',
         name: 'pos.system',
-      })
+        icon: 'laptop',
+        data: activeMenu.data,
+        refetch: true,
+      }),
     );
     navigate('/pos-system');
   };
@@ -486,7 +502,7 @@ export default function OrderList() {
       data.map((item) => ({
         label: item.translation?.title,
         value: item.id,
-      }))
+      })),
     );
   }
 
@@ -524,7 +540,7 @@ export default function OrderList() {
         setMenuData({
           activeMenu,
           data: null,
-        })
+        }),
       );
     });
     dispatch(fetchOrders({ status: null, page: data?.page, perPage: 20 }));

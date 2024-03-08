@@ -1,22 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { Button, Card, Col, Form, Input, Row } from 'antd';
-import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import {
-  disableRefetch,
-  removeFromMenu,
-  setMenuData,
-} from '../../../redux/slices/menu';
+import { Card, Form } from 'antd';
+import { batch, shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { disableRefetch, removeFromMenu, setMenuData } from 'redux/slices/menu';
 import { useTranslation } from 'react-i18next';
-import LanguageList from '../../../components/language-list';
-import getTranslationFields from '../../../helpers/getTranslationFields';
-import Map from '../../../components/map';
-import branchService from '../../../services/seller/branch';
-import { fetchBranch } from '../../../redux/slices/branch';
-import getDefaultLocation from '../../../helpers/getDefaultLocation';
-import { usePlacesWidget } from 'react-google-autocomplete';
-import { MAP_API_KEY } from '../../../configs/app-global';
+import LanguageList from 'components/language-list';
+import getTranslationFields from 'helpers/getTranslationFields';
+import branchService from 'services/seller/branch';
+import { fetchBranch } from 'redux/slices/branch';
+import BranchForm from './branch-form';
 
 const SellerBranchEdit = () => {
   const { t } = useTranslation();
@@ -25,21 +18,8 @@ const SellerBranchEdit = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const { id } = useParams();
-  const { settings } = useSelector(
-    (state) => state.globalSettings,
-    shallowEqual
-  );
-  const { google_map_key } = useSelector(
-    (state) => state.globalSettings.settings,
-    shallowEqual
-  );
-  const [location, setLocation] = useState(getDefaultLocation(settings));
-  const [loadingBtn, setLoadingBtn] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { languages, defaultLang } = useSelector(
-    (state) => state.formLang,
-    shallowEqual
-  );
+  const { languages } = useSelector((state) => state.formLang, shallowEqual);
 
   useEffect(() => {
     return () => {
@@ -48,6 +28,7 @@ const SellerBranchEdit = () => {
       data.close_time = JSON.stringify(data?.close_time);
       dispatch(setMenuData({ activeMenu, data }));
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function getLanguageFields(data) {
@@ -57,7 +38,7 @@ const SellerBranchEdit = () => {
     const { translations } = data;
     const result = languages.map((item) => ({
       [`title[${item.locale}]`]: translations.find(
-        (el) => el.locale === item.locale
+        (el) => el.locale === item.locale,
       )?.title,
     }));
     return Object.assign({}, ...result);
@@ -69,14 +50,18 @@ const SellerBranchEdit = () => {
       .getById(id)
       .then((res) => {
         let branch = res.data;
-        setLocation({
-          lat: Number(branch?.location.latitude),
-          lng: Number(branch?.location.longitude),
-        });
-        form.setFieldsValue({
+        const data = {
           ...branch,
+          mapCoordinates: {
+            lat: Number(branch?.location.latitude),
+            lng: Number(branch?.location.longitude),
+          },
           ...getLanguageFields(branch),
           address: branch.address?.address,
+        };
+        dispatch(setMenuData({ activeMenu, data }));
+        form.setFieldsValue({
+          ...data,
         });
       })
       .finally(() => {
@@ -85,7 +70,7 @@ const SellerBranchEdit = () => {
       });
   };
 
-  const onFinish = (values) => {
+  const handleSubmit = (values) => {
     const body = {
       title: getTranslationFields(languages, values, 'title'),
       address: {
@@ -95,42 +80,28 @@ const SellerBranchEdit = () => {
         floor: null,
       },
       location: {
-        longitude: location.lng,
-        latitude: location.lat,
+        longitude: values.location.lng,
+        latitude: values.location.lat,
       },
     };
-    setLoadingBtn(true);
     const nextUrl = 'seller/branch';
-    branchService
-      .update(id, body)
-      .then(() => {
-        toast.success(t('successfully.created'));
+
+    return branchService.update(id, body).then(() => {
+      toast.success(t('successfully.updated'));
+      batch(() => {
         dispatch(removeFromMenu({ ...activeMenu, nextUrl }));
-        navigate(`/${nextUrl}`);
-        dispatch(fetchBranch());
-      })
-      .finally(() => setLoadingBtn(false));
+        dispatch(fetchBranch({}));
+      });
+      navigate(`/${nextUrl}`);
+    });
   };
 
   useEffect(() => {
     if (activeMenu.refetch) {
       getBranch(id);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu.refetch]);
-
-  const { ref } = usePlacesWidget({
-    apiKey: google_map_key || MAP_API_KEY,
-    onPlaceSelected: (place) => {
-      const location = {
-        lat: place?.geometry.location.lat(),
-        lng: place?.geometry.location.lng(),
-      };
-      setLocation(location);
-      form.setFieldsValue({
-        [`address[${defaultLang}]`]: place?.formatted_address,
-      });
-    },
-  });
 
   return (
     <Card
@@ -139,63 +110,7 @@ const SellerBranchEdit = () => {
       className='h-100'
       extra={<LanguageList />}
     >
-      <Form
-        name='branch-add'
-        layout='vertical'
-        onFinish={onFinish}
-        form={form}
-        initialValues={{ ...activeMenu.data }}
-        className='d-flex flex-column h-100'
-      >
-        <Row gutter={12}>
-          <Col span={12}>
-            {languages.map((item, idx) => (
-              <Form.Item
-                key={'title' + idx}
-                label={t('title')}
-                name={`title[${item.locale}]`}
-                rules={[
-                  {
-                    required: item.locale === defaultLang,
-                    message: t('required'),
-                  },
-                ]}
-                hidden={item.locale !== defaultLang}
-              >
-                <Input />
-              </Form.Item>
-            ))}
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              label={t('address')}
-              name={`address`}
-              rules={[
-                {
-                  required: true,
-                  message: t('required'),
-                },
-              ]}
-            >
-              <input className='address-input' ref={ref} placeholder={''} />
-            </Form.Item>
-          </Col>
-          <Col span={24}>
-            <Map
-              location={location}
-              setLocation={setLocation}
-              setAddress={(value) => form.setFieldsValue({ address: value })}
-            />
-          </Col>
-        </Row>
-        <div className='flex-grow-1 d-flex flex-column justify-content-end'>
-          <div className='pb-5'>
-            <Button type='primary' htmlType='submit' loading={loadingBtn}>
-              {t('submit')}
-            </Button>
-          </div>
-        </div>
-      </Form>
+      <BranchForm form={form} handleSubmit={handleSubmit} />
     </Card>
   );
 };

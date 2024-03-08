@@ -122,7 +122,7 @@ export default function ProductRequestList({ parentId, type = 'main' }) {
             <HiArrowNarrowRight />
             <Image
               src={getImage(
-                row.data.images?.at(0).url || row.data.images?.at(0)
+                row.data.images?.at(0)?.url || row.data.images?.at(0)
               )}
               alt='img_gallery'
               width={100}

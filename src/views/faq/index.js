@@ -6,10 +6,9 @@ import {
 } from '@ant-design/icons';
 import { Button, Card, Space, Switch, Table } from 'antd';
 import { toast } from 'react-toastify';
-import GlobalContainer from '../../components/global-container';
 import CustomModal from '../../components/modal';
 import { Context } from '../../context/context';
-import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { shallowEqual, useDispatch, useSelector, batch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { addMenu, disableRefetch, setMenuData } from '../../redux/slices/menu';
 import useDidUpdate from '../../helpers/useDidUpdate';
@@ -19,6 +18,7 @@ import faqService from '../../services/faq';
 import { fetchFaqs } from '../../redux/slices/faq';
 import DeleteButton from '../../components/delete-button';
 import FilterColumns from '../../components/filter-column';
+import moment from 'moment';
 
 export default function FAQ() {
   const { t } = useTranslation();
@@ -31,7 +31,7 @@ export default function FAQ() {
         url: `faq/${row.uuid}`,
         id: `faq_${row.uuid}`,
         name: t('edit.faq'),
-      })
+      }),
     );
     navigate(`/faq/${row.uuid}`);
   };
@@ -62,6 +62,7 @@ export default function FAQ() {
       dataIndex: 'created_at',
       key: 'created_at',
       is_show: true,
+      render: (_, row) => moment(row?.created_at).format('YYYY-MM-DD HH:mm'),
     },
     {
       title: t('active'),
@@ -116,7 +117,7 @@ export default function FAQ() {
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { faqs, meta, loading, params } = useSelector(
     (state) => state.faq,
-    shallowEqual
+    shallowEqual,
   );
 
   const faqDelete = () => {
@@ -126,7 +127,7 @@ export default function FAQ() {
         {},
         ...id.map((item, index) => ({
           [`ids[${index}]`]: item,
-        }))
+        })),
       ),
     };
     faqService
@@ -146,7 +147,7 @@ export default function FAQ() {
       .setActive(id)
       .then(() => {
         toast.success(t('successfully.updated'));
-        dispatch(fetchFaqs());
+        dispatch(fetchFaqs({}));
         setIsModalVisible(false);
       })
       .finally(() => setLoadingBtn(false));
@@ -154,9 +155,12 @@ export default function FAQ() {
 
   useEffect(() => {
     if (activeMenu.refetch) {
-      dispatch(fetchFaqs());
-      dispatch(disableRefetch(activeMenu));
+      batch(() => {
+        dispatch(fetchFaqs({}));
+        dispatch(disableRefetch(activeMenu));
+      });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu.refetch]);
 
   useDidUpdate(() => {
@@ -178,7 +182,7 @@ export default function FAQ() {
       setMenuData({
         activeMenu,
         data: { ...activeMenu.data, perPage, page, column, sort },
-      })
+      }),
     );
   }
 
@@ -206,7 +210,7 @@ export default function FAQ() {
         id: 'add.faq',
         url: `faq/add`,
         name: t('add.faq'),
-      })
+      }),
     );
     navigate(`/faq/add`);
   };

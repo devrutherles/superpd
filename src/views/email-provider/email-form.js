@@ -111,6 +111,21 @@ export default function EmailProviderForm({ form, handleSubmit }) {
           </Form.Item>
         </Col>
 
+        <Col span={12}>
+          <Form.Item
+            rules={[
+              {
+                required: true,
+                message: t('required'),
+              },
+            ]}
+            label={t('from.site')}
+            name='from_site'
+          >
+            <Input />
+          </Form.Item>
+        </Col>
+
         <Col span={8}>
           <Form.Item label={t('active')} name='active' valuePropName='checked'>
             <Switch />

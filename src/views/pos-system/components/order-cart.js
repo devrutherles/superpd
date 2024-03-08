@@ -6,7 +6,7 @@ import {
   PlusOutlined,
 } from '@ant-design/icons';
 import { Button, Card, Col, Form, Image, Input, Row, Space, Spin } from 'antd';
-import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { batch, shallowEqual, useDispatch, useSelector } from 'react-redux';
 import {
   addToCart,
   clearCart,
@@ -21,25 +21,24 @@ import {
   setCartData,
   setCartOrder,
   addOrderNotes,
-} from '../../../redux/slices/cart';
-import shopService from '../../../services/shop';
-import getImage from '../../../helpers/getImage';
-import useDidUpdate from '../../../helpers/useDidUpdate';
-import orderService from '../../../services/order';
-import invokableService from '../../../services/rest/invokable';
+  setCartTotalCoupon,
+  clearData,
+} from 'redux/slices/cart';
+import shopService from 'services/shop';
+import getImage from 'helpers/getImage';
+import useDidUpdate from 'helpers/useDidUpdate';
+import orderService from 'services/order';
+import invokableService from 'services/rest/invokable';
 import { useTranslation } from 'react-i18next';
-import numberToPrice from '../../../helpers/numberToPrice';
-import {
-  getCartData,
-  getCartItems,
-} from '../../../redux/selectors/cartSelector';
+import numberToPrice from 'helpers/numberToPrice';
+import { getCartData, getCartItems } from 'redux/selectors/cartSelector';
 import PreviewInfo from '../../order/preview-info';
 import { toast } from 'react-toastify';
-import { fetchRestProducts } from '../../../redux/slices/product';
-import useDebounce from '../../../helpers/useDebounce';
-import transactionService from '../../../services/transaction';
+import useDebounce from 'helpers/useDebounce';
+import transactionService from 'services/transaction';
 import moment from 'moment';
 import QueryString from 'qs';
+import { setRefetch } from 'redux/slices/menu';
 
 export default function OrderCart() {
   const { t } = useTranslation();
@@ -55,12 +54,17 @@ export default function OrderCart() {
   const [loadingCoupon, setLoadingCoupon] = useState(null);
   const [couponField, setCouponField] = useState('');
   const debouncedCartItems = useDebounce(cartItems, 300);
-  const cartData = useSelector((state) => getCartData(state.cart));
+  const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
 
   const deleteCard = (e) => dispatch(removeFromCart(e));
 
   const clearAll = () => {
-    dispatch(clearCart());
+    batch(() => {
+      dispatch(clearCart());
+      dispatch(clearData());
+      dispatch(setRefetch(activeMenu));
+    });
+
     if (currentBag !== 0) {
       dispatch(removeBag(currentBag));
     }
@@ -94,7 +98,8 @@ export default function OrderCart() {
     if (data?.shop?.value) {
       getShops();
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clearData]);
 
   function formatProducts(list) {
     const product = list.map((item) => ({
@@ -107,7 +112,7 @@ export default function OrderCart() {
         quantity: addon.quantity,
         stock_id: addon.stockID,
         parent_id: item.stockID ? item.stockID?.id : item.stock?.id,
-      }))
+      })),
     );
 
     const combine = product.concat(addons);
@@ -115,9 +120,9 @@ export default function OrderCart() {
     const result = {
       products: combine,
       currency_id: currency?.id,
-      coupon: data?.coupon?.name,
+      coupon: coupons[0]?.coupon,
       shop_id: data?.shop?.value,
-      type: data?.deliveries?.label?.toLowerCase(),
+      type: data?.deliveries?.value,
       address: {
         latitude: data?.address?.lat,
         longitude: data?.address?.lng,
@@ -127,18 +132,10 @@ export default function OrderCart() {
   }
 
   useDidUpdate(() => {
-    dispatch(
-      fetchRestProducts({
-        perPage: 12,
-        currency_id: currency?.id,
-        shop_id: data?.shop?.value,
-        active: 1,
-      })
-    );
     if (filteredCartItems.length) {
       productCalculate();
     }
-  }, [currency]);
+  }, [data?.shop, currency]);
 
   useDidUpdate(() => {
     if (filteredCartItems.length) {
@@ -146,7 +143,15 @@ export default function OrderCart() {
     } else {
       dispatch(clearCartShops());
     }
-  }, [debouncedCartItems, currentBag, data?.address, currency]);
+  }, [
+    debouncedCartItems,
+    currentBag,
+    data?.address,
+    currency,
+    coupons,
+    data?.coupon,
+    data?.deliveries,
+  ]);
 
   function productCalculate() {
     const products = formatProducts(filteredCartItems);
@@ -159,36 +164,30 @@ export default function OrderCart() {
         const items = product.stocks.map((item) => ({
           ...filteredCartItems.find((el) => el.id === item.id),
           ...item,
-          ...item.stock.countable,
-          stock: item.stock.stock_extras,
-          stocks: item.stock.stock_extras,
-          stockID: item.stock,
+          ...item?.stock?.countable,
+          stock: item?.stock?.stock_extras,
+          stocks: item?.stock?.stock_extras,
+          stockID: item?.stock,
         }));
         let shopList = [{ ...shops, products: items }];
+        console.log('shopList', shopList);
         dispatch(setCartShops(shopList));
         const orderData = {
           product_total: product.stocks?.reduce(
-            (acc, curr) => acc + (curr.total_price || curr.price),
-            0
+            (acc, curr) => acc + (curr?.total_price || curr?.price || 0),
+            0,
           ),
-          product_tax: product.total_tax,
-          shop_tax: product.total_shop_tax,
-          order_total: product.total_price,
-          delivery_fee: product.delivery_fee,
+          product_tax: product?.total_tax,
+          shop_tax: product?.total_shop_tax,
+          order_total: product?.total_price,
+          delivery_fee: product?.delivery_fee,
           service_fee: product?.service_fee,
+          couponOBJ: product?.coupon,
         };
         dispatch(setCartTotal(orderData));
-        // calculateCashback(product.total_price);
       })
       .finally(() => setLoading(false));
   }
-
-  // function calculateCashback(amount) {
-  //   const payload = { amount };
-  //   invokableService
-  //     .checkCashback(payload)
-  //     .then(({ data }) => dispatch(setCartCashback(data.price)));
-  // }
 
   const handleSave = (id) => {
     setOrderId(id);
@@ -198,24 +197,17 @@ export default function OrderCart() {
     setOrderId(null);
     clearAll();
     toast.success(t('successfully.closed'));
-    dispatch(
-      fetchRestProducts({
-        perPage: 12,
-        currency_id: currency?.id,
-        shop_id: cartData?.shop.value,
-        active: 1,
-      })
-    );
   };
 
   function handleCheckCoupon(shopId) {
-    let coupon = coupons.find((item) => item.shop_id === shopId);
-    if (!coupon) {
-      return;
-    }
+    const data = {
+      coupon: couponField,
+      shop_id: shopId,
+    };
+
     setLoadingCoupon(shopId);
     invokableService
-      .checkCoupon(coupon)
+      .checkCoupon(data)
       .then((res) => {
         const coupon = res.data.id;
         dispatch(setCartData({ coupon, bag_id: currentBag }));
@@ -224,8 +216,9 @@ export default function OrderCart() {
             shop_id: shopId,
             price: res.data.price,
             verified: true,
-          })
+          }),
         );
+        dispatch(setCartTotalCoupon(res.data));
       })
       .catch(() =>
         dispatch(
@@ -233,8 +226,8 @@ export default function OrderCart() {
             shop_id: shopId,
             price: 0,
             verified: false,
-          })
-        )
+          }),
+        ),
       )
       .finally(() => setLoadingCoupon(null));
   }
@@ -275,18 +268,18 @@ export default function OrderCart() {
         stock_id: addon.stockID,
         quantity: addon.quantity,
         parent_id: product.stockID.id,
-      }))
+      })),
     );
     const body = {
       user_id: data.user?.value,
       currency_id: currency?.id,
       rate: currency.rate,
       shop_id: data.shop.value,
-      delivery_id: data.deliveries.label,
-      delivery_fee: data.delivery_fee,
+      delivery_id: data.deliveries?.value,
+      // delivery_fee: data.delivery_fee,
       coupon: coupons[0]?.coupon,
       tax: total.order_tax,
-      payment_type: data.paymentType?.label,
+      payment_type: data.paymentType?.value,
       delivery_date: data.delivery_date,
       delivery_address_id: data.address?.address,
       address: {
@@ -300,14 +293,14 @@ export default function OrderCart() {
         longitude: data.address?.lng,
       },
       delivery_time: moment(data.delivery_time, 'HH:mm').format('HH:mm'),
-      delivery_type: data.deliveries.label.toLowerCase(),
-      delivery_type_id: data.deliveries.value,
+      delivery_type: data.deliveries.value,
+      delivery_type_id: data.deliveries.key,
       products: products.concat(...addons),
       phone: data?.phone?.toString(),
     };
 
     const payment = {
-      payment_sys_id: data.paymentType.value,
+      payment_sys_id: data.paymentType.key,
     };
 
     orderService
@@ -391,7 +384,8 @@ export default function OrderCart() {
                           <span>
                             {numberToPrice(
                               item?.total_price || item?.price,
-                              currency?.symbol
+                              currency?.symbol,
+                              currency?.position,
                             )}
                           </span>
 
@@ -432,7 +426,7 @@ export default function OrderCart() {
                             addOrderNotes({
                               label: item.stockID.id,
                               value: event.target.value || undefined,
-                            })
+                            }),
                           )
                         }
                       />
@@ -491,7 +485,8 @@ export default function OrderCart() {
                             <span>
                               {numberToPrice(
                                 item?.total_price || item?.price,
-                                currency?.symbol
+                                currency?.symbol,
+                                currency?.position,
                               )}
                             </span>
 
@@ -521,7 +516,7 @@ export default function OrderCart() {
                     </Row>
                   </div>
                 </>
-              )
+              ),
             )}
 
             <div className='d-flex my-3'>
@@ -543,7 +538,7 @@ export default function OrderCart() {
                       user_id: data?.user?.value,
                       shop_id: shop.id,
                       verified: false,
-                    })
+                    }),
                   )
                 }
                 onChange={(event) => setCouponField(event.target.value)}
@@ -553,7 +548,7 @@ export default function OrderCart() {
                   couponField.trim().length === 0 ||
                   couponField.trim().length < 2
                 }
-                onClick={() => handleCheckCoupon(shop.id)}
+                onClick={() => handleCheckCoupon(shop?.products?.[0]?.shop?.id)}
                 loading={loadingCoupon === shop.id}
               >
                 {t('check.coupon')}
@@ -567,36 +562,69 @@ export default function OrderCart() {
             <div className='all-price-container'>
               <span>{t('sub.total')}</span>
               <span>
-                {numberToPrice(total.product_total, currency?.symbol)}
+                {numberToPrice(
+                  total.product_total,
+                  currency?.symbol,
+                  currency?.position,
+                )}
               </span>
             </div>
-            {/* <div className='all-price-container'>
-              <span>{t('product.tax')}</span>
-              <span>{numberToPrice(total.product_tax, currency.symbol)}</span>
-            </div> */}
             <div className='all-price-container'>
               <span>{t('shop.tax')}</span>
-              <span>{numberToPrice(total.shop_tax, currency?.symbol)}</span>
+              <span>
+                {numberToPrice(
+                  total.shop_tax,
+                  currency?.symbol,
+                  currency?.position,
+                )}
+              </span>
             </div>
             <div className='all-price-container'>
               <span>{t('delivery.fee')}</span>
-              <span>{numberToPrice(total.delivery_fee, currency?.symbol)}</span>
+              <span>
+                {numberToPrice(
+                  total.delivery_fee,
+                  currency?.symbol,
+                  currency?.position,
+                )}
+              </span>
             </div>
             <div className='all-price-container'>
               <span>{t('service.fee')}</span>
-              <span>{numberToPrice(total.service_fee, currency?.symbol)}</span>
+              <span>
+                {numberToPrice(
+                  total.service_fee,
+                  currency?.symbol,
+                  currency?.position,
+                )}
+              </span>
             </div>
-            {/* <div className='all-price-container'>
-              <span>{t('cashback')}</span>
-              <span>{numberToPrice(total?.cashback, currency.symbol)}</span>
-            </div> */}
+            {total?.couponOBJ?.price && (
+              <div className='all-price-container'>
+                <span>{t('coupon')}</span>
+                <span style={{ color: 'red' }}>
+                  -{' '}
+                  {numberToPrice(
+                    total?.couponOBJ?.price,
+                    currency?.symbol,
+                    currency?.position,
+                  )}
+                </span>
+              </div>
+            )}
           </Col>
         </Row>
 
         <Row className='submit-row'>
           <Col span={14} className='col'>
             <span>{t('total.amount')}</span>
-            <span>{numberToPrice(total.order_total, currency?.symbol)}</span>
+            <span>
+              {numberToPrice(
+                total.order_total,
+                currency?.symbol,
+                currency?.position,
+              )}
+            </span>
           </Col>
           <Col className='col2'>
             <Button

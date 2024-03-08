@@ -27,7 +27,6 @@ import {
 } from '../../../redux/slices/report/order';
 import useDidUpdate from '../../../helpers/useDidUpdate';
 import numberToPrice from '../../../helpers/numberToPrice';
-import { DebounceSelect } from 'components/search';
 import shopService from 'services/restaurant';
 const { Text, Title } = Typography;
 const { RangePicker } = DatePicker;
@@ -46,7 +45,7 @@ const ReportOrder = () => {
   } = useSelector((state) => state.orderReport, shallowEqual);
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
   const [selectedShop, setSelectedShop] = useState();
 
@@ -141,7 +140,15 @@ const ReportOrder = () => {
       is_show: true,
       sorter: (a, b) => a.price - b.price,
       render: (_, data) => {
-        return <>{numberToPrice(data.price, defaultCurrency?.symbol)}</>;
+        return (
+          <>
+            {numberToPrice(
+              data.price,
+              defaultCurrency?.symbol,
+              defaultCurrency?.position,
+            )}
+          </>
+        );
       },
     },
   ]);
@@ -182,7 +189,7 @@ const ReportOrder = () => {
         name: t('order.details'),
         refetch: true,
         data: {},
-      })
+      }),
     );
     navigate(`/${url}`);
   };
@@ -210,7 +217,7 @@ const ReportOrder = () => {
         page: 1,
         perPage: 10,
         shop_id: selectedShop?.value,
-      })
+      }),
     );
   };
 
@@ -245,7 +252,7 @@ const ReportOrder = () => {
       res.data.map((item) => ({
         label: item.translation ? item.translation.title : 'no name',
         value: item.id,
-      }))
+      })),
     );
   }
 
@@ -289,7 +296,8 @@ const ReportOrder = () => {
                       ? reportData[item.qty]
                       : numberToPrice(
                           reportData[item.qty],
-                          defaultCurrency?.symbol
+                          defaultCurrency?.symbol,
+                          defaultCurrency?.position,
                         )}
                   </Title>
                 </Col>

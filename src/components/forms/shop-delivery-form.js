@@ -29,7 +29,9 @@ const ShopDeliveryForm = ({
 }) => {
   const { t } = useTranslation();
   const deleteDay = (e) => setDays(days.filter((item) => item !== e));
-  const disabledDays = [{ from: new Date(1900, 4, 18), to: new Date() }];
+  const disabledDays = [
+    { from: new Date(1900, 4, 18), to: new Date(moment().subtract(1, 'days')) },
+  ];
   const [list, setList] = useState(true);
 
   const footer =

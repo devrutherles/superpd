@@ -12,7 +12,7 @@ import {
   InputNumber,
 } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { DebounceSelect } from '../../../../components/search';
+import { DebounceSelect } from 'components/search';
 import {
   CloseOutlined,
   PlusOutlined,
@@ -21,7 +21,7 @@ import {
 } from '@ant-design/icons';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import userService from '../../../../services/seller/user';
+import userService from 'services/seller/user';
 import { isArray } from 'lodash';
 import {
   addBag,
@@ -29,14 +29,15 @@ import {
   setCartData,
   setCurrency,
   setCurrentBag,
-} from '../../../../redux/slices/cart';
-import { AsyncSelect } from '../../../../components/async-select';
-import { getCartData } from '../../../../redux/selectors/cartSelector';
+} from 'redux/slices/cart';
+import { AsyncSelect } from 'components/async-select';
+import { getCartData } from 'redux/selectors/cartSelector';
 import UserAddModal from './user-add-modal';
-import restPaymentService from '../../../../services/rest/payment';
+import restPaymentService from 'services/rest/payment';
 import DeliveryInfo from './delivery-info';
 import PosUserAddress from './pos-user-address';
 import { useLocation } from 'react-router-dom';
+import moment from 'moment/moment';
 
 export default function OrderTabs() {
   const { t } = useTranslation();
@@ -44,16 +45,16 @@ export default function OrderTabs() {
   const dispatch = useDispatch();
   const { currencies, loading } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
   const { myShop: shop } = useSelector((state) => state.myShop, shallowEqual);
   const { currentBag, bags, currency } = useSelector(
     (state) => state.cart,
-    shallowEqual
+    shallowEqual,
   );
   const { payment_type, before_order_phone_required } = useSelector(
     (state) => state.globalSettings.settings,
-    shallowEqual
+    shallowEqual,
   );
   const locat = useLocation();
   const delivery_type = locat?.state?.delivery_type;
@@ -79,13 +80,13 @@ export default function OrderTabs() {
     if (!data) return;
     if (isArray(data)) {
       return data.map((item) => ({
-        label: `${item.firstname} ${item.lastname ? item.lastname : ''}`,
-        value: item.id,
+        label: `${item?.firstname || ''} ${item?.lastname || ''}`,
+        value: item?.id,
       }));
     } else {
       return {
-        label: `${data.firstname} ${data.lastname || ''}`,
-        value: data.id,
+        label: `${data?.firstname || ''} ${data?.lastname || ''}`,
+        value: data?.id,
       };
     }
   }
@@ -98,7 +99,7 @@ export default function OrderTabs() {
         userUuid: user.uuid,
         bag_id: currentBag,
         phone: user?.phone,
-      })
+      }),
     );
     setUserPhoneNumber(user?.phone);
     form.setFieldsValue({ address: null, phone: user?.phone });
@@ -138,7 +139,7 @@ export default function OrderTabs() {
         setCartData({
           currentCurrency,
           bag_id: currentBag,
-        })
+        }),
       );
       dispatch(setCurrency(currentCurrency));
       form.setFieldsValue({
@@ -153,12 +154,13 @@ export default function OrderTabs() {
         setCartData({
           formCurrency,
           bag_id: currentBag,
-        })
+        }),
       );
       form.setFieldsValue({
         currency: formCurrency,
       });
     }
+    // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
@@ -167,10 +169,13 @@ export default function OrderTabs() {
       payment_type: data.paymentType || null,
       address: data.address.address || null,
       delivery: data.deliveries || null,
-      delivery_date: data.delivery_date || null,
-      delivery_time: data.delivery_time || null,
+      delivery_time: data?.delivery_time
+        ? moment(`${data?.delivery_date} ${data?.delivery_time}`)
+        : null,
+      delivery_date: data?.delivery_date ? moment(data?.delivery_date) : null,
       phone: data?.phone || null,
     });
+    // eslint-disable-next-line
   }, [currentBag, data]);
 
   async function fetchPaymentList() {
@@ -178,10 +183,10 @@ export default function OrderTabs() {
       data
         .filter((el) => el.tag === 'cash' || el.tag === 'wallet')
         .map((item) => ({
-          label: item.tag || 'no name',
-          value: item.id,
-          key: item.id,
-        }))
+          label: t(item.tag) || t('no.name'),
+          value: item?.tag,
+          key: item?.id,
+        })),
     );
   }
 
@@ -190,10 +195,10 @@ export default function OrderTabs() {
       data
         .filter((el) => el.tag !== 'cash' || el.tag !== 'wallet')
         .map((item) => ({
-          label: item.payment.tag || 'no name',
+          label: t(item?.payment?.tag || 'no.name'),
           value: item.payment.id,
           key: item.payment.id,
-        }))
+        })),
     );
   }
 
@@ -210,7 +215,7 @@ export default function OrderTabs() {
               <Space>
                 <ShoppingCartOutlined />
                 <span>
-                  {t('bag')} - {item}
+                  {t('bag')} - {item + 1}
                 </span>
                 {item && item === currentBag ? (
                   <CloseOutlined
@@ -238,14 +243,14 @@ export default function OrderTabs() {
         layout='vertical'
         name='pos-form'
         form={form}
-        initialValues={{
-          user: data.user || null,
-          address: data.address || null,
-          currency: currency || undefined,
-          payment_type: data.paymentType || null,
-          deliveries: data.deliveries,
-          phone: data.phone || null,
-        }}
+        // initialValues={{
+        //   user: data.user || null,
+        //   address: data.address || null,
+        //   currency: currency || undefined,
+        //   payment_type: data.paymentType || null,
+        //   deliveries: data.deliveries,
+        //   phone: data.phone || null,
+        // }}
       >
         <Card className={!!currentBag ? '' : 'tab-card'}>
           {loading && (
@@ -255,7 +260,7 @@ export default function OrderTabs() {
           )}
           {/* remove when delivery type dine in */}
           <Row gutter={6} style={{ marginBottom: 15 }}>
-            <Col span={9}>
+            <Col span={21}>
               <Form.Item
                 name='user'
                 rules={[{ required: true, message: '' }]}
@@ -286,7 +291,7 @@ export default function OrderTabs() {
                       validator(_, value) {
                         if (value < 0) {
                           return Promise.reject(
-                            new Error(t('must.be.positive'))
+                            new Error(t('must.be.positive')),
                           );
                         }
                       },
@@ -299,7 +304,7 @@ export default function OrderTabs() {
                     disabled={userPhoneNumber}
                     onChange={(phone) =>
                       dispatch(
-                        setCartData({ phone: phone, bag_id: currentBag })
+                        setCartData({ phone: phone, bag_id: currentBag }),
                       )
                     }
                   />

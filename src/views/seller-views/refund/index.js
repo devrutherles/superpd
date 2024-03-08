@@ -12,6 +12,7 @@ import DeleteButton from '../../../components/delete-button';
 import FilterColumn from '../../../components/filter-column';
 import { sellerfetchRefund } from '../../../redux/slices/refund';
 import refundService from '../../../services/seller/refund';
+import moment from "moment/moment";
 
 export default function SellerRefunds() {
   const { t } = useTranslation();
@@ -77,6 +78,7 @@ export default function SellerRefunds() {
       is_show: true,
       dataIndex: 'created_at',
       key: 'created_at',
+      render: (_, row) => moment(row?.created_at).format('YYYY-MM-DD HH:mm')
     },
     {
       title: t('options'),

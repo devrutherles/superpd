@@ -40,8 +40,8 @@ const PreviewInfo = ({ orderId, handleClose }) => {
 
   function calculateProductsPrice() {
     return data?.details.reduce(
-      (total, item) => (total += item.origin_price),
-      0
+      (total, item) => (total += item.origin_price || 0),
+      0,
     );
   }
 
@@ -158,7 +158,11 @@ const PreviewInfo = ({ orderId, handleClose }) => {
                   dataIndex='discount'
                   key='discount'
                   render={(discount) =>
-                    numberToPrice(discount, data?.currency?.symbol)
+                    numberToPrice(
+                      discount,
+                      data?.currency?.symbol,
+                      data?.currency?.position,
+                    )
                   }
                 />
                 <Column
@@ -166,21 +170,35 @@ const PreviewInfo = ({ orderId, handleClose }) => {
                   dataIndex='origin_price'
                   key='origin_price'
                   render={(origin_price) =>
-                    numberToPrice(origin_price, data?.currency?.symbol)
+                    numberToPrice(
+                      origin_price,
+                      data?.currency?.symbol,
+                      data?.currency?.position,
+                    )
                   }
                 />
                 <Column
                   title={t('tax')}
                   dataIndex='tax'
                   key='tax'
-                  render={(tax) => numberToPrice(tax, data?.currency?.symbol)}
+                  render={(tax) =>
+                    numberToPrice(
+                      tax,
+                      data?.currency?.symbol,
+                      data?.currency?.position,
+                    )
+                  }
                 />
                 <Column
                   title={t('price')}
                   dataIndex='total_price'
                   key='total_price'
                   render={(total_price) =>
-                    numberToPrice(total_price, data?.currency?.symbol)
+                    numberToPrice(
+                      total_price,
+                      data?.currency?.symbol,
+                      data?.currency?.position,
+                    )
                   }
                 />
               </Table>
@@ -191,37 +209,45 @@ const PreviewInfo = ({ orderId, handleClose }) => {
                       <span>{t('sub-total.amount')}: </span>
                       {numberToPrice(
                         calculateProductsPrice(),
-                        data?.currency?.symbol
+                        data?.currency?.symbol,
+                        data?.currency?.position,
                       )}
                     </p>
                     <p>
                       {t('delivery.price')} :{' '}
                       {numberToPrice(
                         data?.delivery_fee,
-                        data?.currency?.symbol
+                        data?.currency?.symbol,
+                        data?.currency?.position,
                       )}
                     </p>
                     <p>
                       {t('shop.tax')} :{' '}
-                      {numberToPrice(data?.tax, data?.currency?.symbol)}
+                      {numberToPrice(
+                        data?.tax,
+                        data?.currency?.symbol,
+                        data?.currency?.position,
+                      )}
                     </p>
                     <p>
                       {t('product.tax')} :{' '}
                       {numberToPrice(
                         data?.details?.reduce(
-                          (total, item) => (total += item.tax),
-                          0
+                          (total, item) => (total += item?.tax || 0),
+                          0,
                         ),
-                        data?.currency?.symbol
+                        data?.currency?.symbol,
+                        data?.currency?.position,
                       )}
                     </p>
-                    {/* <p>
-                      {t('coupon')} :{' '}
+                    <p>
+                      {t('service.fee')} :{' '}
                       {numberToPrice(
-                        data?.coupon?.price,
-                        data?.currency?.symbol
+                        data?.service_fee,
+                        data?.currency?.symbol,
+                        data?.currency?.position,
                       )}
-                    </p> */}
+                    </p>
                   </div>
                   <h2 className='font-weight-semibold mt-3'>
                     <span className='mr-1'>
@@ -229,16 +255,21 @@ const PreviewInfo = ({ orderId, handleClose }) => {
                       <div className='ml-2 font-weight-bold'>
                         {numberToPrice(
                           data?.total_price,
-                          data?.currency?.symbol
+                          data?.currency?.symbol,
+                          data?.currency?.position,
                         )}
                       </div>
                     </span>
                     {data?.total_discount ? (
-                      <div className={data?.total_discount ? 'strike' : ''}>
-                        {numberToPrice(
-                          data?.total_discount,
-                          data?.currency?.symbol
-                        )}
+                      <div>
+                        <h3>{t('total.discount')}:</h3>{' '}
+                        <span className={'strike'}>
+                          {numberToPrice(
+                            data?.total_discount,
+                            data?.currency?.symbol,
+                            data?.currency?.position,
+                          )}
+                        </span>
                       </div>
                     ) : null}
                   </h2>

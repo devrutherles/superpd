@@ -1,13 +1,13 @@
 import React, { useEffect, Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
-import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { shallowEqual, useDispatch, useSelector, batch } from 'react-redux';
 import { Layout } from 'antd';
 import Sidebar from '../components/sidebar';
 import TabMenu from '../components/tab-menu';
 import ChatIcons from '../views/chat/chat-icons';
 import Footer from '../components/footer';
 import languagesService from '../services/languages';
-import { setLangugages } from '../redux/slices/formLang';
+import { setLangugages, setDefaultLanguage } from '../redux/slices/formLang';
 import { fetchAllShops } from '../redux/slices/allShops';
 import { fetchCurrencies, fetchRestCurrencies } from '../redux/slices/currency';
 import { data } from '../configs/menu-config';
@@ -24,12 +24,19 @@ const AppLayout = () => {
   const { user } = useSelector((state) => state.auth, shallowEqual);
   const { direction, navCollapsed } = useSelector(
     (state) => state.theme.theme,
-    shallowEqual
+    shallowEqual,
   );
 
   const fetchLanguages = () => {
     languagesService.getAllActive().then(({ data }) => {
-      dispatch(setLangugages(data));
+      batch(() => {
+        dispatch(setLangugages(data));
+        dispatch(
+          setDefaultLanguage(
+            data?.find((item) => item?.default)?.locale || 'en',
+          ),
+        );
+      });
     });
   };
 

@@ -3,7 +3,7 @@ import { Card, Image, Table, Button, Space, Tag, Switch, Tabs } from 'antd';
 import { useTranslation } from 'react-i18next';
 import getImage from '../../../helpers/getImage';
 import CreateCategory from './createCategory';
-import { EditOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { fetchSellerCategory } from '../../../redux/slices/category';
 import {
   addMenu,
@@ -20,6 +20,7 @@ import FilterColumns from '../../../components/filter-column';
 import formatSortType from '../../../helpers/formatSortType';
 import useDidUpdate from '../../../helpers/useDidUpdate';
 import SearchInput from '../../../components/search-input';
+import DeleteButton from 'components/delete-button';
 const colors = ['blue', 'red', 'gold', 'volcano', 'cyan', 'lime'];
 
 const roles = ['all', 'pending', 'published', 'unpublished', 'deleted_at'];
@@ -84,6 +85,13 @@ export default function SellerCategoryList({ parentId, type = 'main' }) {
       is_show: true,
     },
     {
+      title: t('created.by'),
+      dataIndex: 'shop',
+      key: 'shop',
+      is_show: true,
+      render: (shop) => (shop ? t('you') : t('admin')),
+    },
+    {
       title: t('translations'),
       dataIndex: 'locales',
       is_show: true,
@@ -111,7 +119,7 @@ export default function SellerCategoryList({ parentId, type = 'main' }) {
               setId(row.uuid);
               setActive(true);
             }}
-            disabled={row.deleted_at}
+            disabled={row.deleted_at || !row?.shop_id}
             checked={active}
           />
         );
@@ -164,6 +172,16 @@ export default function SellerCategoryList({ parentId, type = 'main' }) {
               type='primary'
               icon={<EditOutlined />}
               onClick={() => goToEdit(row)}
+              disabled={!row?.shop_id}
+            />
+             <DeleteButton
+              disabled={row.deleted_at || !row?.shop_id}
+              icon={<DeleteOutlined />}
+              onClick={() => {
+                setId([row.id]);
+                setIsModalVisible(true);
+                setText(true);
+              }}
             />
           </Space>
         );

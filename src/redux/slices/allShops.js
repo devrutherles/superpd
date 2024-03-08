@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import shopService from '../../services/restaurant';
+import shopService from 'services/restaurant';
 
 const initialState = {
   loading: false,
@@ -10,8 +10,10 @@ const initialState = {
 export const fetchAllShops = createAsyncThunk(
   'shop/fetchAllShops',
   (params = {}) => {
-    return shopService.get(params).then((res) => res);
-  }
+    return shopService
+      .get({ status: 'approved', verify: 1, open: 1, ...params })
+      .then((res) => res);
+  },
 );
 
 const allShopSlice = createSlice({

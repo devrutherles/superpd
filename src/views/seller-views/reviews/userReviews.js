@@ -95,7 +95,7 @@ export default function SellerDeliveryBoyReviews() {
       dataIndex: 'created_at',
       key: 'created_at',
       is_show: true,
-      render: (createdAt) => moment(createdAt).format('DD.MM.YYYY'),
+      render: (createdAt) => moment(createdAt).format('YYYY-MM-DD HH:mm'),
     },
     {
       title: t('options'),

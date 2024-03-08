@@ -1,7 +1,7 @@
 export const PROJECT_NAME = 'Super Pão';
 export const BASE_URL =
   process.env.REACT_APP_BASE_URL || 'https://admin.superpao.online';
-export const WEBSITE_URL = 'https://painel.superpao.online';
+export const WEBSITE_URL = 'http://localhost';
 export const api_url = BASE_URL + '/api/v1/';
 export const api_url_admin = BASE_URL + '/api/v1/dashboard/admin/';
 export const api_url_admin_dashboard = BASE_URL + '/api/v1/dashboard/';

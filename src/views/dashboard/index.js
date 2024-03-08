@@ -33,31 +33,32 @@ export default function Dashboard() {
   const dispatch = useDispatch();
   const { activeMenu } = useSelector((state) => state.menu, shallowEqual);
   const { user } = useSelector((state) => state.auth, shallowEqual);
-  const { loading } = useSelector(
+  const { loading, params } = useSelector(
     (state) => state.statisticsCount,
-    shallowEqual
+    shallowEqual,
   );
 
   function getDashboardsByRole() {
-    const body = { time: 'subMonth' };
+    const body = { time: params.type || 'subMonth' };
+    const otherChartsBody = { time: 'subWeek' };
     switch (user?.role) {
       case 'admin':
         dispatch(fetchStatistics(body));
-        dispatch(fetchTopCustomers(body));
-        dispatch(fetchTopProducts(body));
-        dispatch(fetchOrderCounts(body));
-        dispatch(fetchOrderSales(body));
+        dispatch(fetchTopCustomers(otherChartsBody));
+        dispatch(fetchTopProducts(otherChartsBody));
+        dispatch(fetchOrderCounts(otherChartsBody));
+        dispatch(fetchOrderSales(otherChartsBody));
         break;
       case 'manager':
-        dispatch(fetchTopCustomers(body));
-        dispatch(fetchTopProducts(body));
+        dispatch(fetchTopCustomers(otherChartsBody));
+        dispatch(fetchTopProducts(otherChartsBody));
         break;
       case 'seller':
         dispatch(fetchSellerStatisticsCount(body));
-        dispatch(fetchSellerTopCustomers(body));
-        dispatch(fetchSellerTopProducts(body));
-        dispatch(fetchSellerOrderCounts(body));
-        dispatch(fetchSellerOrderSales(body));
+        dispatch(fetchSellerTopCustomers(otherChartsBody));
+        dispatch(fetchSellerTopProducts(otherChartsBody));
+        dispatch(fetchSellerOrderCounts(otherChartsBody));
+        dispatch(fetchSellerOrderSales(otherChartsBody));
         break;
       case 'moderator':
         break;
@@ -71,11 +72,12 @@ export default function Dashboard() {
   }
 
   useEffect(() => {
-    if (activeMenu.refetch) {
+    if (activeMenu.refetch || params.type) {
       getDashboardsByRole();
       dispatch(disableRefetch(activeMenu));
     }
-  }, [activeMenu.refetch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeMenu.refetch, params.type]);
 
   const renderDashboardByRole = () => {
     switch (user.role) {

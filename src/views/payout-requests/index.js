@@ -11,6 +11,7 @@ import { EditOutlined } from '@ant-design/icons';
 import PayoutRequestModal from './payoutRequestModal';
 import FilterColumns from '../../components/filter-column';
 import { useNavigate } from 'react-router-dom';
+import moment from 'moment';
 
 const { TabPane } = Tabs;
 const roles = ['processed', 'paid', 'rejected', 'canceled'];
@@ -33,11 +34,11 @@ export default function PayoutRequests() {
 
   const { payoutRequests, meta, loading, params } = useSelector(
     (state) => state.payoutRequests,
-    shallowEqual
+    shallowEqual,
   );
   const { defaultCurrency } = useSelector(
     (state) => state.currency,
-    shallowEqual
+    shallowEqual,
   );
   const [modal, setModal] = useState(null);
 
@@ -47,7 +48,7 @@ export default function PayoutRequests() {
         url: `/users/user/${row.uuid}`,
         id: 'user_info',
         name: t('user.info'),
-      })
+      }),
     );
     navigate(`/users/user/${row.uuid}`, { state: { user_id: row.id } });
   };
@@ -76,7 +77,12 @@ export default function PayoutRequests() {
       dataIndex: 'price',
       key: 'price',
       is_show: true,
-      render: (price) => numberToPrice(price, defaultCurrency.symbol),
+      render: (price) =>
+        numberToPrice(
+          price,
+          defaultCurrency?.symbol,
+          defaultCurrency?.position,
+        ),
     },
     {
       title: t('status'),
@@ -106,6 +112,7 @@ export default function PayoutRequests() {
       dataIndex: 'created_at',
       key: 'created_at',
       is_show: true,
+      render: (_, row) => moment(row?.created_at).format('YYYY-MM-DD HH:mm'),
     },
     {
       title: t('options'),
@@ -144,7 +151,7 @@ export default function PayoutRequests() {
     const { field: column, order } = sorter;
     const sort = formatSortType(order);
     dispatch(
-      setMenuData({ activeMenu, data: { perPage, page, column, sort } })
+      setMenuData({ activeMenu, data: { perPage, page, column, sort } }),
     );
   }
 
@@ -154,7 +161,7 @@ export default function PayoutRequests() {
       setMenuData({
         activeMenu,
         data: { ...data, ...items },
-      })
+      }),
     );
   };
 

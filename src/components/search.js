@@ -24,9 +24,7 @@ export const DebounceSelect = ({
   }, [fetchOptions, debounceTimeout]);
 
   const fetchOnFocus = () => {
-    if (!options.length) {
       debounceFetcher('');
-    }
   };
 
   return (
