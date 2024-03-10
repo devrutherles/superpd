@@ -158,7 +158,7 @@ const Login = () => {
                           prefix={
                             <MailOutlined className='site-form-item-icon' />
                           }
-                          placeholder='Email or phone'
+                          placeholder='Email ou telefone'
                         />
                       </Form.Item>
                       <Form.Item
